@@ -1,0 +1,4 @@
+boto3>=1.16.57
+google-cloud-bigquery>=2.6.2
+google-cloud-storage>=1.35.0
+python-dateutil>=2.8.1
