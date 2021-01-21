@@ -1,5 +1,5 @@
 """
-Exception classes
+Exception classes for the simeon package
 """
 class AWSException(Exception):
     """
