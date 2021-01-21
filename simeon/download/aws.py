@@ -23,7 +23,7 @@ BUCKETS = {
     },
     'sql': {
         'Bucket': 'course-data',
-        'Prefix': '{org}-{date}',
+        'Prefix': '{org}-{year}-{month}',
     },
     'log': {
         'Bucket': 'edx-course-data',
@@ -142,6 +142,7 @@ class S3Blob():
         try:
             matches = bucket.objects.filter(Prefix=prefix)
             for obj in matches:
+                obj = obj.Object()
                 details = dict(
                     (v, getattr(obj, k, None)) for k, v in O2B_MAP.items()
                 )
@@ -178,10 +179,11 @@ class S3Blob():
             raise AWSException(msg.format(t=type_))
         if isinstance(date, datetime):
             date = date.strftime('%Y-%m-%d')
-            year = date[:4]
-        else:
-            year = date[:4]
-        prefix = prefix.format(org=org, year=year, site=site, date=date)
+        year = date[:4]
+        month = date[5:7]
+        prefix = prefix.format(
+            org=org, year=year, site=site, date=date, month=month
+        )
         return cls.from_prefix(bucket, prefix)
     
     @staticmethod
