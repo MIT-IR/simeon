@@ -136,6 +136,7 @@ class S3Blob():
         :param prefix: A string with which to filter the list of objects
         :rtype: List[S3Blob]
         :return: A list of S3Blob objects
+        :raises: AWSException
         """
         out = []
         try:
@@ -149,6 +150,39 @@ class S3Blob():
             return out
         except Exception as excp:
             raise AWSException('{e}'.format(e=excp))
+    
+    @classmethod
+    def from_info(cls, bucket, type_, date, org='mitx', site='edx'):
+        """
+        Make a list of blobs with the given parameters
+
+        :type bucket: s3.Bucket
+        :param bucket: The boto3.s3.Bucket object to tie to this blob
+        :type type_: str
+        :param type_: "sql" or "email" or "sql"
+        :type date: Union[str, datetime]
+        :param date: A datetime or str object for a threshold date
+        :type org: str
+        :param org: The org whose data will be fetched.
+        :type site: str
+        :param site: The site from which data were generated
+        :rtype: List[S3Blob]
+        :raises: AWSException
+        """
+        prefix = BUCKETS.get(type_, {}).get('Prefix')
+        if not prefix:
+            msg = (
+                'The given file type, {t!r}, does not any associated'
+                ' AWS S3 information.'
+            )
+            raise AWSException(msg.format(t=type_))
+        if isinstance(date, datetime):
+            date = date.strftime('%Y-%m-%d')
+            year = date[:4]
+        else:
+            year = date[:4]
+        prefix = prefix.format(org=org, year=year, site=site, date=date)
+        return cls.from_prefix(bucket, prefix)
     
     @staticmethod
     def _make_local(name):
