@@ -208,3 +208,6 @@ class S3Blob():
             os.makedirs(dirname, exist_ok=True)
         self.bucket.download_file(self.name, filename)
         return filename
+    
+    def __repr__(self):
+        return "Name: {n} - Size: {s}".format(n=self.name, s=self.size)
