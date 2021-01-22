@@ -78,7 +78,7 @@ def split_tracking_log(filename: str, ddir: str):
             fhandle = fhandles[fname]
             if isinstance(fhandle, gzip.GzipFile):
                 fhandle.write(
-                    json.dumps(line_info['data']).encode('utf8', 'ignore') + '\n'
+                    json.dumps(line_info['data']).encode('utf8', 'ignore') + b'\n'
                 )
             else:
-                json.dump(line_info['data'], fhandle, indent=2)
+                json.dump(line_info['data'] + '\n', fhandle)
