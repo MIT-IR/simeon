@@ -3,6 +3,7 @@ Some utility functions
 """
 import itertools as its
 import gzip
+import json
 import os
 import re
 import urllib.parse as urlparser
@@ -117,6 +118,24 @@ def parse_mongo_tstamp(timestamp: str):
         raise ValueError(msg) from None
 
 
+def check_for_funny_keys(entry, name='toplevel'):
+    for key, val in entry.items():
+        if key.startswith('i4x-') or key.startswith('xblock.'):
+            return True
+        if key[0] in '0123456789':
+            return True
+        if '-' in key or '.' in key:
+            newkey = key.replace('-','_').replace('.','__')
+            entry[newkey] = val
+            entry.pop(key)
+            key = newkey
+        if isinstance(val, dict):
+            ret = check_for_funny_keys(val, name + '/' + key)
+            if ret:
+                entry[key] = json.dumps(val)
+    return False
+
+
 def rephrase_mongo_keys(record: dict):
     """
     Update the given record in place. The target keys
@@ -169,5 +188,6 @@ def rephrase_mongo_keys(record: dict):
                 subrec[key] = str(subrec.get(key, ''))
             else:
                 record[key] = str(record.get(key, ''))
+    check_for_funny_keys(record)
     for key in ('context', 'depth', 'retired_username'):
         record.pop(key, None)
