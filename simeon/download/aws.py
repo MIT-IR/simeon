@@ -1,6 +1,7 @@
 """
 Module of utilities to help with listing and downloading files from S3
 """
+import json
 import os
 import re
 import subprocess as sb
@@ -215,3 +216,12 @@ class S3Blob():
         return "Name: {n} - Size: {s} - Last Modified: {m}".format(
             n=self.name, s=self.size, m=self.last_modified
         )
+
+    def to_json(self):
+        """
+        Jsonify the Blob
+        """
+        return json.dumps({
+            'name': self.name, 'size': self.size,
+            'last_modified': self.last_modified.strftime('%c %Z'),
+        })

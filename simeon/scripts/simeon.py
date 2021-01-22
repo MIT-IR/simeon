@@ -24,7 +24,10 @@ def list_files(parsed_args):
     bucket = aws.make_s3_bucket(info['Bucket'])
     blobs = aws.S3Blob.from_prefix(bucket=bucket, prefix=info['Prefix'])
     for blob in blobs:
-        print(blob)
+        if parsed_args.json:
+            print(blob.to_json())
+        else:
+            print(blob)
 
 
 def download_files(parsed_args):
@@ -182,6 +185,11 @@ def main():
         help='The edX site from which to list data. Default: %(default)s',
         choices=['edge', 'edx', 'patches'],
         default='edx',
+    )
+    lister.add_argument(
+        '--json', '-j',
+        help='The edX site from which to list data. Default: %(default)s',
+        action='store_true',
     )
     splitter = subparsers.add_parser(
         'split',
