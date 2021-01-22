@@ -1,6 +1,7 @@
 """
 Some utility functions
 """
+import itertools as its
 import gzip
 import os
 import re
@@ -55,7 +56,13 @@ def get_course_id(record: dict) -> str:
             course = urlparser.urlparse(record.get('page')).path
         else:
             course = urlparser.urlparse(record.get('event_type', '')).path
-    course = course.strip('/').replace('courses', '').split(':')[:2][-1]
+    chunks = its.skipwhile(
+        lambda c: not c.strip(),
+        course.replace('courses', '').strip('/').split(':')
+    )
+    course = next(chunks, '')
+    if not any(k in course.lower() for k in ('mit', 'vj')):
+        course = next(chunks, '')
     return '/'.join(course.split('+')[:3])
 
 

@@ -73,6 +73,7 @@ def split_tracking_log(filename: str, ddir: str):
         for i, line in enumerate(zfh):
             line_info = process_line(line, i + 1)
             fname = line_info.get('filename')
+            fname = os.path.join(ddir, fname)
             if fname not in fhandles:
                 fhandles[fname] = utils.make_file_handle(fname, is_gzip=True)
             fhandle = fhandles[fname]
