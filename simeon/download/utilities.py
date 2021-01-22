@@ -56,7 +56,7 @@ def get_course_id(record: dict) -> str:
             course = urlparser.urlparse(record.get('page')).path
         else:
             course = urlparser.urlparse(record.get('event_type', '')).path
-    chunks = its.skipwhile(
+    chunks = its.dropwhile(
         lambda c: not c.strip(),
         course.replace('courses', '').strip('/').split(':')
     )
