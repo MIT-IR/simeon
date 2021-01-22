@@ -41,7 +41,7 @@ def process_line(
     try:
         record = json.loads(line)
     except json.decoder.JSONDecodeError:
-        return {'data': line, 'filename': 'dead_letter_queue.json'}
+        return {'data': line, 'filename': 'dead_letter_queue.json.gz'}
     course_id = utils.get_course_id(record)
     record['course_id'] = course_id
     utils.rephrase_mongo_keys(record)

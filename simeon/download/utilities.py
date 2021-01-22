@@ -4,14 +4,15 @@ Some utility functions
 import gzip
 import os
 import re
+import urllib.parse as urlparser
 from datetime import datetime
 from functools import lru_cache
 
 from dateutil.parser import parse as parse_date
 
 
-CID_PATT1 = re.compile('^http[s]*://[^/]+/courses/([^/]+/[^/]+/[^/]+)/', re.I)
-CID_PATT2 = re.compile('/courses/([^/]+/[^/]+/[^/]+)/', re.I)
+CID_PATT1 = re.compile(r'^http[s]*://[^/]+/courses/([^/]+/[^/]+/[^/]+)/', re.I)
+CID_PATT2 = re.compile(r'/courses/([^/]+/[^/]+/[^/]+)/', re.I)
 
 
 def make_file_handle(fname: str, mode: str='w', is_gzip: bool=False):
@@ -46,17 +47,14 @@ def get_course_id(record: dict) -> str:
     :return: A valid edX course ID or an empty string
     """
     course = record.get(
-        'course_id', record.get('context', {}).get('course_id', '')
+        'course_id',
+        record.get('context', {}).get('course_id', '')
     )
     if not course:
         if 'browser' in record.get('event_source', '').lower():
-            match = CID_PATT1.search(record.get('page', ''))
-            if match:
-                course = match.group(1)
+            course = urlparser.urlparse(record.get('page')).path
         else:
-            match = CID_PATT2.search(record.get('event_type', ''))
-            if match:
-                course = match.group(1)
+            course = urlparser.urlparse(record.get('event_type', '')).path
     chunks = course.split(':')[-1].split('+')[:3]
     return '/'.join(chunks)
 
@@ -81,6 +79,7 @@ def make_tracklog_path(course_id: str, date: datetime, is_gzip=True) -> str:
         course_id.replace('.', '_').replace('/', '__'),
         'tracklog-{ds}.json{x}'.format(ds=datestr, x=ext)
     )
+
 
 @lru_cache(maxsize=None)
 def parse_mongo_tstamp(timestamp: str):
