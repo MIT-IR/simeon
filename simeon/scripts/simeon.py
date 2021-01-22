@@ -109,7 +109,8 @@ def main():
         action='store_true',
     )
     subparsers = parser.add_subparsers(
-        description='Choose a subcommand to carry out a task with simeon'
+        description='Choose a subcommand to carry out a task with simeon',
+        dest='command'
     )
     subparsers.required = True
     downloader = subparsers.add_parser(
