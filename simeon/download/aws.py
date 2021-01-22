@@ -23,7 +23,7 @@ BUCKETS = {
     },
     'sql': {
         'Bucket': 'course-data',
-        'Prefix': '{org}-{year}-{month}',
+        'Prefix': '{org}-',
     },
     'log': {
         'Bucket': 'edx-course-data',
@@ -150,7 +150,7 @@ class S3Blob():
                 out.append(cls(**details))
             return out
         except Exception as excp:
-            raise AWSException('{e}'.format(e=excp))
+            raise AWSException('{e}'.format(e=excp)) from None
     
     @classmethod
     def from_info(cls, bucket, type_, date, org='mitx', site='edx'):
@@ -176,7 +176,7 @@ class S3Blob():
                 'The given file type, {t!r}, does not any associated'
                 ' AWS S3 information.'
             )
-            raise AWSException(msg.format(t=type_))
+            raise AWSException(msg.format(t=type_)) from None
         if isinstance(date, datetime):
             date = date.strftime('%Y-%m-%d')
         year = date[:4]
@@ -212,4 +212,6 @@ class S3Blob():
         return filename
     
     def __repr__(self):
-        return "Name: {n} - Size: {s}".format(n=self.name, s=self.size)
+        return "Name: {n} - Size: {s} - Last Modified: {m}".format(
+            n=self.name, s=self.size, m=self.last_modified
+        )
