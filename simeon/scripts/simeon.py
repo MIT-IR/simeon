@@ -24,6 +24,9 @@ def list_files(parsed_args):
     bucket = aws.make_s3_bucket(info['Bucket'])
     blobs = aws.S3Blob.from_prefix(bucket=bucket, prefix=info['Prefix'])
     for blob in blobs:
+        fdate = aws.get_file_date(blob.name)
+        if parsed_args.threshold_date > fdate:
+            continue
         if parsed_args.json:
             print(blob.to_json())
         else:
