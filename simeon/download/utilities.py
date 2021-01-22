@@ -55,8 +55,8 @@ def get_course_id(record: dict) -> str:
             course = urlparser.urlparse(record.get('page')).path
         else:
             course = urlparser.urlparse(record.get('event_type', '')).path
-    chunks = course.split(':')[-1].split('+')[:3]
-    return '/'.join(chunks)
+    course = course.strip('/').replace('courses', '').split(':')[:2][-1]
+    return '/'.join(course.split('+')[:3])
 
 
 @lru_cache(maxsize=None)
