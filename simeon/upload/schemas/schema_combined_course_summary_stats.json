@@ -1,0 +1,1849 @@
+[
+    {
+        "type": "STRING", 
+        "name": "course_id"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_Institution",
+	"description": "From course listings file"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_Semester"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_New_or_Rerun"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_Andrew_Recodes_New_Rerun"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_Course_Number"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_Short_Title"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_Andrew_s_Short_Titles"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_Title"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_Instructors"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_4_way_Category_by_name"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_4_way_CS_STEM_HSocSciGov_HumHistRel"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_Registration_Open"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_Course_Launch"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_Course_Wrap"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_course_id"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_Empirical_Course_Wrap"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "listings_Andrew_s_Order"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "listings_certifies"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "listings_MinPassGrade"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "registered_sum"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "viewed_sum"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "explored_sum"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "certified_sum"
+    }, 
+    {
+        "type": "INTEGER", 
+	"description": "Number of registrants who are either certified or explored; necessary because certified may or may not be explored",
+        "name": "certified_or_explored_sum" 
+    }, 
+    {
+        "type": "INTEGER", 
+	"description": "Number of registrants who are both certified and explored; necessary because certified may or may not be explored",
+        "name": "certified_and_explored_sum" 
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "n_male"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "n_female"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "n_usa_and_viewed"
+    }, 
+    {
+        "type": "INTEGER", 
+	"description": "sum(case when ((LoE=\"b\") or (LoE=\"m\") or (LoE=\"p\") or (LoE=\"p_oth\") or (LoE=\"p_se\")) then 1 else 0 end)",
+        "name": "n_bachplus_in_reg"
+    }, 
+    {
+        "type": "INTEGER", 
+	"description": "sum(case when (viewed and ((LoE=\"b\") or (LoE=\"m\") or (LoE=\"p\") or (LoE=\"p_oth\") or (LoE=\"p_se\"))) then 1 else 0 end)",
+        "name": "n_bachplus_in_viewed"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "n_not_bachplus_in_reg", 
+	"description": "sum(case when ((LoE=\"a\") or (LoE=\"el\") or (LoE=\"hs\") or (LoE=\"jhs\") or (LoE=\"none\")) then 1 else 0 end)",
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "n_not_bachplus_in_viewed", 
+	"description": "sum(case when (viewed and ((LoE=\"a\") or (LoE=\"el\") or (LoE=\"hs\") or (LoE=\"jhs\") or (LoE=\"none\"))) then 1 else 0 end)",
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "n_male_viewed"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "n_female_viewed"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "n_verified_id"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "verified_viewed"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "verified_explored"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "verified_certified"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "verified_avg_grade"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "verified_n_male"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "verified_n_female"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "n_reg_nonzero_grade"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "n_viewed_nonzero_grade"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "n_explored_nonzero_grade"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nplay_video_sum"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "nchapters_avg"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "ndays_act_sum"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nevents_sum"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nforum_posts_sum"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "min_gade_certified"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "min_start_time"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "max_last_event"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "max_nchapters"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nforum_votes_sum"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nforum_endorsed_sum"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nforum_threads_sum"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nforum_commments_sum"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nforum_pinned_sum"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "nprogcheck_avg"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "certified_nprogcheck"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "verified_nprogcheck"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nshow_answer_sum"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nseq_goto_sum"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "npause_video_sum"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "avg_of_avg_dt"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "avg_of_sum_dt"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "certified_avg_dt"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "certified_sum_dt"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "n_have_ip"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "n_missing_cc"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "nbw_wrap_date"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nregistered_by_wrap"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "nregistered_by_wrap_pct"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "frac_female"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "certified_of_nregistered_by_wrap_pct"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "cbr_course_id",
+	"description": "From stats_cert_rates_by_registration table"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "cbr_wrap_date",
+	"description": "From stats_cert_rates_by_registration table"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "cbr_nregistered"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "cbr_ncertified"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "cbr_ncertified_by_ewrap"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "cbr_nviewed"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "cbr_nregistered_by_wrap"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "cbr_nregistered_by_wrap_pct"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "cbr_nviewed_by_wrap"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "cbr_nviewed_by_ewrap"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "cbr_nregistered_before_launch"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "cbr_ncertified_and_registered_before_launch"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "cbr_nregistered_during_course"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "cbr_ncertified_and_registered_during_course"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "cbr_pct_certified_of_reg"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "cbr_pct_certified_reg_before_launch"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "cbr_pct_certified_reg_during_course"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "cbr_pct_certified_of_reg_by_wrap"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "cbr_pct_certified_of_viewed"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "cbr_pct_certified_of_viewed_by_wrap"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "cbr_pct_certified_of_viewed_by_ewrap"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_explored_course_id",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_explored_nplay_video_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_explored_ndays_act_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_explored_nchapters_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_explored_nevents_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_explored_nforum_posts_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_explored_grade_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_explored_nforum_votes_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_explored_nforum_endorsed_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_explored_nforum_threads_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_explored_nforum_comments_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_explored_nprogcheck_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_explored_nshow_answer_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_explored_npause_video_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_explored_avg_dt_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_explored_sum_dt_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_explored_age_in_2014_median",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_explored_frac_nonzero_play_video",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_explored_frac_nonzero_grade",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_explored_frac_nonzero_forum_posts",
+	"description": "From explored_median_stats_by_course table, computed in course reports"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_certified_course_id"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_certified_nplay_video_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_certified_ndays_act_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_certified_nchapters_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_certified_nevents_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_certified_nforum_posts_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_certified_grade_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_certified_nforum_votes_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_certified_nforum_endorsed_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_certified_nforum_threads_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_certified_nforum_comments_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_certified_nprogcheck_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_certified_nshow_answer_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_certified_npause_video_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_certified_avg_dt_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_certified_sum_dt_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_certified_age_in_2014_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_certified_frac_nonzero_play_video"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_certified_frac_nonzero_grade"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_certified_frac_nonzero_forum_posts"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_viewed_course_id"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_viewed_nplay_video_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_viewed_ndays_act_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_viewed_nchapters_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_viewed_nevents_median"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_viewed_nforum_posts_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_viewed_grade_median"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_viewed_nforum_votes_median"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_viewed_nforum_endorsed_median"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_viewed_nforum_threads_median"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_viewed_nforum_comments_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_viewed_nprogcheck_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_viewed_nshow_answer_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_viewed_npause_video_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_viewed_avg_dt_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_viewed_sum_dt_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_viewed_age_in_2014_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_viewed_frac_nonzero_play_video"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_viewed_frac_nonzero_grade"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_viewed_frac_nonzero_forum_posts"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_verified_course_id"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_verified_nplay_video_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_verified_ndays_act_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_verified_nchapters_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_verified_nevents_median"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_verified_nforum_posts_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_verified_grade_median"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_verified_nforum_votes_median"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_verified_nforum_endorsed_median"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_verified_nforum_threads_median"
+    }, 
+    {
+        "type": "STRING", 
+        "name": "msbc_verified_nforum_comments_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_verified_nprogcheck_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_verified_nshow_answer_median"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "msbc_verified_npause_video_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_verified_avg_dt_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_verified_sum_dt_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_verified_age_in_2014_median"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_verified_frac_nonzero_play_video"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_verified_frac_nonzero_grade"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "msbc_verified_frac_nonzero_forum_posts"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "course_length_days",
+	"description": "from course_metainfo tables"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "nquant_per_week"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "total_assessments_per_week"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "nqual_per_week"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "nweeks"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_discussion"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_impl"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_initial_display"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_responseparam"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_formularesponse"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_answer"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_vertical"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_selfassessment"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_track"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_multiplechoiceresponse"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_customtag"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_task"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_radiogroup"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_peergrading"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_optionresponse"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_optioninput"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_textbox"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_choiceresponse"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_header"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_rubric"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_openended"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_drag_and_drop_input"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_choice"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_choicegroup"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_sequential"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_img"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_formulaequationinput"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_problem"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_stringresponse"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_openendedparam"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_combinedopenended"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_video"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_description"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_coderesponse"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_textline"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_chapter"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_checkboxgroup"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_customresponse"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_grader_payload"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_solution"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_numericalresponse"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_draggable"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_answer_display"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_section"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_prompt"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_category"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_codeparam"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_target"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_code"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_option"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nexcluded_sub_20_chapter"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_crowdsource_hinter"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_matlabinput"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_plot_payload"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_symbolicresponse"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_videosequence"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_emph"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_problemset"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nexcluded_sub_20_video"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_button"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_textbook"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_vsepr_input"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_imageresponse"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_imageinput"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_include"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_chemicalequationinput"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_sqrt"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_image"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_conditional"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_jsinput"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_word_cloud"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_designprotein2dinput"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_link"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_editageneinput"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_editamoleculeinput"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_randomize"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_canvas"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_meta"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nexcluded_sub_20_problem"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_input"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_label"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_schematic"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_select"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_hintgroup"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_nobr"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_schematicresponse"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "nexcluded_sub_20_sequential"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_object"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_big"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_transcript"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_lti"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_openendedresponse"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_openendedinput"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_crystallography"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_openendedrubric"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_max_score"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_form"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_caption"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_h5"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_blockquotes"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_block"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_hintpart"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_del"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_param"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_embed"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_formulahint"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_customhint"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_solved"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_var"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_foldit"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_timelimit"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_discuss"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_edxxml"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_assessments"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_name"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_openassessment"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_feedbackprompt"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_assessment"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_explanation"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_criterion"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_split_test"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_col"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_colgroup"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "nforum_posts_per_week"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_annotationresponse"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_annotatable"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_tag_prompt"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_comment"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_annotationinput"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_options"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_comment_prompt"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_poll_question"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_wrapper"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_map"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_area"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_wbr"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_thead"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_mentoring"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_textannotation"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_imageannotation"
+    }, 
+    {
+        "type": "INTEGER", 
+        "name": "count_fieldset"
+    },
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_total_hours", 
+        "description": "Time on task: sum of total hours spent by all registrants on the course, based on a 30 minute idle cutoff; uses parallel model, assuming user multitasks, so event time windows are ended only by same kind of event"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_problem_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_video_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_forum_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_total_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_problem_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_video_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_forum_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_total_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_problem_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_video_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_forum_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_total_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_problem_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_video_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_sum_forum_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_total_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_problem_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_video_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_forum_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_total_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_problem_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_video_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_forum_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_total_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_problem_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_video_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_forum_hours_certified", 
+        "mode": "NULLABLE"
+    },
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_total_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_problem_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_video_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "ToT_median_forum_hours_verified", 
+        "mode": "NULLABLE"
+    },
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_problem_seen", 
+        "description": "Show Answer Statistics giving average percentage of times when show answer is clicked for problems seen",
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_not_attempted", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_attempted", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_perfect", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_partial", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_problem_seen_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_not_attempted_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_attempted_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_perfect_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_partial_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_problem_seen_explored", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_not_attempted_explored", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_attempted_explored", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_perfect_explored", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_partial_explored", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_problem_seen_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_not_attempted_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_attempted_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_perfect_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_avg_pct_show_answer_partial_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_problem_seen", 
+        "description": "Show Answer Statistics giving median percentage of times when show answer is clicked for problems seen (pct's calcualted per user, then median taken)",
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_not_attempted", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_attempted", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_perfect", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_partial", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_problem_seen_explored", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_not_attempted_explored", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_attempted_explored", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_perfect_explored", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_partial_explored", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_problem_seen_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_not_attempted_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_attempted_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_perfect_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_partial_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_problem_seen_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_not_attempted_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_attempted_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_perfect_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SAS_median_pct_show_answer_partial_verified", 
+        "mode": "NULLABLE"
+    },
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_total_serial_hours", 
+	"description": "Serial Time on Task data giving sum of total hours; serial model assumes user doing one task at a time, making any event end the time frame of a given event",
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_problem_serial_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_video_serial_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_forum_serial_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_total_serial_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_problem_serial_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_video_serial_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_forum_serial_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_total_serial_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_problem_serial_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_video_serial_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_forum_serial_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_total_serial_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_problem_serial_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_video_serial_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_sum_forum_serial_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_total_serial_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_problem_serial_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_video_serial_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_forum_serial_hours", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_total_serial_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_problem_serial_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_video_serial_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_forum_serial_hours_viewed", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_total_serial_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_problem_serial_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_video_serial_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_forum_serial_hours_certified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_total_serial_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_problem_serial_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_video_serial_hours_verified", 
+        "mode": "NULLABLE"
+    }, 
+    {
+        "type": "FLOAT", 
+        "name": "SToT_median_forum_serial_hours_verified", 
+        "mode": "NULLABLE"
+    }
+]

@@ -1,0 +1,54 @@
+{
+    "extra_geoip": [
+        {
+            "type": "STRING",
+            "name": "ip",
+	    "description": "IP address"
+        },
+        {
+            "type": "STRING",
+            "name": "city",
+	    "description": "city name (unicode!)"
+        },
+        {
+            "type": "STRING",
+            "name": "countryLabel",
+	    "description": "country name"
+        },
+        {
+            "type": "STRING",
+            "name": "country",
+	    "description": "two-level country code"
+        },
+        {
+            "type": "STRING",
+            "name": "postalCode",
+	    "description": "local postal code, e.g. zip code in the US"
+        },
+        {
+            "type": "STRING",
+            "name": "continent",
+	    "description": "name of continent"
+        },
+        {
+            "type": "STRING",
+            "name": "subdivision",
+	    "description": "full name of subdivision, e.g. state in the US"
+        },
+        {
+            "type": "STRING",
+            "name": "region",
+	    "description": "iso_code name of region, e.g. state two-letter code in the US"
+        },
+        {
+            "type": "FLOAT",
+            "name": "latitude",
+	    "description": "latitude"
+        },
+        {
+            "type": "FLOAT",
+            "name": "longitude",
+	    "description": "longitude"
+        }
+    ]
+}
