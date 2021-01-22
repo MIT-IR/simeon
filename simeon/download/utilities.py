@@ -45,7 +45,9 @@ def get_course_id(record: dict) -> str:
     :rtype: str
     :return: A valid edX course ID or an empty string
     """
-    course = record.get('course_id', '')
+    course = record.get(
+        'course_id', record.get('context', {}).get('course_id', '')
+    )
     if not course:
         if 'browser' in record.get('event_source', '').lower():
             match = CID_PATT1.search(record.get('page', ''))
@@ -55,7 +57,8 @@ def get_course_id(record: dict) -> str:
             match = CID_PATT2.search(record.get('event_type', ''))
             if match:
                 course = match.group(1)
-    return course
+    chunks = course.split(':')[-1].split('+')[:3]
+    return '/'.join(chunks)
 
 
 @lru_cache(maxsize=None)
