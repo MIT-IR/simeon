@@ -60,20 +60,19 @@ def get_course_id(record: dict) -> str:
 
 
 @lru_cache(maxsize=None)
-def make_tracklog_path(course_id: str, date: datetime, is_gzip=True) -> str:
+def make_tracklog_path(course_id: str, datestr: str, is_gzip=True) -> str:
     """
     Make a local file path name with the given course ID and datetime object
 
     :type course_id: str
     :param course_id: Properly formatted edX course ID
-    :type date: datetime
-    :param date: Date associated with records that would be saved in the file
+    :type datestr: str
+    :param datestr: %Y-%m-%d formatted date associated with the tracking log
     :type is_gzip: bool
     :param is_gzip: Whether or not we're making a GZIP file path
     :rtype: str
     :return: A local FS file path
     """
-    datestr = date.strftime('%Y-%m-%d')
     ext = '.gz' if is_gzip else ''
     return os.path.join(
         course_id.replace('.', '_').replace('/', '__'),

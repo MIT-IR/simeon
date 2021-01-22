@@ -48,7 +48,9 @@ def process_line(
     if not date:
         try:
             date = parse_date(record.get('time', ''))
-            outfile = utils.make_tracklog_path(course_id, date, is_gzip)
+            outfile = utils.make_tracklog_path(
+                course_id, date.strftime('%Y-%m-%d'), is_gzip
+            )
         except Exception:
             ext = '.gz' if is_gzip else ''
             outfile = os.path.join(
@@ -56,7 +58,9 @@ def process_line(
                 'tracklog-unknown.json{x}'.format(x=ext)
             )
     else:
-        outfile = utils.make_tracklog_path(course_id, date, is_gzip)
+        outfile = utils.make_tracklog_path(
+            course_id, date.strftime('%Y-%m-%d'), is_gzip
+        )
     return {'data': record, 'filename': outfile}
 
 
