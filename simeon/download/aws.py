@@ -174,7 +174,7 @@ class S3Blob():
         prefix = BUCKETS.get(type_, {}).get('Prefix')
         if not prefix:
             msg = (
-                'The given file type, {t!r}, does not any associated'
+                'The given file type, {t!r}, does not have any associated'
                 ' AWS S3 information.'
             )
             raise AWSException(msg.format(t=type_)) from None
