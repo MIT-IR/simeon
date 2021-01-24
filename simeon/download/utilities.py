@@ -39,7 +39,7 @@ def make_file_handle(fname: str, mode: str='w', is_gzip: bool=False):
     return open(fname, mode)
 
 
-def get_course_id(record: dict) -> str:
+def get_course_id(record: dict, org_keywords=('mit', 'vj')) -> str:
     """
     Given a JSON record, try getting the course_id out of it.
 
@@ -62,7 +62,7 @@ def get_course_id(record: dict) -> str:
         course.replace('courses', '').strip('/').split(':')
     )
     course = next(chunks, '')
-    if not any(k in course.lower() for k in ('mit', 'vj')):
+    if not any(k in course.lower() for k in org_keywords):
         course = next(chunks, '')
     return '/'.join(course.split('+')[:3])
 
@@ -189,5 +189,5 @@ def rephrase_mongo_keys(record: dict):
             else:
                 record[key] = str(record.get(key, ''))
     check_for_funny_keys(record)
-    for key in ('context', 'depth', 'retired_username'):
+    for key in ('depth', 'retired_username'):
         record.pop(key, None)
