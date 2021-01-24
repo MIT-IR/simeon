@@ -31,7 +31,8 @@ BUCKETS = {
         'Prefix': '{org}/{site}/events/{year}/{org}-{site}-events-',
     },
 }
-DATE = datetime.today().strftime('%Y-%m-%d')
+BEGIN_DATE = '2012-09-01'
+END_DATE = datetime.today().strftime('%Y-%m-%d')
 DATE_PATT = re.compile(r'\d{4}-\d{2}-\d{2}')
 O2B_MAP = dict(
     key='name', last_modified='last_modified', content_length='size'
