@@ -44,7 +44,7 @@ def process_line(
         return {'data': line, 'filename': 'dead_letter_queue.json.gz'}
     course_id = utils.get_course_id(record)
     record['course_id'] = course_id
-    utils.rephrase_mongo_keys(record)
+    utils.rephrase_record(record)
     if not date:
         try:
             date = parse_date(record.get('time', ''))

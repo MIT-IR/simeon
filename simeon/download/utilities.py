@@ -4,6 +4,7 @@ Some utility functions
 import itertools as its
 import gzip
 import json
+import math
 import os
 import re
 import urllib.parse as urlparser
@@ -15,6 +16,86 @@ from dateutil.parser import parse as parse_date
 
 CID_PATT1 = re.compile(r'^http[s]*://[^/]+/courses/([^/]+/[^/]+/[^/]+)/', re.I)
 CID_PATT2 = re.compile(r'/courses/([^/]+/[^/]+/[^/]+)/', re.I)
+# The following are patterns from edx2bigquery that try to pluck out
+# the module ID of an event
+MI_PATT1 = re.compile(
+    r'/courses/course-v1:(?P<org>[^+]+)\+(?P<course>[^+]+)\+'
+    r'(?P<semester>[^+]+)/xblock/block-v1:[^+]+\+[^+]+\+[^+]+\+type@'
+    r'(?P<mtype>[^+]+)\+block@(?P<id>[^/]+)/handler'
+)
+MI_PATT2 = re.compile(
+    r'/courses/course-v1:(?P<org>[^+]+)\+(?P<course>[^+]+)\+'
+    r'(?P<semester>[^+]+)/[bc]'
+)
+MI_PATT2A = re.compile(r'input_(?P<id>[^=]+)_[0-9]+_[^=]+=')
+MI_PATT3 = re.compile(
+    r'/courses/(?P<org>[^/]+)/(?P<course>[^/]+)/(?P<semester>[^+]+)'
+    r'/courseware/(?P<chapter>[^/]+)/(?P<sequential>[^/]+)/'
+)
+MI_PATT3A = re.compile(
+    r'input_i4x-(?P<org>[^-]+?)-(?P<course>[^-]+?)-'
+    r'(?P<mtype>[^-]+?)-(?P<id>.+?)_[0-9]+_[^=]+=.*'
+)
+MI_PATT4 = re.compile(
+    r'/courses/course-v1:(?P<org>[^+]+)\+(?P<course>[^+]+)\+'
+    r'(?P<semester>[^+]+)/xblock/block-v1:[^+]+\+[^+]+\+[^+]+\+type@'
+    r'(?P<mtype>[^+]+)\+block@(?P<id>[^/]+)'
+)
+MI_PATT5 = re.compile(
+    r'block-v1:(?P<org>[^+]+)\+(?P<course>[^+]+)\+(?P<semester>[^+]+)\+type@'
+    r'(?P<mtype>[^+]+)\+block@(?P<id>[^/]+)'
+)
+MI_PATT6 = re.compile(
+    r'/courses/course-v1:(?P<org>[^+]+)\+(?P<course>[^+]+)\+'
+    r'(?P<semester>[^+]+)/courseware/(?P<chapter>[^/]+)/(?P<id>[^/]+)/'
+)
+MI_PATT6A = re.compile(
+    r'i4x-(?P<org>[^-]+)-(?P<course>[^+]+)-(?P<mtype>[^-]+)-(?P<id>[^-]+)'
+)
+MI_PATT7 = re.compile(r'i4x://([^/]+/[^/]+/[^/]+/[^/]+)')
+MI_PATT7A = re.compile(r'i4x://([^/]+/[^/]+/[^/]+/[^/]+)/goto_position')
+MI_PATT7B = re.compile(
+    r'i4x://(?P<org>[^/]+)/(?P<course>[^/]+)/'
+    r'(?P<mtype>[^/]+)/(?P<id>[^/]+)/(?P<action>[^/]+)'
+)
+MI_PATT7C = re.compile(
+    r'i4x://(?P<org>[^/]+)/(?P<course>[^/]+)/'
+    r'(?P<mtype>[^/]+)/(?P<id>[^/]+)'
+)
+MI_PATT8 = re.compile(
+    r'/courses/([^/]+/[^/]+)/[^/]+/courseware/[^/]+/([^/]+)/(|[#]*)$'
+)
+MI_PATT9 = re.compile(
+    r'/courses/([^/]+/[^/]+)/[^/]+/courseware/([^/]+)/$'
+)
+MI_PATT10 = re.compile(
+    r'^input_i4x-([^\-]+)-([^\-]+)-problem-([^ =]+)'
+    r'_([0-9]+)_([0-9]+)(|_comment|_dynamath)='
+)
+MI_PATT11 = re.compile(
+    r'^/courses/([^/]+/[^/]+)/([^/]+)/discussion/threads/([^/]+)'
+)
+MI_PATT12 = re.compile(
+    r'^/courses/([^/]+/[^/]+)/([^/]+)/discussion/forum/i4x([^/]+)/threads/([^/]+)'
+)
+MI_PATT13 = re.compile(
+    r'^/courses/([^/]+/[^/]+)/([^/]+)/discussion/i4x([^/]+)/threads/create'
+)
+MI_PATT14 = re.compile(
+    r'^/courses/([^/]+/[^/]+)/([^/]+)/discussion/forum/([^/]+)/threads/([^/]+)'
+)
+MI_PATT15 = re.compile(
+    r'/courses/([^/]+/[^/]+)/[^/]+/courseware/[^/]+/([^/]+)/$'
+)
+MI_PATT16 = re.compile(
+    r'/courses/([^/]+/[^/]+)/[^/]+/jump_to_id/([^/]+)(/|)$'
+)
+MI_PATT17 = re.compile(
+    r'/courses/(?P<org>[^/]+)/(?P<course>[^/]+)/'
+    r'(?P<semester>[^+]+)/xblock/i4x:;_;_[^/]+;_[^/]+;_'
+    r'(?P<mtype>[^;]+);_(?P<id>[^/]+)/handler/.*'
+)
+MI_PATT18 = re.compile(r'i4x-([^\-]+)-([^\-]+)-video-([^ ]+)')
 
 
 def make_file_handle(fname: str, mode: str='w', is_gzip: bool=False):
@@ -45,6 +126,8 @@ def get_course_id(record: dict, org_keywords=('mit', 'vj')) -> str:
 
     :type record: dict
     :param record: A deserialized JSON record
+    :type org_keywords: Iterable[str]
+    :param org_keywords: Iterable of keywords pertaining to your organization
     :rtype: str
     :return: A valid edX course ID or an empty string
     """
@@ -65,6 +148,208 @@ def get_course_id(record: dict, org_keywords=('mit', 'vj')) -> str:
     if not any(k in course.lower() for k in org_keywords):
         course = next(chunks, '')
     return '/'.join(course.split('+')[:3])
+
+
+def pluck_match_groups(match, names):
+    """
+    Pluck the strings matching the given names
+    out of the given SRE_Match object.
+    Make a string with the matched strings
+
+    :type match: SRE_Match
+    :param match: A regex match object from re.search or re.match
+    :type names: Union[Tuple, List]
+    :param names: A list of group names to pluck out of the match object
+    :rtype: str
+    :return: A concatenated string from the found matches
+    """
+    mdict = match.groupdict()
+    if not mdict:
+        mdict = dict(enumerate(match.groups(), 1))
+    return '/'.join(mdict.get(n, n) for n in names)
+
+
+def get_module_id(record: dict, org_keywords=('mit', 'vj')):
+    """
+    Get the module ID of the given record
+
+    :type record: dict
+    :param record: A deserialized JSON record
+    :type org_keywords: Iterable[str]
+    :param org_keywords: Iterable of keywords pertaining to your organization
+    :rtype: str
+    :return: A valid edX course ID or an empty string
+    """
+    event = record['event']
+    event_type = record['event_type']
+    path = record.get('context', {}).get('path', '')
+    for chunk in (event_type, path):
+        match = MI_PATT1.search(chunk)
+        if match:
+            return pluck_match_groups(
+                match, ['org', 'course', 'mtype', 'id']
+            )
+    conds = [
+        all([
+            'problem' in event_type,
+            isinstance(event, str) and event.startswith('input_'),
+        ]),
+        all([
+            event_type == 'problem_graded',
+            isinstance(event, list) and len(event) > 0,
+            event[0].startswith('input_')
+        ])
+    ]
+    page = record.get('page', '') or ''
+    for cond in conds:
+        if cond:
+            match = MI_PATT2.search(page)
+            if match:
+                if isinstance(event, list):
+                    substr = event[0]
+                else:
+                    substr = event.split('&', 1)[0]
+                submatch = MI_PATT2A.search(substr)
+                if submatch:
+                    return pluck_match_groups(
+                        match, ['org', 'course', 'problem', 'id']
+                    )
+            if isinstance(event, list):
+                match = MI_PATT3A.search(event[0])
+            else:
+                match = MI_PATT3A.search(event)
+            if match:
+                return pluck_match_groups(
+                    match, ['org', 'course', 'mtype', 'id']
+                )
+    for chunk in (event_type, path):
+        match = MI_PATT4.search(chunk)
+        if match:
+            return pluck_match_groups(
+                match, ['org', 'course', 'mtype', 'id']
+            )
+    if not isinstance(event, dict):
+        try:
+            event_dict = json.loads(event)
+        except:
+            event_dict = None
+        if isinstance(event_dict, dict) and 'id' in event_dict:
+            event = event_dict
+    if isinstance(event, dict) and isinstance(event.get('id'), str):
+        event_id = event['id']
+        match = MI_PATT5.search(event_id)
+        if match:
+            return pluck_match_groups(
+                match, ['org', 'course', 'mtype', 'id']
+            )
+        match = MI_PATT6A.search(event_id)
+        if match:
+            return pluck_match_groups(
+                match, ['org', 'course', 'mtype', 'id']
+            )
+        if event_type == 'play_video' and '/' not in event_id:
+            match = MI_PATT6.search(page)
+            if match:
+                return pluck_match_groups(
+                    match, ['org', 'course', 'video', event_id]
+                )
+    elif isinstance(event, str):
+        match = MI_PATT5.search(event)
+        if match:
+            return pluck_match_groups(
+                match, ['org', 'course', 'mtype', 'id']
+            )
+    bad_events = ('add_resource', 'delete_resource', 'recommender_upvote')
+    if event_type in bad_events:
+        return None
+    if isinstance(event, dict) and not isinstance(event.get('id'), str):
+        return None
+    if record.get('event_source') == 'browser':
+        try:
+            match = MI_PATT7.search(event.get('id', ''))
+            if match:
+                if event_type == 'seq_goto' or event_type == 'seq_next':
+                    return match.group(1) + '/' + event.get('new', '')
+                return match.group(1)
+        except:
+            pass
+        if event_type == 'page_close':
+            match = MI_PATT8.search(page)
+            if match:
+                return match.group(1) + '/sequential/' + match.group(2) + '/'
+            match = MI_PATT9.search(page)
+            if match:
+                return match.group(1) + '/chapter/' + match.group(2) + '/'
+        try:
+            match = MI_PATT7.search(event.get('problem', ''))
+            if match:
+                return match.group(1)
+        except:
+            pass
+        if isinstance(event, str):
+            substr = event
+        else:
+            substr = event[0]
+        try:
+            match = MI_PATT10.search(substr)
+            if match:
+                return '/'.join((
+                    match.group(1), match.group(2),
+                    'problem', match.group(3)
+                ))
+        except:
+            pass
+    patt_names = (
+        (MI_PATT11, (1, 'forum', 3)),
+        (MI_PATT12, (1, 'forum', 4)),
+        (MI_PATT13, (1, 'forum', 'new')),
+        (MI_PATT14, (1, 'forum', 4)),
+        (MI_PATT15, (1, 'sequential', 2, '')),
+        (MI_PATT9, (1, 'chapter', 2)),
+        (MI_PATT16, (1, 'jump_to_id', 2)),
+        (MI_PATT17, ('org', 'course', 'mtype', 'id')),
+    )
+    for patt, names in patt_names:
+        match = patt.search(event_type)
+        if match:
+            return pluck_match_groups(match, names)
+    match = MI_PATT17.search(path)
+    if match:
+        return pluck_match_groups(
+            match, ['org', 'course', 'mtype', 'id']
+        )
+    if isinstance(event, str) and event.startswith('input_'):
+        match = MI_PATT3A.search(event)
+        if match:
+            return pluck_match_groups(
+            match, ['org', 'course', 'mtype', 'id']
+        )
+    match = MI_PATT7.search(event_type)
+    if match:
+        if MI_PATT7A.search(event_type):
+            try:
+                return match.group(1) + '/' + event['POST']['position'][0]
+            except:
+                pass
+        return match.group(1)
+    match = MI_PATT7B.search(event_type)
+    if match:
+        return pluck_match_groups(match, ['org', 'course', 'mtype', 'id'])
+    if isinstance(event, str):
+        match = MI_PATT7C.search(event)
+        if match:
+            return pluck_match_groups(match, ['org', 'course', 'mtype', 'id'])
+    if isinstance(event, dict):
+        keys = [
+            ('problem_id', MI_PATT7, (1,)),
+            ('id', MI_PATT18, (1, 2, 'video', 3)),
+        ]
+        for key, patt, names in keys:
+            if event.get(key):
+                match = patt.search(event[key])
+                if match:
+                    return pluck_match_groups(match, names)
+    return None
 
 
 @lru_cache(maxsize=None)
@@ -118,76 +403,280 @@ def parse_mongo_tstamp(timestamp: str):
         raise ValueError(msg) from None
 
 
-def check_for_funny_keys(entry, name='toplevel'):
-    for key, val in entry.items():
+def check_for_funny_keys(record, name='toplevel'):
+    """
+    I am quite frankly not sure what Ike is trying to do here,
+    but there should be a better way.
+    For now, though, we'll just have to make do.
+
+    :type record: dict
+    :param record: Dictionary whose values are modified
+    :type name: str
+    :param name: Name of the level of the dict
+    :rtype: None
+    :return: Modifies the record in place
+    """
+    for key, val in record.items():
         if key.startswith('i4x-') or key.startswith('xblock.'):
             return True
         if key[0] in '0123456789':
             return True
         if '-' in key or '.' in key:
-            newkey = key.replace('-','_').replace('.','__')
-            entry[newkey] = val
-            entry.pop(key)
+            newkey = key.replace('-', '_').replace('.', '__')
+            record[newkey] = val
+            record.pop(key)
             key = newkey
         if isinstance(val, dict):
             ret = check_for_funny_keys(val, name + '/' + key)
             if ret:
-                entry[key] = json.dumps(val)
+                record[key] = json.dumps(val)
     return False
 
 
-def rephrase_mongo_keys(record: dict):
+def stringify_dict(record, *keys):
     """
-    Update the given record in place. The target keys
-    are those whose values came from a MongoDB export
+    Given a dictionary and some keys, JSON stringify
+    the values at those keys in place.
 
-    For now, I am skipping Ike's check_for_funny_keys function
-    from the ephrase_forum_data.py module in edx2bigquery
+    :type record: dict
+    :param record: Dictionary whose values are modified
+    :type keys: Iterable[str]
+    :param keys: multiple args
+    :rtype: None
+    :return: Modifies the dict in place
+    """
+    for key in keys:
+        if isinstance(key, (list, tuple)) and len(key) > 1:
+            key, subkey, *_ = key
+            if key not in record or subkey not in record[key]:
+                continue
+            record[key][subkey] = json.dumps(record[key][subkey])
+        else:
+            if key not in record:
+                continue
+            record[key] = json.dumps(record[key])
+
+
+def move_unknown_fields_to_agent(record, *keys):
+    """
+    Move the values associated with the given keys
+    into record['agent']
+
+    :type record: dict
+    :param record: Dictionary whose values are modified
+    :type keys: Iterable[str]
+    :param keys: multiple args
+    :rtype: None
+    :return: Modifies the record in place
+    """
+    agent = {'oldagent': record.get('agent', '')}
+    for key in keys:
+        if '.' in key:
+            prefix, subkey = key.split('.', 1)
+            if prefix in record:
+                subrecord = record[prefix]
+                if subkey in subrecord:
+                    agent[key] = subrecord[subkey]
+                    subrecord.pop(subkey)
+        else:
+            if key in record:
+                agent[key] = record[key]
+                record.pop(key)
+    record['agent'] = json.dumps(agent)
+
+
+def is_float(val):
+    """
+    Check that the string can be coerced into a float.
+    """
+    try:
+        float(val)
+        return True
+    except (TypeError, ValueError):
+        return False
+
+
+def check_record_schema(record: dict, schema: list, coerce=True):
+    """
+    Given one of the schemas in simeon.upload.schemas,
+    check and coerce (if True), the corresponding values
+
+    :type record: dict
+    :param record: Dictionary whose values are modified
+    :type schema: Iterable[Dict[str, Union[str, Dict]]]
+    :param schema: A list of dicts with info on BigQuery table fields
+    :type coerce: bool
+    :param coerce: Whether or not to coerce values
+    :rtype: None
+    :return: Modifies the record if needed
+    """
+    pass
+
+
+def move_field_to_mongoid(record: dict, path: list):
+    """
+    Move the values associated with the given path
+    into record['mongoid']
+
+    :type record: dict
+    :param record: Dictionary whose values are modified
+    :type keys: Iterable[str]
+    :param keys: A list of keys to traverse and move
+    :rtype: None
+    :return: Modifies the record in place
+    """
+    mongoid = record.get('mongoid')
+    if not isinstance(mongoid, dict):
+        mongoid = {'old_mongoid': mongoid}
+    key = path[0]
+    if len(path) == 1:
+        if key in record:
+            val = record.pop(key)
+            mongoid[key] = val
+            return
+        return
+    if key not in mongoid:
+        mongoid[key] = {}
+    return move_field_to_mongoid(record, path[1:])
+
+
+def drop_empties(record, *keys):
+    """
+    Recursive drop keys whose corresponding values are empty
+    from the given record.
+
+    :type record: dict
+    :param record: Dictionary whose values are modified
+    :type keys: Iterable[str]
+    :param keys: multiple args
+    :rtype: None
+    :return: Modifies the record in place
+    """
+    if not keys:
+        return
+    key = keys[0]
+    if isinstance(record, dict) and key in record:
+        if len(keys) == 1:
+            if record[key] == '':
+                record.pop(key)
+        else:
+            drop_empties(record[key], *keys[1:])
+
+
+def rephrase_record(record: dict, org_keywords=('mit', 'vj')):
+    """
+    Update the given record in place. The purpose of this function
+    is to turn this record into something with the same schema as that of
+    the target BigQuery table.
 
     :type record: dict
     :param record: A deserialized JSON record
     :rtype: None
     :return: Nothing
     """
-    date_keys = (
-        ('endorsement', 'time'), ('updated_at', '$date'),
-        ('created_at', '$date'), ('last_activity_at', '$date')
-    )
-    str_keys = (
-        ('historical_abuse_flaggers', None),
-        ('abuse_flaggers', None),
-        ('at_position_list', None),
-        ('tags_array', None),
-        ('up', 'votes'),
-        ('up', 'votes')
-    )
+    if 'course_id' not in record:
+        record['course_id'] = get_course_id(record, org_keywords)
+    if 'module_id' not in record:
+        record['module_id'] = get_module_id(record, org_keywords)
+    if 'event' not in record:
+        record['event'] = ''
+    if 'event_js' not in record:
+        event = record.get('event')
+        try:
+            if not isinstance(event, dict):
+                event = json.loads(event)
+            event_js = True
+        except:
+            event_js = False
+        record['event'] = event
+        record['event_js'] = event_js
+    event = None
+    event = record.get('event')
+    if event is not None:
+        record['event'] = json.dumps(event)
+    event_type = record.get('event_type', '')
+    known_types = set([
+        'play_video', 'seq_goto', 'seq_next', 'seq_prev',
+        'seek_video', 'load_video', 'save_problem_success',
+        'save_problem_fail', 'reset_problem_success',
+        'reset_problem_fail', 'show_answer',
+        'edx.course.enrollment.activated',
+        'edx.course.enrollment.deactivated',
+        'edx.course.enrollment.mode_changed',
+        'edx.course.enrollment.upgrade.succeeded', 'speed_change_video',
+        'problem_check', 'problem_save', 'problem_reset'
+    ])
+    if isinstance(event, dict):
+        outs = ('video_embedded', 'harvardx.button', 'harvardx.')
+        out_conds = not any(k in event_type for k in outs)
+        in_conds = 'problem_' in event_type or event_type in known_types
+        if in_conds and out_conds:
+            record['event_struct'] = event
+        else:
+            record['event_struct'] = {
+                'GET': json.dumps(event.get('GET')),
+                'POST': json.dumps(event.get('POST')),
+                'query': event.get('query')
+            }
+    else:
+        if 'event_struct' in record:
+            record.pop('event_struct')
     if '_id' in record:
         record['mongoid'] = record['_id']['$oid']
         record.pop('_id')
-    if 'parent_id' in record:
-        data['parent_id'] = record['parent_id']['$oid']
-    for key, subkey in date_keys:
-        if key in record:
-            record[key] = parse_mongo_tstamp(record[key][subkey])
-    if 'comment_thread_id' in record:
-        record['comment_thread_id'] = record['comment_thread_id']['$oid']
-    endorsement_conds = (
-        'endorsement' in record,
-        record.get('endorsement', '') in ('null', None, ''),
+    if isinstance(event, dict):
+        if 'POST' in event:
+            event['POST'] = json.dumps(event['POST'])
+        if 'GET' in event:
+            event['GET'] = json.dumps(event['GET'])
+        if 'child-id' in event:
+            event['child_id'] = event['child-id']
+            event.pop('child-id')
+
+    problem_events = set([
+        'problem_check', 'problem_save', 'problem_reset'
+    ])
+    if event_type in problem_events and record['event_source'] == 'browser':
+        if isinstance(event, (str, list, tuple)):
+            event = {'data': json.dumps(event)}
+    if isinstance(event, (str, list, tuple)):
+        event = {'data': json.dumps(event)}
+    to_stringify = (
+        ('state', 'input_state'), ('state', 'correct_map'),
+        ('state', 'student_answers'),
+        'correct_map', 'answers', 'submission', 'old_state',
+        'new_state', 'permutation', 'options_selected', 'corrections',
     )
-    if all(endorsement_conds):
-        record.pop('endorsement')
-    if 'parent_ids' in record:
-        record['parent_ids'] = ' '.join(
-            [subrec['$oid'] for subrec in record['parent_ids']]
-        )
-    for key, subkey in str_keys:
-        if key in record:
-            if subkey:
-                subrec = record.get(subkey, {})
-                subrec[key] = str(subrec.get(key, ''))
-            else:
-                record[key] = str(record.get(key, ''))
+    if event is not None:
+        stringify_dict(event, *to_stringify)
+    context = record.get('context', {})
+    stringify_dict(context, 'course_user_tags')
+    mobile_api_context_fields = [
+        'application', 'client', 'received_at', 'component',
+        'open_in_browser_url', 'module.usage_key',
+        'module.original_usage_version', 'module.original_usage_key',
+        'asides',
+    ]
+    move_unknown_fields_to_agent(context, *mobile_api_context_fields)
+    mongo_paths = [
+        ['referer'], ['accept_language'],
+        ['event_struct', 'requested_skip_interval'],
+        ['event_struct', 'submitted_answer'],
+        ['event_struct', 'num_attempts'], ['event_struct', 'task_id'],
+        ['event_struct', 'content'], ['nonInteraction'], ['label'],
+        ['event_struct', 'widget_placement'], ['event_struct', 'tab_count'],
+        ['event_struct', 'current_tab'], ['event_struct', 'target_tab'],
+        ['event_struct', 'state', 'has_saved_answers'], ['context', 'label'],
+        ['roles'], ['environment'], ['minion_id'],
+        ['event_struct', 'duration'], ['event_struct', 'play_medium']
+    ]
+    for path in mongo_paths:
+        move_field_to_mongoid(record, path)
+    drop_empties(record, 'context', 'user_id')
+    record.pop('event_js', '')
+    if record.get('event_type') == 'speed_change_video':
+        speed = record.get('event_struct', {}).get('new_speed')
+        if is_float(speed):
+            if math.isnan(float(speed)):
+                record['event_struct'].pop('new_speed', '')
     check_for_funny_keys(record)
-    for key in ('depth', 'retired_username'):
-        record.pop(key, None)
