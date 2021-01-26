@@ -3,6 +3,7 @@ simeon is a command line tool that helps with processing edx data
 """
 import os
 import sys
+import traceback
 from argparse import ArgumentParser
 
 import simeon.download.aws as aws
@@ -43,8 +44,10 @@ def split_log_files(parsed_args):
         try:
             logs.split_tracking_log(fname, parsed_args.destination)
         except Exception as excp:
+            _, _, tb = sys.exc_info()
+            traces = '\n'.join(map(str.strip, traceback.format_tb(tb)))
             failed = True
-            msg = 'Failed to split {f}: {e}'.format(f=fname, e=excp)
+            msg = 'Failed to split {f}: {e}'.format(f=fname, e=traces)
             print(msg, file=sys.stderr)
     sys.exit(0 if not failed else 1)
 
