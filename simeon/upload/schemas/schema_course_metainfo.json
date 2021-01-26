@@ -1,17 +1,17 @@
 {
     "course_metainfo": [
         {
-            "type": "STRING",
+            "field_type": "STRING",
             "name": "course_id",
 	    "description": "course ID"
         },
         {
-            "type": "STRING",
+            "field_type": "STRING",
             "name": "key",
 	    "description": "key"
         },
         {
-            "type": "STRING",
+            "field_type": "STRING",
             "name": "value",
 	    "description": "value corresponding to key"
         }

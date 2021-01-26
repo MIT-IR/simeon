@@ -1,559 +1,559 @@
 {
     "tracking_log": [
         {
-            "type": "TIMESTAMP", 
+            "field_type": "TIMESTAMP", 
             "name": "time"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "username"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "ip"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "event_source"
         }, 
         {
-            "type": "STRING", 
-            "name": "event_type"
+            "field_type": "STRING", 
+            "name": "event_field_type"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "agent"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "course_id"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "module_id"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "page"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "host"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "vname"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "datafn"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "event_js"
         }, 
         {
             "fields": [
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "course_id"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "course_user_tags"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "user_id"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "org_id"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "username"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "ip"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "agent"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "host"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "session"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "path"
                 }, 
                 {
                     "fields": [
                         {
-                            "type": "STRING", 
+                            "field_type": "STRING", 
                             "name": "display_name"
                         }
                     ], 
-                    "type": "RECORD", 
+                    "field_type": "RECORD", 
                     "name": "module"
                 }
             ], 
-            "type": "RECORD", 
+            "field_type": "RECORD", 
             "name": "context"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "mongoid"
         }, 
         {
             "fields": [
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "POST"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "GET"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "course_id"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "user_id"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "mode"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "data"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "code"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "id"
                 }, 
                 {
-                    "type": "FLOAT", 
+                    "field_type": "FLOAT", 
                     "name": "currentTime"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "new"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "old"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "problem"
                 }, 
                 {
-                    "type": "STRING", 
-                    "name": "type"
+                    "field_type": "STRING", 
+                    "name": "field_type"
                 }, 
                 {
-                    "type": "FLOAT", 
+                    "field_type": "FLOAT", 
                     "name": "new_time"
                 }, 
                 {
-                    "type": "FLOAT", 
+                    "field_type": "FLOAT", 
                     "name": "old_time"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "problem_id"
                 }, 
                 {
                     "fields": [
                         {
-                            "type": "STRING", 
+                            "field_type": "STRING", 
                             "name": "student_answers"
                         }, 
                         {
-                            "type": "INTEGER", 
+                            "field_type": "INTEGER", 
                             "name": "seed"
                         }, 
                         {
-                            "type": "BOOLEAN", 
+                            "field_type": "BOOLEAN", 
                             "name": "done"
                         }, 
                         {
-                            "type": "STRING", 
+                            "field_type": "STRING", 
                             "name": "correct_map"
                         }, 
                         {
-                            "type": "STRING", 
+                            "field_type": "STRING", 
                             "name": "input_state"
                         }
                     ], 
-                    "type": "RECORD", 
+                    "field_type": "RECORD", 
                     "name": "state"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "answers"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "submission"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "success"
                 }, 
                 {
-                    "type": "FLOAT", 
+                    "field_type": "FLOAT", 
                     "name": "grade"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "correct_map"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "attempts"
                 }, 
                 {
-                    "type": "FLOAT", 
+                    "field_type": "FLOAT", 
                     "name": "max_grade"
                 }, 
                 {
-                    "type": "FLOAT", 
+                    "field_type": "FLOAT", 
                     "name": "current_time"
                 }, 
                 {
-                    "type": "FLOAT", 
+                    "field_type": "FLOAT", 
                     "name": "old_speed"
                 }, 
                 {
-                    "type": "FLOAT", 
+                    "field_type": "FLOAT", 
                     "name": "new_speed"
                 }, 
                 {
-                    "type": "FLOAT", 
+                    "field_type": "FLOAT", 
                     "name": "speed"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "failure"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "course"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "total_results"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "query"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "corrected_text"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "page"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "child_id"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "group_id"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "partition_name"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "partition_id"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "group_name"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "old_state"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "new_state"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "status"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "is_user_staff"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "chapter"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "direction"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "name"
                 }, 
                 {
-                    "type": "FLOAT", 
+                    "field_type": "FLOAT", 
                     "name": "amount"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "chapter_title"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "caseSensitive"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "findPrevious"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "highlightAll"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "item_id"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "submission_returned_uuid"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "requesting_student_id"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "saved_response"
                 }, 
                 {
                     "fields": [
                         {
-                            "type": "STRING", 
+                            "field_type": "STRING", 
                             "name": "text"
                         }
                     ], 
-                    "type": "RECORD", 
+                    "field_type": "RECORD", 
                     "name": "answer"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "created_at"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "attempt_number"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "submission_uuid"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "submitted_at"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "corrections"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "options_selected"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "scorer_id"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "feedback"
                 }, 
                 {
-                    "type": "STRING", 
-                    "name": "score_type"
+                    "field_type": "STRING", 
+                    "name": "score_field_type"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "parts"
                 }, 
                 {
                     "fields": [
                         {
-                            "type": "STRING", 
+                            "field_type": "STRING", 
                             "name": "content_hash"
                         }
                     ], 
-                    "type": "RECORD", 
+                    "field_type": "RECORD", 
                     "name": "rubric"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "scored_at"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "feedback_text"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "options"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "thumbnail_title"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "location"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "permutation"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "url"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "descriptionText"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "description"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "title"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "aws_secret_key"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "uploadedFileDir"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "aws_access_key"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "bucketName"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "downvotes"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "upvotes"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "uploadedFileName"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "error"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "newVotes"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "oldVotes"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "old_description"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "old_title"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "old_url"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "old_descriptionText"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "toggle"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "reason"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "isProblematic"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "oldReason"
                 }, 
                 {
-                    "type": "INTEGER", 
+                    "field_type": "INTEGER", 
                     "name": "category"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "selection"
                 }, 
                 {
-                    "type": "STRING", 
+                    "field_type": "STRING", 
                     "name": "element"
                 }
             ], 
-            "type": "RECORD", 
+            "field_type": "RECORD", 
             "name": "event_struct"
         }, 
 	{
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "event"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "name"
         }, 
         {
-            "type": "STRING", 
+            "field_type": "STRING", 
             "name": "session"
         }
     ]

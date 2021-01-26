@@ -1,27 +1,27 @@
 {
     "user_partitions": [
         {
-            "type": "INTEGER",
+            "field_type": "INTEGER",
             "name": "id",
 	    "description": "user_parition table entry ID"
         },
         {
-            "type": "INTEGER",
+            "field_type": "INTEGER",
             "name": "user_id",
 	    "description": "user_id"
         },
         {
-            "type": "STRING",
+            "field_type": "STRING",
             "name": "key",
 	    "description": "partition key"
         },
         {
-            "type": "STRING",
+            "field_type": "STRING",
             "name": "course_id",
 	    "description": "course_id"
         },
         {
-            "type": "INTEGER",
+            "field_type": "INTEGER",
             "name": "value",
 	    "description": "partition assignment value (which partition the user is assigned to)"
         }

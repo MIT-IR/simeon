@@ -1,85 +1,85 @@
 {
     "problem_analysis": [
         {
-            "type": "STRING",
+            "field_type": "STRING",
             "name": "course_id",
 	    "description": "course_id"
         },
         {
-            "type": "INTEGER",
+            "field_type": "INTEGER",
             "name": "user_id",
 	    "description": "unique user ID, matching user_info_combo and users tables"
         },
         {
-            "type": "STRING",
+            "field_type": "STRING",
             "name": "problem_url_name",
 	    "description": "unique database key for this problem in the course"
         },
         {
-            "type": "RECORD",
+            "field_type": "RECORD",
             "name": "item",
 	    "mode": "REPEATED",
 	    "description": "record of items associated with this problem",
 	    "fields": [
 	        {
-		    "type" : "STRING",
+		    "field_type" : "STRING",
 		    "name": "answer_id",
 		    "description": "problem answer_id from edX-platform correct_map, unique to this problem"
 		},
 	        {
-		    "type" : "STRING",
+		    "field_type" : "STRING",
 		    "name": "response",
 		    "description": "student response to this item"
 		},
 	        {
-		    "type" : "STRING",
+		    "field_type" : "STRING",
 		    "name": "correctness",
 		    "description": "either 'correct' or 'incorrect' or other value as determined by the capa problem"
 		},
 	        {
-		    "type" : "BOOLEAN",
+		    "field_type" : "BOOLEAN",
 		    "name": "correct_bool",
 		    "description": "True if correctness = 'correct'"
 		},
 		{
-		    "type": "FLOAT",
+		    "field_type": "FLOAT",
 	            "name": "npoints",
 		    "description": "number of points awarded -- may be float, but is usually an integer"
 	        },
 	        {
-		    "type" : "STRING",
+		    "field_type" : "STRING",
 		    "name": "msg",
 		    "description": "message provided back to student by capa problem; often a hint, or error msg"
 		},
 	        {
-		    "type" : "STRING",
+		    "field_type" : "STRING",
 		    "name": "hint",
 		    "description": "hint string provided back to student by capa problem"
 		}
 	    ]
         },
         {
-            "type": "INTEGER",
+            "field_type": "INTEGER",
             "name": "attempts",
 	    "description": "number of attempts made by user on this problem up to this entry"
         },
         {
-            "type": "BOOLEAN",
+            "field_type": "BOOLEAN",
             "name": "done",
 	    "description": "flag indicating if problem was done by student (may be buggy, especially pre-2014)"
         },
         {
-            "type": "FLOAT",
+            "field_type": "FLOAT",
             "name": "grade",
 	    "description": "grade earned for this problem, computed by capa problem"
         },
         {
-            "type": "FLOAT",
+            "field_type": "FLOAT",
             "name": "max_grade",
 	    "description": "max_grade earned for this problem"
         },
         {
-            "type": "TIMESTAMP",
+            "field_type": "TIMESTAMP",
             "name": "created",
 	    "description": "creation date of this entry in the edX platform database"
         }
