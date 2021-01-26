@@ -26,6 +26,14 @@ class TestUploadUtilities(unittest.TestCase):
             ('log', 'data/MITx__123__2T2020/no-date-here.json.gz'),
             ('sql', 'data/MITx__123__2T2020/.hidden.csv.gz')
         ]
+        self.bad_file_types = [
+            ('bad', 'data/MITx__123__2T2020/tracklog-2020-06-01.json.gz'),
+            ('worse', 'data/MITx__123__2T2020/user_info_combo.csv.gz'),
+            ('worst', 'data/MITx__123__2T2020/person_course.csv.gz'),
+            ('bad', 'data/MITx__123__2T2020/forum.csv.gz'),
+            ('worse', 'data/MITx__123__2T2020/forum_person.csv.gz'),
+            ('worst', 'data/MITx__123__2T2020/email-opt-in.csv.gz'),
+        ]
         self.missing_schema_tables = [
             'this_table_doesnt_exist_anywhere',
             'neither_does_this',
@@ -62,3 +70,14 @@ class TestUploadUtilities(unittest.TestCase):
         for table in self.missing_schema_tables:
             with self.assertRaises(MissingSchemaException):
                 uputils.get_bq_schema(table)
+
+    def test_local_to_bq_table_with_unknown_file_types(self):
+        """
+        Test that uputils.local_to_bq_table raises a ValueError when
+        given an unknown file type.
+        """
+        for ftype, fname in self.bad_file_types:
+            msg = 'With file name {f} and ftype {t}'.format(f=fname, t=ftype)
+            with self.subTest(msg):
+                with self.assertRaises(ValueError):
+                    uputils.local_to_bq_table(fname, ftype, self.project)

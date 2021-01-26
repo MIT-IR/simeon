@@ -128,6 +128,20 @@ def local_to_bq_table(fname: str, file_type: str, project: str) -> str:
     )
 
 
+def dict_to_schema_field(schema_dict: dict):
+    """
+    Make a SchemaField
+    """
+    if schema_dict.get('field_type') != 'RECORD':
+        return bigquery.SchemaField(**schema_dict)
+    fields = []
+    for subfield in schema_dict.get('fields', []):
+        fields.append(dict_to_schema_field(subfield))
+    schema_dict['fields'] = fields
+    field = bigquery.SchemaField(**schema_dict)
+    return field
+
+
 def get_bq_schema(table: str, schema_dir: str=SCHEMA_DIR):
     """
     Given a bare table name (without leading project or dataset),
@@ -141,6 +155,8 @@ def get_bq_schema(table: str, schema_dir: str=SCHEMA_DIR):
     :return: A list of bigquery.SchemaField objects
     """
     bname = table.split('.')[-1]
+    if all(k in bname for k in ('track', 'log')):
+        bname = 'tracking_log'
     schema_file = os.path.join(schema_dir, 'schema_{t}.json'.format(t=bname))
     if not os.path.exists(schema_file):
         raise MissingSchemaException(
@@ -152,5 +168,32 @@ def get_bq_schema(table: str, schema_dir: str=SCHEMA_DIR):
     with open(schema_file) as jf:
         schema = json.load(jf)
         for field in schema.get(bname, []):
-            out.append(bigquery.SchemaField(**field))
+            out.append(dict_to_schema_field(field))
     return out
+
+
+def make_bq_config(
+    table: str, append: bool=False,
+    create: bool=True, file_format: str='json'
+):
+    """
+    Make a bigquery.LoadConfig object
+    """
+    schema = get_bq_schema(table)
+    if 'json' in file_format.lower():
+        file_format = bigquery.SourceFormat.NEWLINE_DELIMITED_JSON
+    else:
+        file_format = bigquery.SourceFormat.CSV
+    if create:
+        create = bigquery.CreateDisposition.CREATE_IF_NEEDED
+    else:
+        create = bigquery.CreateDisposition.CREATE_NEVER
+    if append:
+        append = bigquery.WriteDisposition.WRITE_APPEND
+    else:
+        append = bigquery.WriteDisposition.WRITE_TRUNCATE
+    return bigquery.LoadJobConfig(
+        schema=schema, source_format=file_format,
+        create_disposition=create, write_disposition=append,
+
+    )
