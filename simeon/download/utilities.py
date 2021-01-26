@@ -196,8 +196,8 @@ def get_module_id(record: dict, org_keywords=('mit', 'vj')):
         ]),
         all([
             event_type == 'problem_graded',
-            isinstance(event, list) and len(event) > 0,
-            event[0].startswith('input_')
+            bool(event),
+            isinstance(event, list) and event[0].startswith('input_')
         ])
     ]
     page = record.get('page', '') or ''
