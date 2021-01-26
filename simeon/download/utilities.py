@@ -288,8 +288,10 @@ def get_module_id(record: dict, org_keywords=('mit', 'vj')):
             pass
         if isinstance(event, str):
             substr = event
-        else:
+        elif isinstance(event, (list, tuple)):
             substr = event[0]
+        else:
+            substr = ''
         try:
             match = MI_PATT10.search(substr)
             if match:
