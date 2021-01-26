@@ -18,7 +18,7 @@
         }, 
         {
             "field_type": "STRING", 
-            "name": "event_field_type"
+            "name": "event_type"
         }, 
         {
             "field_type": "STRING", 
