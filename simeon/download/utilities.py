@@ -262,8 +262,9 @@ def get_module_id(record: dict, org_keywords=('mit', 'vj')):
     bad_events = ('add_resource', 'delete_resource', 'recommender_upvote')
     if event_type in bad_events:
         return None
-    if isinstance(event, dict) and not isinstance(event.get('id'), str):
-        return None
+    if isinstance(event, dict):
+        if 'id' in event and not isinstance(event.get('id'), str):
+            return None
     if record.get('event_source') == 'browser':
         try:
             match = MI_PATT7.search(event.get('id', ''))
