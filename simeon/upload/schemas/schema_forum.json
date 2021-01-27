@@ -60,7 +60,7 @@
         }, 
         {
             "field_type": "STRING", 
-            "name": "_field_type"
+            "name": "_type"
         }, 
         {
             "field_type": "TIMESTAMP", 
@@ -120,7 +120,7 @@
         }, 
         {
             "field_type": "STRING", 
-            "name": "thread_field_type"
+            "name": "thread_type"
         }, 
         {
             "field_type": "STRING", 

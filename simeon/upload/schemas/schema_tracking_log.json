@@ -164,7 +164,7 @@
                 }, 
                 {
                     "field_type": "STRING", 
-                    "name": "field_type"
+                    "name": "type"
                 }, 
                 {
                     "field_type": "FLOAT", 
@@ -400,7 +400,7 @@
                 }, 
                 {
                     "field_type": "STRING", 
-                    "name": "score_field_type"
+                    "name": "score_type"
                 }, 
                 {
                     "field_type": "STRING", 

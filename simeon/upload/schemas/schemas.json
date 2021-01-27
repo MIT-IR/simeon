@@ -42,7 +42,7 @@
         }, 
         {
             "field_type": "INTEGER", 
-            "name": "content_field_type_id"
+            "name": "content_type_id"
         }, 
         {
             "field_type": "STRING", 
@@ -74,7 +74,7 @@
         }, 
         {
             "field_type": "STRING", 
-            "name": "group_field_type"
+            "name": "group_type"
         }
     ], 
     "simplewiki_permission_can_write": [
@@ -268,7 +268,7 @@
         }, 
         {
             "field_type": "STRING", 
-            "name": "module_field_type"
+            "name": "module_type"
         }, 
         {
             "field_type": "STRING", 
@@ -674,7 +674,7 @@
         }, 
         {
             "field_type": "STRING", 
-            "name": "_field_type"
+            "name": "_type"
         }, 
         {
             "field_type": "Boolean", 
@@ -1012,7 +1012,7 @@
         }, 
         {
             "field_type": "INTEGER", 
-            "name": "content_field_type_id"
+            "name": "content_type_id"
         }, 
         {
             "field_type": "STRING", 
@@ -1302,7 +1302,7 @@
         }, 
         {
             "field_type": "INTEGER", 
-            "name": "content_field_type_id"
+            "name": "content_type_id"
         }, 
         {
             "field_type": "INTEGER", 
@@ -1656,7 +1656,7 @@
         }, 
         {
             "field_type": "STRING", 
-            "name": "assoc_field_type"
+            "name": "assoc_type"
         }
     ], 
     "psychometrics_psychometricdata": [
@@ -1896,7 +1896,7 @@
         }, 
         {
             "field_type": "STRING", 
-            "name": "notification_field_type_id"
+            "name": "notification_type_id"
         }, 
         {
             "field_type": "STRING", 
@@ -1976,7 +1976,7 @@
         }, 
         {
             "field_type": "INTEGER", 
-            "name": "content_field_type_id"
+            "name": "content_type_id"
         }
     ], 
     "simplewiki_revision": [
@@ -2076,7 +2076,7 @@
         },
         {
 	    "field_type": "STRING",
-	    "name": "avatar_field_type"
+	    "name": "avatar_type"
 	},
         {
 	    "field_type": "STRING",

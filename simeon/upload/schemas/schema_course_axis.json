@@ -3,7 +3,7 @@
         {
             "field_type": "STRING",
             "name": "category",
-	    "description": "field_type of course content, e.g. chapter, sequential, vertical, problem, video, html"
+            "description": "type of course content, e.g. chapter, sequential, vertical, problem, video, html"
         },
         {
             "field_type": "INTEGER",
@@ -77,13 +77,13 @@
                         },
                         {
                             "field_type": "STRING", 
-                            "name": "ifield_type",
-                            "description": "Problem field_type for problems found in course.xml - only searches within a list of known problem field_types"
+                            "name": "itype",
+                            "description": "Problem type for problems found in course.xml - only searches within a list of known problem types"
                         },
                         {
                             "field_type": "INTEGER", 
                             "name": "num_items",
-                            "description": "Number of problem sub-parts, or the number of pfield_types found in a single problem"
+                            "description": "Number of problem sub-parts, or the number of ptypes found in a single problem"
                         },
                         {
                             "field_type": "BOOLEAN", 

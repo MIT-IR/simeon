@@ -17,7 +17,7 @@
         },
         {
             "field_type": "STRING", 
-            "name": "slug_field_type",
+            "name": "slug_type",
             "description": "One of 'initial_post', 'response_post' or 'comment' "
         },
         {
@@ -28,7 +28,7 @@
         {
             "field_type": "STRING", 
             "name": "parent_id",
-            "description": "slug_id, for response_post to which this comment is attached, if this row has slug_field_type = comment"
+            "description": "slug_id, for response_post to which this comment is attached, if this row has slug_type = comment"
         },
         {
             "field_type": "STRING", 
@@ -38,7 +38,7 @@
         {
             "field_type": "STRING", 
             "name": "responded_to",
-            "description": "username of forum author who created a response to the original thread, if this row has slug_field_type = 'comment'"
+            "description": "username of forum author who created a response to the original thread, if this row has slug_type = 'comment'"
         },
         {
             "field_type": "STRING", 

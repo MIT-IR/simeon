@@ -13,7 +13,7 @@
         {
             "field_type": "STRING",
             "name": "usage_key",
-	    "description": "Usage key of the subsection. (This is sometimes known as module_id or location. In the format `` block-v1:org+course+run+field_type@sequential+block@1234`` for courses created after DATE and in the format i4x://org/course/sequential/1234 for older courses."
+            "description": "Usage key of the subsection. (This is sometimes known as module_id or location. In the format `` block-v1:org+course+run+type@sequential+block@1234`` for courses created after DATE and in the format i4x://org/course/sequential/1234 for older courses."
         },
         {
             "field_type": "FLOAT",
