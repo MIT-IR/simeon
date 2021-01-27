@@ -170,15 +170,17 @@ def push_to_bq(parsed_args):
     done = 0
     while done < len(all_jobs):
         for job in all_jobs:
-            job.reload()
+            if not job.state.lower() == 'done':
+                job.reload()
             done += (job.state.lower() == 'done')
     errors = []
     for job in all_jobs:
         if job.errors:
+            print(
+                'Error encountered: {e}'.format(job.errors), file=sys.stderr
+            )
             errors.extend(job.errors)
     if errors:
-        msg = 'Errors: {e}'
-        print(msg.format(e=errors), file=sys.stderr)
         sys.exit(1)
     print(
         '{c} item(s) loaded to BigQuery'.format(c=len(all_jobs))
