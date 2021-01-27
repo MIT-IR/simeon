@@ -65,7 +65,10 @@ def local_to_gcs_path(fname: str, file_type: str, bucket: str) -> str:
     if not bucket.startswith('gs://'):
         bucket = 'gs://{b}'.format(b=bucket)
     dname, bname = os.path.split(os.path.abspath(os.path.expanduser(fname)))
-    gcs_file = '{d}/{f}'.format(d=os.path.basename(dname), f=bname)
+    gcs_file = '{d}/{f}'.format(
+        d=os.path.basename(dname).replace('.', '_'),
+        f=bname
+    )
     return '{b}/{s}/{f}'.format(b=bucket, s=segment, f=gcs_file)
 
 
@@ -116,7 +119,7 @@ def local_to_bq_table(fname: str, file_type: str, project: str) -> str:
     else:
         suffix = 'logs'
         table = 'tracklog_' + ''.join(re.findall(r'\d+', bname))
-    dataset = os.path.basename(dname)
+    dataset = os.path.basename(dname).replace('.', '_')
     if not table.replace('tracklog_', '') or not dataset:
         raise BigQueryNameException(
             'A BigQuery table name could not be constructed with {f}'.format(
