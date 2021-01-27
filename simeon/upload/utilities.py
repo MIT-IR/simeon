@@ -127,7 +127,7 @@ def local_to_bq_table(fname: str, file_type: str, project: str) -> str:
             )
         )
     return '{p}.{d}_{s}.{t}'.format(
-        d=os.path.basename(dname), s=suffix, p=project, t=table
+        d=dataset, s=suffix, p=project, t=table
     )
 
 
