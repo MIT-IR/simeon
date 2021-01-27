@@ -1,6 +1,7 @@
 """
 Utility functions for the CLI tool
 """
+import os
 from argparse import ArgumentTypeError
 
 from dateutil.parser import parse as dateparse
@@ -25,3 +26,15 @@ def gcs_bucket(bucket: str) -> str:
     if not bucket.startswith('gs://'):
         return 'gs://{b}'.format(b=bucket)
     return bucket
+
+
+def optional_file(fname: str) -> str:
+    """
+    Clean up a given a file path if it's not None.
+    Also, check that it exists. Otherwise, raise ArgumentTypeError
+    """
+    if fname is not None:
+        if not os.path.exists(fname):
+            msg = 'The given file name {f!r} does not exist.'
+            raise ArgumentTypeError(msg.format(f=fname))
+    return os.path.realpath(fname)
