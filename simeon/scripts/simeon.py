@@ -4,7 +4,9 @@ simeon is a command line tool that helps with processing edx data
 import os
 import sys
 import traceback
-from argparse import ArgumentParser
+from argparse import (
+    ArgumentParser, FileType
+)
 
 from simeon.download import aws, logs
 from simeon.exceptions import AWSException
@@ -38,7 +40,6 @@ def list_files(parsed_args):
     that match the given criteria
     """
     parsed_args.year = parsed_args.begin_date[:4]
-    parsed_args.verbose = not parsed_args.quiet
     info = aws.BUCKETS.get(parsed_args.file_type)
     info['Prefix'] = info['Prefix'].format(
         site=parsed_args.site, year=parsed_args.year,
@@ -51,7 +52,7 @@ def list_files(parsed_args):
         )
     except AWSException as excp:
         errmsg = 'Failed to list files: {e}'.format(e=excp)
-        print(errmsg, file=sys.stderr)
+        parsed_args.logger.error(errmsg)
         sys.exit(1)
     for blob in blobs:
         fdate = aws.get_file_date(blob.name)
@@ -68,15 +69,22 @@ def split_log_files(parsed_args):
     tracking log files and put them in the provider destination directory
     """
     failed = False
+    msg = '{w} file name {f}'
     for fname in parsed_args.tracking_logs:
+        parsed_args.logger.info(
+            msg.format(f=fname, w='Splitting')
+        )
         try:
             logs.split_tracking_log(fname, parsed_args.destination)
+            parsed_args.logger.info(
+                msg.format(f=fname, w='Done splitting')
+            )
         except Exception as excp:
             _, _, tb = sys.exc_info()
             traces = '\n'.join(map(str.strip, traceback.format_tb(tb)))
             failed = True
             msg = 'Failed to split {f}: {e}'.format(f=fname, e=traces)
-            print(msg, file=sys.stderr)
+            parsed_args.logger.error(msg)
     sys.exit(0 if not failed else 1)
 
 
@@ -86,7 +94,6 @@ def download_files(parsed_args):
     that match the given criteria
     """
     parsed_args.year = parsed_args.begin_date[:4]
-    parsed_args.verbose = not parsed_args.quiet
     info = aws.BUCKETS.get(parsed_args.file_type)
     info['Prefix'] = info['Prefix'].format(
         site=parsed_args.site, year=parsed_args.year,
@@ -103,20 +110,29 @@ def download_files(parsed_args):
                 os.path.basename(os.path.join(*blob.name.split('/')))
             )
             downloads.setdefault(fullname, 0)
+            parsed_args.logger.info(
+                'Downloading {n} into {f}'.format(n=blob.name, f=fullname)
+            )
             blob.download_file(fullname)
             downloads[fullname] += 1
+            parsed_args.logger.info(
+                'Done downloading {n}'.format(n=blob.name)
+            )
             try:
+                parsed_args.logger.info('Decrypting {f}'.format(f=fullname))
                 if parsed_args.file_type == 'email':
                     aws.process_email_file(fullname, parsed_args.verbose)
                 else:
                     aws.decrypt_file(fullname, parsed_args.verbose)
                     downloads[fullname] += 1
                 if parsed_args.verbose:
-                    print('Downloaded and decrypted {f}'.format(f=fullname))
+                    parsed_args.logger.info(
+                        'Downloaded and decrypted {f}'.format(f=fullname)
+                    )
             except Exception as excp:
-                print(excp, file=sys.stderr)
+                parsed_args.logger.info(excp)
     if not downloads:
-        print('No files found matching the given criteria')
+        parsed_args.logger.info('No files found matching the given criteria')
     if parsed_args.file_type == 'log' and parsed_args.split:
         parsed_args.tracking_logs = []
         for k, v in downloads.items():
@@ -133,7 +149,7 @@ def push_to_bq(parsed_args):
     Push to BigQuery
     """
     if not parsed_args.items:
-        print('No items to process')
+        parsed_args.logger.info('No items to process')
         sys.exit(0)
     try:
         if parsed_args.service_account_file is not None:
@@ -147,15 +163,15 @@ def push_to_bq(parsed_args):
             )
     except Exception as excp:
         errmsg = 'Failed to connect to BigQuery: {e}'
-        print(errmsg.format(e=excp), file=sys.stderr)
+        parsed_args.logger.error(errmsg.format(e=excp))
         sys.exit(1)
     all_jobs = []
     for item in parsed_args.items:
         if not os.path.exists(item):
             errmsg = 'Skipping {f!r}. It does not exist.'
-            print(errmsg.format(f=item), file=sys.stderr)
+            parsed_args.logger.error(errmsg.format(f=item))
             if parsed_args.fail_fast:
-                print('Exiting...', file=sys.stderr)
+                parsed_args.logger.error('Exiting...')
                 sys.exit(1)
             continue
         if os.path.isdir(item):
@@ -175,21 +191,21 @@ def push_to_bq(parsed_args):
         errmsg = (
             'No items processed. Perhaps, the given directory is empty?'
         )
-        print(errmsg, file=sys.stderr)
+        parsed_args.logger.error(errmsg)
         sys.exit(1)
     if parsed_args.wait_for_loads:
         wait_for_bq_jobs(all_jobs)
     errors = []
     for job in all_jobs:
         if job.errors:
-            print(
-                'Error encountered: {e}'.format(e=job.errors), file=sys.stderr
+            parsed_args.logger.error(
+                'Error encountered: {e}'.format(e=job.errors)
             )
             errors.extend(job.errors)
     if errors:
         sys.exit(1)
     if parsed_args.wait_for_loads:
-        print(
+        parsed_args.logger.info(
             '{c} item(s) loaded to BigQuery'.format(c=len(all_jobs))
         )
         sys.exit(0)
@@ -197,7 +213,7 @@ def push_to_bq(parsed_args):
         '{c} BigQuery data load jobs started. Please consult your '
         'BigQuery console for more details about the status of said jobs.'
     )
-    print(msg.format(c=len(all_jobs)))
+    parsed_args.logger.info(msg.format(c=len(all_jobs)))
 
 
 def push_generated_files(parsed_args):
@@ -208,11 +224,11 @@ def push_generated_files(parsed_args):
     if parsed_args.destination == 'bq':
         push_to_bq(parsed_args)
     msg = (
-        'Push has not yet been implemented for gcs.\n'
-        'When ready, your data will be pushed with info:\n'
-        'Project: {p} - Bucket: {b}'
+        'Push has not yet been implemented for gcs. '
+        'When ready, your data will be pushed with info: '
+        'Project => {p} - Bucket => {b}'
     )
-    print(
+    parsed_args.logger.info(
         msg.format(
             p=parsed_args.project, b=parsed_args.bucket,
             d=parsed_args.destination.upper()
@@ -233,9 +249,21 @@ def main():
     }
     parser = ArgumentParser(description=__doc__)
     parser.add_argument(
-        '--quiet', '-q',
+        '--quiet', '-Q',
         help='Only print error messages to standard streams.',
         action='store_true',
+    )
+    parser.add_argument(
+        '--config-file', '-C',
+        help=(
+            'The INI configuration file to use for default arguments.'
+        ),
+    )
+    parser.add_argument(
+        '--log-file', '-L',
+        help='Log file to use when simeon prints messages. Default: stdout',
+        type=FileType('w'),
+        default=sys.stdout,
     )
     subparsers = parser.add_subparsers(
         description='Choose a subcommand to carry out a task with simeon',
@@ -421,6 +449,8 @@ def main():
         action='store_true',
     )
     args = parser.parse_args()
+    args.verbose = not args.quiet
+    args.logger = cli_utils.make_logger(args.verbose, args.log_file)
     COMMANDS.get(args.command)(args)
 
 
