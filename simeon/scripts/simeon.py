@@ -75,7 +75,9 @@ def split_log_files(parsed_args):
             msg.format(f=fname, w='Splitting')
         )
         try:
-            logs.split_tracking_log(fname, parsed_args.destination)
+            logs.split_tracking_log(
+                fname, parsed_args.destination, parsed_args.dynamic_date
+            )
             parsed_args.logger.info(
                 msg.format(f=fname, w='Done splitting')
             )
@@ -130,7 +132,7 @@ def download_files(parsed_args):
                         'Downloaded and decrypted {f}'.format(f=fullname)
                     )
             except Exception as excp:
-                parsed_args.logger.info(excp)
+                parsed_args.logger.error(excp)
     if not downloads:
         parsed_args.logger.info('No files found matching the given criteria')
     if parsed_args.file_type == 'log' and parsed_args.split:
@@ -375,6 +377,15 @@ def main():
         help='Split downloaded log files',
         action='store_true',
     )
+    downloader.add_argument(
+        '--dynamic-date', '-m',
+        help=(
+            'If splitting the downloaded files, use the '
+            'dates from the records to make tracking log file names. '
+            'Otherwise, the dates in the GZIP file names are used.'
+        ),
+        action='store_true',
+    )
     lister = subparsers.add_parser(
         'list',
         help='List edX research data with the given criteria'
@@ -434,6 +445,14 @@ def main():
         '--destination', '-d',
         help='Directory where to download the file(s). Default: %(default)s',
         default=os.getcwd(),
+    )
+    splitter.add_argument(
+        '--dynamic-date', '-m',
+        help=(
+            'Use the dates from the records to make tracking log file names. '
+            'Otherwise, the dates in the GZIP file names are used.'
+        ),
+        action='store_true',
     )
     pusher = subparsers.add_parser(
         'push',

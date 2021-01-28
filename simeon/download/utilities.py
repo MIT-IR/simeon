@@ -98,6 +98,22 @@ MI_PATT17 = re.compile(
 MI_PATT18 = re.compile(r'i4x-([^\-]+)-([^\-]+)-video-([^ ]+)')
 
 
+def get_file_date(fname):
+    """
+    Extract the date in a file name and parse it into a datetime object
+
+    :type fname: str
+    :param fname: Some file name
+    :rtype: Union[None, datetime]
+    :return: Returns a datetime object or None
+    """
+    fname = os.path.basename(fname)
+    try:
+        return parse_date(re.search(r'\d{4}-\d{2}-\d{2}', fname).group(0))
+    except:
+        return None
+
+
 def make_file_handle(fname: str, mode: str='w', is_gzip: bool=False):
     """
     Create a file handle pointing the given file name.

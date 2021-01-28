@@ -64,14 +64,25 @@ def process_line(
     return {'data': record, 'filename': outfile}
 
 
-def split_tracking_log(filename: str, ddir: str):
+def split_tracking_log(filename: str, ddir: str, dynamic_date: bool=False):
     """
     Split the records in the given GZIP tracking log file
+
+    :type filename: str
+    :param filename: The GZIP file to split
+    :type ddir: str
+    :param ddir: Destination directory of the generated file
+    :type dynamic_date: bool
+    :param dynamic_date: Use dates from the JSON records to make
+        output file names
+    :rtype: None
+    :return: Writes records to generated file names
     """
     fhandles = dict()
+    date = utils.get_file_date(filename)
     with gzip.open(filename) as zfh:
         for i, line in enumerate(zfh):
-            line_info = process_line(line, i + 1)
+            line_info = process_line(line, i + 1, date=date)
             fname = line_info.get('filename')
             fname = os.path.join(ddir, fname)
             if fname not in fhandles:
