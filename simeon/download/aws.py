@@ -20,7 +20,7 @@ from simeon.exceptions import (
 BUCKETS = {
     'email': {
         'Bucket': 'course-data',
-        'Prefix': 'email-opt-in/email-opt-in-{org}-{year}',
+        'Prefix': 'email-opt-in/email-opt-in-{org}-',
     },
     'sql': {
         'Bucket': 'course-data',
