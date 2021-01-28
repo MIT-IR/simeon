@@ -53,15 +53,7 @@ def list_files(parsed_args):
         errmsg = 'Failed to list files: {e}'.format(e=excp)
         print(errmsg, file=sys.stderr)
         sys.exit(1)
-    while True:
-        try:
-            blob = next(blobs)
-        except StopIteration:
-            break
-        except Exception as excp:
-            errmsg = 'Failed to list files: {e}'.format(e=excp)
-            print(errmsg, file=sys.stderr)
-            sys.exit(1)
+    for blob in blobs:
         fdate = aws.get_file_date(blob.name)
         if parsed_args.begin_date <= fdate <= parsed_args.end_date:
             if parsed_args.json:
