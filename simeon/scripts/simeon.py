@@ -12,6 +12,25 @@ from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
 
 
+def wait_for_bq_jobs(job_list):
+    """
+    Given a list of BigQuery data load jobs,
+    wait for them all to finish.
+
+    :type job_list: Iterable[LoadJob]
+    :param job_list: An Iterable of LoadJob objects from the bigquery package
+    :rtype: None
+    :return: Nothing
+    :TODO: Improve this function to behave a little less like a tight loop
+    """
+    done = 0
+    while done < len(job_list):
+        for job in job_list:
+            state = job.done()
+            if not state:
+                job.reload()
+            done += state
+
 
 def list_files(parsed_args):
     """
@@ -167,25 +186,27 @@ def push_to_bq(parsed_args):
         )
         print(errmsg, file=sys.stderr)
         sys.exit(1)
-    done = 0
-    while done < len(all_jobs):
-        for job in all_jobs:
-            if not job.state.lower() == 'done':
-                job.reload()
-            done += (job.state.lower() == 'done')
+    if parsed_args.wait_for_loads:
+        wait_for_bq_jobs(all_jobs)
     errors = []
     for job in all_jobs:
         if job.errors:
             print(
-                'Error encountered: {e}'.format(job.errors), file=sys.stderr
+                'Error encountered: {e}'.format(e=job.errors), file=sys.stderr
             )
             errors.extend(job.errors)
     if errors:
         sys.exit(1)
-    print(
-        '{c} item(s) loaded to BigQuery'.format(c=len(all_jobs))
+    if parsed_args.wait_for_loads:
+        print(
+            '{c} item(s) loaded to BigQuery'.format(c=len(all_jobs))
+        )
+        sys.exit(0)
+    msg = (
+        '{c} BigQuery data load jobs started. Please consult your '
+        'BigQuery console for more details about the status of said jobs.'
     )
-    sys.exit(0)
+    print(msg.format(c=len(all_jobs)))
 
 
 def push_generated_files(parsed_args):
@@ -397,6 +418,14 @@ def main():
         help=(
             'Force simeon to quit as soon as an error is encountered'
             ' with any of the given items.'
+        ),
+        action='store_true',
+    )
+    pusher.add_argument(
+        '--wait-for-loads', '-w',
+        help=(
+            'Wait for asynchronous BigQuery load jobs to finish. '
+            'Otherwise, simeon creates load jobs and exits.'
         ),
         action='store_true',
     )
