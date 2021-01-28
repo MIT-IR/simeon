@@ -113,9 +113,6 @@ def download_files(parsed_args):
                     downloads[fullname] += 1
                 if parsed_args.verbose:
                     print('Downloaded and decrypted {f}'.format(f=fullname))
-                if parsed_args.file_type == 'log' and parsed_args.split:
-                    decrypted_fname, _ = os.path.splitext(fullname)
-                    logs.split_tracking_log(decrypted_fname, parsed_args.destination)
             except Exception as excp:
                 print(excp, file=sys.stderr)
     if not downloads:
@@ -124,6 +121,7 @@ def download_files(parsed_args):
         parsed_args.tracking_logs = []
         for k, v in downloads.items():
             if v == 2:
+                k, _ = os.path.splitext(k)
                 parsed_args.tracking_logs.append(k)
         split_log_files(parsed_args)
     rc = 0 if all(v == 2 for v in downloads.values()) else 1
