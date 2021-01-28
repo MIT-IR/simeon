@@ -8,6 +8,7 @@ from datetime import datetime
 from typing import List
 
 from google.cloud import bigquery
+from google.cloud import storage
 
 from simeon.upload import utilities as uputils
 
@@ -77,6 +78,8 @@ class BigqueryClient(bigquery.Client):
         :param append: Whether or not to append the records to the table
         :type use_storage: bool
         :param use_storage: Whether or not to load the data from GCS
+        :type bucket: str
+        :param bucket: GCS bucket name to use
         :rtype: bigquery.LoadJob
         :return: The LoadJob object associated with the work being done
         :raises: Propagates exceptions from self.load_table_from_file and
@@ -103,3 +106,63 @@ class BigqueryClient(bigquery.Client):
         return loader(
             fname, dest, job_config=config, job_id_prefix=job_prefix
         )
+
+
+class GCSClient(storage.Client):
+    """
+    Make a client to load data files to GCS
+    """
+    def load_on_file_to_gcs(
+        self, fname: str, file_type: str, bucket: str, overwrite: bool=True
+    ):
+        """
+        Load the given file to GCS
+
+        :type fname: str
+        :param fname: The local file to load to GCS
+        :type file_type: str
+        :param: file_type: One of sql, email, log
+        :type bucket: str
+        :param bucket: GCS bucket name
+        :type overwrite: bool
+        :param overwrite: Overwrite the target blob if it exists
+        :rtype: None
+        :return: Nothing
+        :raises: Propagates everything from the underlying package
+        """
+        dest = storage.Blob.from_string(
+            uputils.local_to_gcs_path(fname, file_type, bucket),
+            client=self
+        )
+        gen_match = None if overwrite else 0
+        dest.upload_from_filename(fname, if_generation_match=gen_match)
+
+    def load_dir(
+        self, dirname: str, file_type: str, bucket: str, overwrite: bool=True
+    ):
+        """
+        Load all the files in the given directory or
+        any immediate subdirectories
+
+        :type dirname: str
+        :param dirname: The directory whose files are loaded
+        :type file_type: str
+        :param: file_type: One of sql, email, log
+        :type bucket: str
+        :param bucket: GCS bucket name
+        :type overwrite: bool
+        :param overwrite: Overwrite the target blobs if they exist
+        :rtype: None
+        :return: Nothing
+        :raises: Propagates everything from the underlying package
+        """
+        format_ = 'json' if file_type == 'log' else 'csv'
+        patts = (
+            os.path.join(dirname, '*.{f}.gz'.format(f=format_)),
+            os.path.join(dirname, '*', '*.{f}.gz'.format(f=format_))
+        )
+        files = []
+        for patt in patts:
+            files.extend(glob.glob(patt))
+        for fname in files:
+            self.load_on_file_to_gcs(fname, file_type, bucket, overwrite)
