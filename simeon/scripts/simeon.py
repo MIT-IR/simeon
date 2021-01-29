@@ -128,7 +128,9 @@ def download_files(parsed_args):
                     aws.process_email_file(fullname, parsed_args.verbose)
                 else:
                     aws.decrypt_files(
-                        fullname, parsed_args.verbose, parsed_args.logger
+                        fnames=fullname, verbose=parsed_args.verbose,
+                        logger=parsed_args.logger,
+                        timeout=parsed_args.decryption_timeout,
                     )
                     downloads[fullname] += 1
                 if parsed_args.verbose:
@@ -396,6 +398,15 @@ def main():
     downloader.add_argument(
         '--request-id', '-r',
         help='Request ID when listing RDX files',
+    )
+    downloader.add_argument(
+        '--decryption-timeout', '-t',
+        help=(
+            'Number of seconds to wait for the decryption of files.'
+            ' Default: %(default)s'
+        ),
+        default=5 * 60,
+        type=int,
     )
     lister = subparsers.add_parser(
         'list',
