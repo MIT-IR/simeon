@@ -68,7 +68,7 @@ def decrypt_files(fnames, verbose=True, logger=None):
     if isinstance(fnames, str):
         fnames = [fnames]
     cmd = 'gpg --batch --yes --decrypt {f}'.format(
-        f=' '.join(map(lambda s: '{s!r}'.format(s=s), fnames))
+        f=' '.join(fnames)
     )
     if verbose and logger is not None:
         logger.info(cmd)
