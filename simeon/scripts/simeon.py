@@ -401,11 +401,7 @@ def main():
     )
     downloader.add_argument(
         '--decryption-timeout', '-t',
-        help=(
-            'Number of seconds to wait for the decryption of files.'
-            ' Default: %(default)s'
-        ),
-        default=5 * 60,
+        help='Number of seconds to wait for the decryption of files.',
         type=int,
     )
     lister = subparsers.add_parser(
