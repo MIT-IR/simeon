@@ -28,7 +28,7 @@ class BigqueryClient(bigquery.Client):
         :type dirname: str
         :param dirname: Grandparent or parent directory of split up files
         :type file_type: str
-        :param file_type: One of sql, email, log
+        :param file_type: One of sql, email, log, rdx
         :type project: str
         :param project: Target GCP project
         :type create: bool
@@ -69,7 +69,7 @@ class BigqueryClient(bigquery.Client):
         :type fname: str
         :param fname: The specific file to load
         :type file_type: str
-        :param file_type: One of sql, email, log
+        :param file_type: One of sql, email, log, rdx
         :type project: str
         :param project: Target GCP project
         :type create: bool
@@ -121,7 +121,7 @@ class GCSClient(storage.Client):
         :type fname: str
         :param fname: The local file to load to GCS
         :type file_type: str
-        :param: file_type: One of sql, email, log
+        :param: file_type: One of sql, email, log, rdx
         :type bucket: str
         :param bucket: GCS bucket name
         :type overwrite: bool
@@ -147,7 +147,7 @@ class GCSClient(storage.Client):
         :type dirname: str
         :param dirname: The directory whose files are loaded
         :type file_type: str
-        :param: file_type: One of sql, email, log
+        :param: file_type: One of sql, email, log, rdx
         :type bucket: str
         :param bucket: GCS bucket name
         :type overwrite: bool

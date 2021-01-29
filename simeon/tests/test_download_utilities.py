@@ -295,12 +295,12 @@ class TestDownloadUtilities(unittest.TestCase):
 
     def test_bad_decryption(self):
         """
-        Test that decrypt_file raises DecryptionError when file is missing
+        Test that decrypt_files raises DecryptionError when file is missing
         """
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             with self.assertRaises(DecryptionError):
-                aws.decrypt_file('thereisnowaythisfileexists.gpg', False)
+                aws.decrypt_files('thereisnowaythisfileexists.gpg', False)
     
     def test_good_module_id_recs(self):
         """

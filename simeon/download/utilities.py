@@ -1,5 +1,5 @@
 """
-Some utility functions
+Some utility functions for working with the downloaded data files
 """
 import itertools as its
 import gzip

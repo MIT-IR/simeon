@@ -70,7 +70,7 @@ def split_log_files(parsed_args):
     """
     failed = False
     msg = '{w} file name {f}'
-    for fname in parsed_args.tracking_logs:
+    for fname in parsed_args.downloaded_files:
         parsed_args.logger.info(
             msg.format(f=fname, w='Splitting')
         )
@@ -125,7 +125,9 @@ def download_files(parsed_args):
                 if parsed_args.file_type == 'email':
                     aws.process_email_file(fullname, parsed_args.verbose)
                 else:
-                    aws.decrypt_file(fullname, parsed_args.verbose)
+                    aws.decrypt_files(
+                        fullname, parsed_args.verbose, parsed_args.logger
+                    )
                     downloads[fullname] += 1
                 if parsed_args.verbose:
                     parsed_args.logger.info(
@@ -136,11 +138,11 @@ def download_files(parsed_args):
     if not downloads:
         parsed_args.logger.info('No files found matching the given criteria')
     if parsed_args.file_type == 'log' and parsed_args.split:
-        parsed_args.tracking_logs = []
+        parsed_args.downloaded_files = []
         for k, v in downloads.items():
             if v == 2:
                 k, _ = os.path.splitext(k)
-                parsed_args.tracking_logs.append(k)
+                parsed_args.downloaded_files.append(k)
         split_log_files(parsed_args)
     rc = 0 if all(v == 2 for v in downloads.values()) else 1
     sys.exit(rc)
@@ -329,13 +331,16 @@ def main():
     subparsers.required = True
     downloader = subparsers.add_parser(
         'download',
-        help='Download edX research data with the given criteria'
+        help='Download edX research data with the given criteria',
+        description=(
+            'Download edX research data with the given criteria below'
+        )
     )
     downloader.set_defaults(command='download')
     downloader.add_argument(
         '--file-type', '-f',
         help='The type of files to get. Default: %(default)s',
-        choices=['email', 'sql', 'log'],
+        choices=['email', 'sql', 'log', 'rdx'],
         default='sql',
     )
     downloader.add_argument(
@@ -388,13 +393,16 @@ def main():
     )
     lister = subparsers.add_parser(
         'list',
-        help='List edX research data with the given criteria'
+        help='List edX research data with the given criteria',
+        description=(
+            'List edX research data with the given criteria below'
+        )
     )
     lister.set_defaults(command='list')
     lister.add_argument(
         '--file-type', '-f',
         help='The type of files to list. Default: %(default)s',
-        choices=['email', 'sql', 'log'],
+        choices=['email', 'sql', 'log', 'rdx'],
         default='sql',
     )
     lister.add_argument(
@@ -433,11 +441,12 @@ def main():
     )
     splitter = subparsers.add_parser(
         'split',
-        help='Split downloaded tracking log files'
+        help='Split downloaded tracking log or sql files',
+        description='Split downloaded tracking log or sql files'
     )
     splitter.set_defaults(command='split')
     splitter.add_argument(
-        'tracking_logs',
+        'downloaded_files',
         help='List of tracking log files to split',
         nargs='+'
     )
@@ -456,7 +465,10 @@ def main():
     )
     pusher = subparsers.add_parser(
         'push',
-        help='Push the generated data files to some target destination'
+        help='Push the generated data files to some target destination',
+        description=(
+            'Push to the given items to Google Cloud Storage or BigQuery'
+        ),
     )
     pusher.set_defaults(command='push')
     pusher.add_argument(
@@ -488,17 +500,23 @@ def main():
     pusher.add_argument(
         '--file-type', '-f',
         help='The type of files to push. Default: %(default)s',
-        choices=['email', 'sql', 'log'],
+        choices=['email', 'sql', 'log', 'rdx'],
         default='sql',
     )
     pusher.add_argument(
         '--create', '-c',
-        help='Whether to create destination tables when pushing to bq',
+        help=(
+            'Whether to create destination BigQuery tables and '
+            'datasets if they don\'t exist'
+        ),
         action='store_true',
     )
     pusher.add_argument(
         '--append', '-a',
-        help='Whether to append to destination tables when pushing to bq',
+        help=(
+            'Whether to append to destination tables if they exist'
+            ' when pushing data to BigQuery'
+        ),
         action='store_true',
     )
     pusher.add_argument(

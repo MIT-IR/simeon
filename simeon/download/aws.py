@@ -30,6 +30,10 @@ BUCKETS = {
         'Bucket': 'edx-course-data',
         'Prefix': '{org}/{site}/events/{year}/{org}-{site}-events-',
     },
+    'rdx': {
+        'Bucket': 'edx-course-data',
+        'Prefix': '{org}/rdx/{request}',
+    },
 }
 BEGIN_DATE = '2012-09-01'
 END_DATE = datetime.today().strftime('%Y-%m-%d')
@@ -47,6 +51,34 @@ def make_s3_bucket(bucket):
         return boto.resource('s3').Bucket(bucket)
     except Exception as excp:
         raise AWSException(excp)
+
+
+def decrypt_files(fnames, verbose=True, logger=None):
+    """
+    Decrypt the given file with gpg.
+    This assumes that the gpg command
+    is available in the SHELL running this script.
+
+    :type fnames: Union[str, List]
+    :param fnames: A file name or a list of file names to decrypt
+    :type verbose: bool
+    :param verbose: Print the command to be run
+    :type logger: A logging.Logger object to print the command with
+    """
+    if isinstance(fnames, str):
+        fnames = [fnames]
+    cmd = 'gpg --batch --yes --decrypt {f}'.format(
+        f=' '.join(map(lambda s: '{s!r}'.format(s=s), fnames))
+    )
+    if verbose and logger is not None:
+        logger.info(cmd)
+    proc =  sb.Popen(cmd.split(), stdout=sb.PIPE, stderr=sb.PIPE)
+    if proc.wait(timeout=60) != 0:
+        err = proc.stderr.read().decode('utf8', 'ignore').strip()
+        raise DecryptionError(
+            'Failed to decrypt {f}: {e}'.format(f=' '.join(fnames), e=err)
+        )
+    return True
 
 
 def process_email_file(fname, verbose=True):
@@ -67,7 +99,7 @@ def process_email_file(fname, verbose=True):
                     if not chunk:
                         break
                     fh.write(chunk)
-            decrypt_file(out, verbose)
+            decrypt_files(out, verbose)
 
 
 def get_file_date(fname):
@@ -79,27 +111,6 @@ def get_file_date(fname):
     if match:
         return match.group(0)
     return ''
-
-
-def decrypt_file(fname, verbose=True):
-    """
-    Decrypt the given file with gpg.
-    This assumes that the gpg command
-    is available in the SHELL running this script.
-    """
-    out, _ = os.path.splitext(fname)
-    cmd = 'gpg --batch --yes --output {o} --decrypt {f}'.format(
-        o=out, f=fname
-    )
-    if verbose:
-        print(cmd)
-    proc =  sb.Popen(cmd.split(), stdout=sb.PIPE, stderr=sb.PIPE)
-    if proc.wait(timeout=60) != 0:
-        err = proc.stderr.read().decode('utf8', 'ignore').strip()
-        raise DecryptionError(
-            'Failed to decrypt {f}: {e}'.format(f=fname, e=err)
-        )
-    return True
 
 
 class S3Blob():
