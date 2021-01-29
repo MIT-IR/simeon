@@ -43,7 +43,8 @@ def list_files(parsed_args):
     info = aws.BUCKETS.get(parsed_args.file_type)
     info['Prefix'] = info['Prefix'].format(
         site=parsed_args.site, year=parsed_args.year,
-        date=parsed_args.begin_date, org=parsed_args.org
+        date=parsed_args.begin_date, org=parsed_args.org,
+        request=parsed_args.request_id or '',
     )
     bucket = aws.make_s3_bucket(info['Bucket'])
     try:
@@ -99,7 +100,8 @@ def download_files(parsed_args):
     info = aws.BUCKETS.get(parsed_args.file_type)
     info['Prefix'] = info['Prefix'].format(
         site=parsed_args.site, year=parsed_args.year,
-        date=parsed_args.begin_date, org=parsed_args.org
+        date=parsed_args.begin_date, org=parsed_args.org,
+        request=parsed_args.request_id or '',
     )
     bucket = aws.make_s3_bucket(info['Bucket'])
     blobs = aws.S3Blob.from_prefix(bucket=bucket, prefix=info['Prefix'])
@@ -391,6 +393,10 @@ def main():
         ),
         action='store_true',
     )
+    downloader.add_argument(
+        '--request-id', '-r',
+        help='Request ID when listing RDX files',
+    )
     lister = subparsers.add_parser(
         'list',
         help='List edX research data with the given criteria',
@@ -433,6 +439,10 @@ def main():
         help='The edX site from which to list data. Default: %(default)s',
         choices=['edge', 'edx', 'patches'],
         default='edx',
+    )
+    lister.add_argument(
+        '--request-id', '-r',
+        help='Request ID when listing RDX files',
     )
     lister.add_argument(
         '--json', '-j',
