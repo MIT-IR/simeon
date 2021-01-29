@@ -73,8 +73,9 @@ def decrypt_files(fnames, verbose=True, logger=None, timeout=60):
     """
     if isinstance(fnames, str):
         fnames = [fnames]
-    cmd = 'gpg --batch --yes --decrypt {f}'.format(
-        f=' '.join(fnames)
+    verbosity = '--verbose' if verbose else ''
+    cmd = 'gpg {v} --batch --yes --decrypt-files {f}'.format(
+        f=' '.join(fnames), v=verbosity
     )
     if verbose and logger is not None:
         logger.info(cmd)
@@ -84,6 +85,9 @@ def decrypt_files(fnames, verbose=True, logger=None, timeout=60):
         raise DecryptionError(
             'Failed to decrypt {f}: {e}'.format(f=' '.join(fnames), e=err)
         )
+    if verbose and logger is not None:
+        for line in proc.stdout:
+            logger.info(line.decode('utf8', 'ignore').strip())
     return True
 
 

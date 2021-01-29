@@ -136,7 +136,7 @@ def download_files(parsed_args):
                         logger=parsed_args.logger,
                         timeout=parsed_args.decryption_timeout,
                     )
-                    downloads[fullname] += 1
+                downloads[fullname] += 1
                 if parsed_args.verbose:
                     parsed_args.logger.info(
                         'Downloaded and decrypted {f}'.format(f=fullname)
