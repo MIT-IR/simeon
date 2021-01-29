@@ -125,7 +125,11 @@ def download_files(parsed_args):
             try:
                 parsed_args.logger.info('Decrypting {f}'.format(f=fullname))
                 if parsed_args.file_type == 'email':
-                    aws.process_email_file(fullname, parsed_args.verbose)
+                    aws.process_email_file(
+                        fname=fullname, verbose=parsed_args.verbose,
+                        logger=parsed_args.logger,
+                        timeout=parsed_args.decryption_timeout,
+                    )
                 else:
                     aws.decrypt_files(
                         fnames=fullname, verbose=parsed_args.verbose,

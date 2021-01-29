@@ -87,7 +87,7 @@ def decrypt_files(fnames, verbose=True, logger=None, timeout=60):
     return True
 
 
-def process_email_file(fname, verbose=True):
+def process_email_file(fname, verbose=True, logger=None, timeout=60):
     """
     Email opt-in files are kind of different in that
     they are zip archives inside of which reside GPG encrypted files.
@@ -105,7 +105,10 @@ def process_email_file(fname, verbose=True):
                     if not chunk:
                         break
                     fh.write(chunk)
-            decrypt_files(out, verbose)
+            decrypt_files(
+                fnames=out, verbose=verbose,
+                logger=logger, timeout=timeout
+            )
 
 
 def get_file_date(fname):
