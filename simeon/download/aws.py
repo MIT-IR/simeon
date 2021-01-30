@@ -4,7 +4,6 @@ Module of utilities to help with listing and downloading files from S3
 import json
 import os
 import re
-import subprocess as sb
 import sys
 import weakref
 import zipfile
@@ -15,6 +14,7 @@ import boto3 as boto
 from simeon.exceptions import (
     AWSException, DecryptionError
 )
+from simeon.download.utilities import decrypt_files
 
 
 BUCKETS = {
@@ -51,44 +51,6 @@ def make_s3_bucket(bucket):
         return boto.resource('s3').Bucket(bucket)
     except Exception as excp:
         raise AWSException(excp)
-
-
-def decrypt_files(fnames, verbose=True, logger=None, timeout=60):
-    """
-    Decrypt the given file with gpg.
-    This assumes that the gpg command
-    is available in the SHELL running this script.
-
-    :type fnames: Union[str, List]
-    :param fnames: A file name or a list of file names to decrypt
-    :type verbose: bool
-    :param verbose: Print the command to be run
-    :type logger: logging.Logger
-    :param logger: A logging.Logger object to print the command with
-    :type timeout: int
-    :param timeout: Number of seconds to wait for the decryption to finish
-    :rtype: bool
-    :return: Returns True if the decryption fails
-    :raises: DecryptionError
-    """
-    if isinstance(fnames, str):
-        fnames = [fnames]
-    verbosity = '--verbose' if verbose else ''
-    cmd = 'gpg {v} --batch --yes --decrypt-files {f}'.format(
-        f=' '.join(fnames), v=verbosity
-    )
-    if verbose and logger is not None:
-        logger.info(cmd)
-    proc =  sb.Popen(cmd.split(), stdout=sb.PIPE, stderr=sb.PIPE)
-    if proc.wait(timeout=timeout) != 0:
-        err = proc.stderr.read().decode('utf8', 'ignore').strip()
-        raise DecryptionError(
-            'Failed to decrypt {f}: {e}'.format(f=' '.join(fnames), e=err)
-        )
-    if verbose and logger is not None:
-        for line in proc.stdout:
-            logger.info(line.decode('utf8', 'ignore').strip())
-    return True
 
 
 def process_email_file(fname, verbose=True, logger=None, timeout=60):

@@ -300,7 +300,7 @@ class TestDownloadUtilities(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             with self.assertRaises(DecryptionError):
-                aws.decrypt_files('thereisnowaythisfileexists.gpg', False)
+                downutils.decrypt_files('thereisnowaythisfileexists.gpg', False)
     
     def test_good_module_id_recs(self):
         """

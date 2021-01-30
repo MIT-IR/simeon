@@ -79,7 +79,10 @@ def split_tracking_log(filename: str, ddir: str, dynamic_date: bool=False):
     :return: Writes records to generated file names
     """
     fhandles = dict()
-    date = utils.get_file_date(filename)
+    if not dynamic_date:
+        date = utils.get_file_date(filename)
+    else:
+        date = None
     with gzip.open(filename) as zfh:
         for i, line in enumerate(zfh):
             line_info = process_line(line, i + 1, date=date)

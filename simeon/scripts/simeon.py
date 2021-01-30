@@ -8,7 +8,7 @@ from argparse import (
     ArgumentParser, FileType
 )
 
-from simeon.download import aws, logs
+from simeon.download import aws, emails, logs, utilities as downutils
 from simeon.exceptions import AWSException
 from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
@@ -83,10 +83,10 @@ def split_log_files(parsed_args):
                 msg.format(f=fname, w='Done splitting')
             )
         except Exception as excp:
-            _, _, tb = sys.exc_info()
-            traces = '\n'.join(map(str.strip, traceback.format_tb(tb)))
+            # _, _, tb = sys.exc_info()
+            # traces = '\n'.join(map(str.strip, traceback.format_tb(tb)))
             failed = True
-            msg = 'Failed to split {f}: {e}'.format(f=fname, e=traces)
+            msg = 'Failed to split {f}: {e}'.format(f=fname, e=excp)
             parsed_args.logger.error(msg)
     sys.exit(0 if not failed else 1)
 
@@ -125,13 +125,13 @@ def download_files(parsed_args):
             try:
                 parsed_args.logger.info('Decrypting {f}'.format(f=fullname))
                 if parsed_args.file_type == 'email':
-                    aws.process_email_file(
+                    emails.process_email_file(
                         fname=fullname, verbose=parsed_args.verbose,
                         logger=parsed_args.logger,
                         timeout=parsed_args.decryption_timeout,
                     )
                 else:
-                    aws.decrypt_files(
+                    downutils.decrypt_files(
                         fnames=fullname, verbose=parsed_args.verbose,
                         logger=parsed_args.logger,
                         timeout=parsed_args.decryption_timeout,
@@ -462,18 +462,27 @@ def main():
     )
     splitter = subparsers.add_parser(
         'split',
-        help='Split downloaded tracking log or sql files',
-        description='Split downloaded tracking log or sql files'
+        help='Split downloaded tracking log or SQL files',
+        description='Split downloaded tracking log or SQL files'
     )
     splitter.set_defaults(command='split')
     splitter.add_argument(
         'downloaded_files',
-        help='List of tracking log files to split',
+        help='List of tracking log or SQL files to split',
         nargs='+'
     )
     splitter.add_argument(
+        '--file-type', '-f',
+        help='The file type of the items provided. Default: %(default)s',
+        default='log',
+        choices=['log', 'sql'],
+    )
+    splitter.add_argument(
         '--destination', '-d',
-        help='Directory where to download the file(s). Default: %(default)s',
+        help=(
+            'Directory where to place the files from splitting the item(s).'
+            ' Default: %(default)s'
+        ),
         default=os.getcwd(),
     )
     splitter.add_argument(

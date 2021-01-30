@@ -7,11 +7,14 @@ import json
 import math
 import os
 import re
+import subprocess as sb
 import urllib.parse as urlparser
 from datetime import datetime
 from functools import lru_cache
 
 from dateutil.parser import parse as parse_date
+
+from simeon.exceptions import DecryptionError
 
 
 CID_PATT1 = re.compile(r'^http[s]*://[^/]+/courses/([^/]+/[^/]+/[^/]+)/', re.I)
@@ -96,6 +99,44 @@ MI_PATT17 = re.compile(
     r'(?P<mtype>[^;]+);_(?P<id>[^/]+)/handler/.*'
 )
 MI_PATT18 = re.compile(r'i4x-([^\-]+)-([^\-]+)-video-([^ ]+)')
+
+
+def decrypt_files(fnames, verbose=True, logger=None, timeout=60):
+    """
+    Decrypt the given file with gpg.
+    This assumes that the gpg command
+    is available in the SHELL running this script.
+
+    :type fnames: Union[str, List]
+    :param fnames: A file name or a list of file names to decrypt
+    :type verbose: bool
+    :param verbose: Print the command to be run
+    :type logger: logging.Logger
+    :param logger: A logging.Logger object to print the command with
+    :type timeout: int
+    :param timeout: Number of seconds to wait for the decryption to finish
+    :rtype: bool
+    :return: Returns True if the decryption fails
+    :raises: DecryptionError
+    """
+    if isinstance(fnames, str):
+        fnames = [fnames]
+    verbosity = '--verbose' if verbose else ''
+    cmd = 'gpg {v} --batch --yes --decrypt-files {f}'.format(
+        f=' '.join(fnames), v=verbosity
+    )
+    if verbose and logger is not None:
+        logger.info(cmd)
+    proc =  sb.Popen(cmd.split(), stdout=sb.PIPE, stderr=sb.PIPE)
+    if proc.wait(timeout=timeout) != 0:
+        err = proc.stderr.read().decode('utf8', 'ignore').strip()
+        raise DecryptionError(
+            'Failed to decrypt {f}: {e}'.format(f=' '.join(fnames), e=err)
+        )
+    if verbose and logger is not None:
+        for line in proc.stdout:
+            logger.info(line.decode('utf8', 'ignore').strip())
+    return True
 
 
 def get_file_date(fname):
