@@ -529,11 +529,15 @@ def main():
         default='log',
         choices=['log', 'sql'],
     )
-    'no_decryption'
     splitter.add_argument(
         '--no-decryption', '-D',
         help='Don\'t decrypt the unpacked SQL files.',
         action='store_true',
+    )
+    splitter.add_argument(
+        '--decryption-timeout', '-t',
+        help='Number of seconds to wait for the decryption of files.',
+        type=int,
     )
     splitter.add_argument(
         '--destination', '-d',
