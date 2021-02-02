@@ -37,19 +37,29 @@ def batch_decrypt_files(
     :rtype: None
     :return: Nothing
     """
-    for batch in _batch_them(all_files, size):
-        decrypt_files(
-            fnames=batch, verbose=verbose, logger=logger, timeout=timeout
-        )
+    with ThreadPool(10) as pool:
+        futures = []
+        for batch in _batch_them(all_files, size):
+            futures.append(
+                pool.apply_async(
+                    func=decrypt_files, kwds=dict(
+                        fnames=batch, verbose=verbose,
+                        logger=logger, timeout=timeout
+                    )
+                )
+            )
+        for future in futures:
+            future.get()
 
 
-def unpacker(zfile, name):
+def unpacker(zfile, name, ddir):
     """
     A worker callable to pass a Thread or Process pool
     """
     name, target_name = format_sql_filename(name)
     if name is None or target_name is None:
         return
+    target_name = os.path.join(ddir, target_name)
     target_dir = os.path.dirname(target_name)
     os.makedirs(target_dir, exist_ok=True)
     with zfile.open(name) as zh, open(target_name, 'wb') as fh:
@@ -58,7 +68,7 @@ def unpacker(zfile, name):
     return target_name
 
 
-def process_sql_archive(archive, ddir=None, verbose=False, logger=None):
+def process_sql_archive(archive, ddir=None):
     """
     Unpack and decrypt files inside the given archive
 
@@ -66,12 +76,6 @@ def process_sql_archive(archive, ddir=None, verbose=False, logger=None):
     :param archive: SQL data package (a ZIP archive)
     :type ddir: str
     :param ddir: The destination directory of the unpacked files
-    :type verbose: bool
-    :param verbose: Whether to print stuff when decrypting
-    :type logger: logging.Logger
-    :param logger: A Logger object to print messages with
-    :type timeout: int
-    :param timeout: Number of seconds to wait for the decryption to finish
     :rtype: List[str]
     :return: List of file names
     """
@@ -81,13 +85,14 @@ def process_sql_archive(archive, ddir=None, verbose=False, logger=None):
     with zipfile.ZipFile(archive) as zf:
         names = zf.namelist()
         with ThreadPool(10) as pool:
-            futures = [
-                pool.apply_async(unpacker, args=(zf, n)) for n in names
-            ]
+            futures = []
+            for name in names:
+                futures.append(
+                    pool.apply_async(unpacker, args=(zf, name, ddir))
+                )
             for future in futures:
                 result = future.get()
                 if not result:
                     continue
                 out.append(result)
     return out
-

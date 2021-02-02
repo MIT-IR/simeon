@@ -104,12 +104,18 @@ def split_sql_files(parsed_args):
             msg.format(f=fname, w='Splitting')
         )
         try:
-            sqls.process_sql_archive(
+            to_decrypt = sqls.process_sql_archive(
                 archive=fname, ddir=parsed_args.destination,
-                verbose=parsed_args.verbose, logger=parsed_args.logger,
             )
             parsed_args.logger.info(
                 msg.format(f=fname, w='Done splitting')
+            )
+            if parsed_args.no_decryption:
+                continue
+            sqls.batch_decrypt_files(
+                all_files=to_decrypt, size=100,
+                verbose=parsed_args.verbose, logger=parsed_args.logger,
+                timeout=parsed_args.decryption_timeout,
             )
         except Exception as excp:
             # _, _, tb = sys.exc_info()
@@ -522,6 +528,12 @@ def main():
         help='The file type of the items provided. Default: %(default)s',
         default='log',
         choices=['log', 'sql'],
+    )
+    'no_decryption'
+    splitter.add_argument(
+        '--no-decryption', '-D',
+        help='Don\'t decrypt the unpacked SQL files.',
+        action='store_true',
     )
     splitter.add_argument(
         '--destination', '-d',
