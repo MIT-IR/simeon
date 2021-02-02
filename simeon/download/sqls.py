@@ -79,10 +79,13 @@ def process_sql_archive(archive, ddir=None, verbose=False, logger=None):
         ddir, _ = os.path.split(archive)
     out = []
     with zipfile.ZipFile(archive) as zf:
+        names = zf.namelist()
         with ThreadPool(10) as pool:
-            futures = [pool.apply_async(unpacker, n) for n in zf.namelist()]
+            futures = [
+                pool.apply_async(unpacker, args=(zf, n)) for n in names
+            ]
             for future in futures:
-                result = future.result()
+                result = future.get()
                 if not result:
                     continue
                 out.append(result)

@@ -11,6 +11,17 @@ def process_email_file(fname, verbose=True, logger=None, timeout=60):
     """
     Email opt-in files are kind of different in that
     they are zip archives inside of which reside GPG encrypted files.
+
+    :type fname: str
+    :param fname: Zip archive containing the email opt-in data file
+    :type verbose: bool
+    :param verbose: Whether to print stuff when decrypting
+    :type logger: logging.Logger
+    :param logger: A Logger object to print messages with
+    :type timeout: int
+    :param timeout: Number of seconds to wait for the decryption to finish
+    :rtype: None
+    :return: Nothing
     """
     dirname, out = os.path.split(fname)
     out, _ = os.path.splitext(out)

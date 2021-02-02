@@ -81,3 +81,7 @@ class TestUploadUtilities(unittest.TestCase):
             with self.subTest(msg):
                 with self.assertRaises(ValueError):
                     uputils.local_to_bq_table(fname, ftype, self.project)
+
+
+if __name__ == '__main__':
+    unittest.main()

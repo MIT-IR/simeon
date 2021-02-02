@@ -44,7 +44,10 @@ def process_line(
         return {'data': line, 'filename': 'dead_letter_queue.json.gz'}
     course_id = utils.get_course_id(record)
     record['course_id'] = course_id
-    utils.rephrase_record(record)
+    try:
+        utils.rephrase_record(record)
+    except KeyError:
+        return {'data': line, 'filename': 'dead_letter_queue.json.gz'}
     if not date:
         try:
             date = parse_date(record.get('time', ''))
@@ -91,9 +94,10 @@ def split_tracking_log(filename: str, ddir: str, dynamic_date: bool=False):
             if fname not in fhandles:
                 fhandles[fname] = utils.make_file_handle(fname, is_gzip=True)
             fhandle = fhandles[fname]
+            data = line_info['data']
+            if not isinstance(data, str):
+                data = json.dumps(data)
             if isinstance(fhandle, gzip.GzipFile):
-                fhandle.write(
-                    json.dumps(line_info['data']).encode('utf8', 'ignore') + b'\n'
-                )
+                fhandle.write(data.encode('utf8', 'ignore') + b'\n')
             else:
-                json.dump(line_info['data'] + '\n', fhandle)
+                fhandle.write(data + '\n')

@@ -4,7 +4,9 @@ Test the download module in the download package
 import unittest
 import warnings
 
-from simeon.download import aws, utilities as downutils
+from simeon.download import (
+    aws, logs, utilities as downutils
+)
 from simeon.exceptions import DecryptionError
 
 
@@ -13,6 +15,33 @@ class TestDownloadUtilities(unittest.TestCase):
     Test the utility functions and classes in the aws module
     """
     def setUp(self):
+        self.bad_json_log_lines = [
+            """{'time': '2020-01-01 23:45:13'}""",
+            """{'time': '2020-01-01 23:45:13', 'course_id': 'science'}""",
+        ]
+        self.bad_log_lines = [
+            """{}""",
+            """{"time": "hello-this-is-a-mess", "course_id": ""}""",
+            """{
+                "time": "2020-01-01 23:45:13",
+                "course_id": "MITx/science/3T2020"
+            }""",
+
+        ]
+        self.good_log_lines = [
+            """{
+                "time": "2021-01-01 23:45:45",
+                "course_id": "MITx/123/1T2020",
+                "event": "{}",
+                "event_type": "problem"
+            }""",
+            """{
+                "time": "2021-06-01 20:45:45",
+                "course_id": "MITx/456/2T2021",
+                "event": "{}",
+                "event_type": "lecture"
+            }"""
+        ]
         self.good_email_fnames = [
             'email-opt-in/email-opt-in-mitx-2021-01-01.zip',
             'email-opt-in/email-opt-in-mitx-2021-01-02.zip',
@@ -284,7 +313,7 @@ class TestDownloadUtilities(unittest.TestCase):
         self.assertListEqual(
             fdates, ['2021-01-01', '2021-01-02', '2021-01-03']
         )
-    
+
     def test_bad_file_dates(self):
         """
         Test that get_file_date returns an empty when given a path
@@ -300,8 +329,10 @@ class TestDownloadUtilities(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             with self.assertRaises(DecryptionError):
-                downutils.decrypt_files('thereisnowaythisfileexists.gpg', False)
-    
+                downutils.decrypt_files(
+                    'thereisnowaythisfileexists.gpg', False
+                )
+
     def test_good_module_id_recs(self):
         """
         Test that downutils.get_module_id works with valid records
@@ -319,6 +350,50 @@ class TestDownloadUtilities(unittest.TestCase):
             msg = 'Getting module ID of {r}'.format(r=record)
             with self.subTest(msg):
                 self.assertIsNone(downutils.get_module_id(record))
+
+    def test_bad_json_log_lines(self):
+        """
+        Test that process_line returns the given string along with
+        target file name 'dead_letter_queue.json.gz' when the JSON line
+        is not properly formatted.
+        """
+        for i, line in enumerate(self.bad_json_log_lines, 1):
+            msg = 'Testing process_line with record {r}'
+            with self.subTest(msg.format(r=line)):
+                out = logs.process_line(line, i)
+                self.assertEqual(
+                    out.get('filename', ''), 'dead_letter_queue.json.gz'
+                )
+                self.assertEqual(line, out.get('data'))
+
+    def test_bad_log_lines(self):
+        """
+        Test that process_line returns the original line to be put
+        in a dead letter queue when there is no 'event' or 'event_type' in
+        the deserialized JSON record.
+        """
+        for i, line in enumerate(self.bad_log_lines, 1):
+            msg = 'Testing process_line with record {r}'
+            with self.subTest(msg.format(r=line)):
+                out = logs.process_line(line, i)
+                self.assertEqual(
+                    out.get('filename', ''), 'dead_letter_queue.json.gz'
+                )
+                self.assertEqual(line, out.get('data'))
+
+    def test_good_log_lines(self):
+        """
+        Test that process_line returns a valid dict and a good file name
+        when the given line is without issues.
+        """
+        for i, line in enumerate(self.good_log_lines, 1):
+            msg = 'Testing process_line with record {r}'
+            with self.subTest(msg.format(r=line)):
+                out = logs.process_line(line, i)
+                self.assertNotIn(
+                    'dead_letter_queue.json.gz', out.get('filename', '')
+                )
+                self.assertIsInstance(out.get('data'), dict)
 
 
 if __name__ == '__main__':
