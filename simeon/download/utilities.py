@@ -99,6 +99,13 @@ MI_PATT17 = re.compile(
     r'(?P<mtype>[^;]+);_(?P<id>[^/]+)/handler/.*'
 )
 MI_PATT18 = re.compile(r'i4x-([^\-]+)-([^\-]+)-video-([^ ]+)')
+SQL_FILE_EXTS = {
+    '.failed': 3,
+    '.gz': 3,
+    '.json': 3,
+    '.mongo': 1,
+    '.sql': 3,
+}
 
 
 def decrypt_files(fnames, verbose=True, logger=None, timeout=60):
@@ -177,10 +184,66 @@ def make_file_handle(fname: str, mode: str='w', is_gzip: bool=False):
     return open(fname, mode)
 
 
+def get_sql_course_id(course_str: str) -> str:
+    """
+    Given a course ID string from the SQL files,
+    pluck out of the actual course ID and format it as follows:
+    ORG/COURSE_NUMBER/TERM
+
+    :type course_str: str
+    :param course_str: The course ID string from edX
+    :rtype: str
+    :return: Actual course ID and format it properly
+    """
+    return course_str.split(':')[-1].replace('+', '/')
+
+
+def format_sql_filename(fname: str) -> (str, str):
+    """
+    Reformat the given edX SQL encrypted file name into a name indicative
+    of where the file should end up after the SQL archive is unpacked.
+    site/folder/filename.ext.gext
+
+    :NOTE: Please unit test me!
+    """
+    if fname.endswith('/'):
+        return None, None
+    file_ = fname.replace('prod-edge', 'edge').replace('ora/', '')
+    if fname.endswith('.gpg'):
+        file_, gext = os.path.splitext(file_)
+    dirname, bname = os.path.split(file_)
+    _, ext = os.path.splitext(bname)
+    limit = SQL_FILE_EXTS.get(ext)
+    if limit is None:
+        raise ValueError(
+            '{f} has an expected extension. Expected are {x}'.format(
+                f=fname, x=', '.join(SQL_FILE_EXTS)
+            )
+        )
+    components = bname.rsplit('-', limit)
+    if '.mongo' in bname:
+        cid, out = components
+        site, out, ending = out.replace('.mongo', ''), 'mongo.json', ''
+    else:
+        cid, out, site, ending = components
+    out = '{o}-{e}.gpg'.format(o=out, e=ending) if ending else out
+    if 'ora/' in fname:
+        out = os.path.join('ora', out)
+    return (
+        fname,
+        os.path.join(
+            site, dirname,
+            cid.replace('-', '__', 2).replace('-', '_').replace('.', '_'),
+            out,
+        )
+    )
+
+
 def get_course_id(record: dict, org_keywords=('mit', 'vj')) -> str:
     """
     Given a JSON record, try getting the course_id out of it.
 
+    :NOTE: Please unit test me!
     :type record: dict
     :param record: A deserialized JSON record
     :type org_keywords: Iterable[str]
@@ -560,6 +623,8 @@ def check_record_schema(record: dict, schema: list, coerce=True):
     """
     Given one of the schemas in simeon.upload.schemas,
     check and coerce (if True), the corresponding values
+
+    :NOTE: Implement and test me!
 
     :type record: dict
     :param record: Dictionary whose values are modified
