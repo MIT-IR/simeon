@@ -303,6 +303,59 @@ class TestDownloadUtilities(unittest.TestCase):
                 'event_source': ''
             },
         ]
+        self.good_sql_course_ids = [
+                                    'filename:MITx+CourseX+9T9999',
+                                    'file:more_file:ORGx+Course.1x+1T1000',
+                                    'file+description:MITx+Course3x+3T3333'
+        ]
+        self.sql_file_name_directory = 'this/is/not/a/filename/'
+        self.sql_file_unexpected_ext = 'prod-foo-bar-baz-bif.doc.gpg'
+        self.sql_file_names = [
+            {
+                'input': 'prod-foo-bar-baz-bif.gz.gpg',
+                'good-output': "baz/prod__foo/bar-bif.gz.gpg",
+            },
+            {
+                'input': 'prod-foo-bar-baz-bif.failed.gpg',
+                'good-output': "baz/prod__foo/bar-bif.failed.gpg",
+            },
+            {
+                'input': 'prod-foo-bar-baz-bif.json.gpg',
+                'good-output': 'baz/prod__foo/bar-bif.json.gpg',
+            },
+            {
+                'input': 'prod-foo-bar-baz-bif.sql.gpg',
+                'good-output': 'baz/prod__foo/bar-bif.sql.gpg',
+            },
+            {
+                'input': 'ora/prod-foo-bar-baz-bif.gz.gpg',
+                'good-output': "baz/prod__foo/ora/bar-bif.gz.gpg",
+            },
+            {
+                'input': 'prod-foo.mongo.gpg',
+                'good-output': 'foo/prod/mongo.json.gpg'
+            }
+        ]
+        self.course_id_records = [
+              {
+                'course_id': 'MITx+CourseX+1T2000'
+              },
+              {
+                'context': {
+                            'course_id': 'MITx+CourseX+1T2000'
+                            }
+              },
+              {
+                'event_source': 'browser',
+                'page': 'https://edx.org/MITx+CourseX+1T2020'
+              },
+              {
+                'event_type': 'https://edx.org/MITx+CourseX+1T2020'
+              },
+              {
+                'event_type': 'https://edx.org/courses:v1:MITx+CourseX+1T2020/'
+              }
+        ]
 
     def test_good_file_dates(self):
         """
@@ -395,7 +448,42 @@ class TestDownloadUtilities(unittest.TestCase):
                 )
                 self.assertIsInstance(out.get('data'), dict)
 
+    def test_good_sql_course_ids(self):
+        """
+        test that get_sql_course_id returns what we would expect
+        without issues
+        """
+        for input in self.good_sql_course_ids:
+            self.assertIsNotNone(downutils.get_sql_course_id(input))
+
+    def test_sql_filename_directory(self):
+        """
+        should just return a tuple of Nones if the given name is a directory
+        """
+        self.assertEqual(downutils.format_sql_filename(self.sql_file_name_directory),
+                         (None, None))
+
+    def test_unexpected_extension(self):
+        """
+        if the file extension is not one of the standard ones, raises error
+        """
+        with self.assertRaises(ValueError):
+            downutils.format_sql_filename(self.sql_file_unexpected_ext)
+
+    def test_sql_filenames(self):
+        """
+        test a variety of filename conversions
+        """
+        for input_dict in self.sql_file_names:
+            self.assertEqual(downutils.format_sql_filename(input_dict['input']),
+                             (input_dict['input'], input_dict['good-output']))
+
+    def test_course_ids(self):
+        """
+        test a variety of JSON-like records for course_id extraction
+        """
+        for record in self.course_id_records:
+            self.assertIsNotNone(downutils.get_course_id(record))
 
 if __name__ == '__main__':
     unittest.main()
-
