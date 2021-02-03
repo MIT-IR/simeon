@@ -79,7 +79,9 @@ def split_log_files(parsed_args):
         )
         try:
             logs.split_tracking_log(
-                fname, parsed_args.destination, parsed_args.dynamic_date
+                filename=fname, ddir=parsed_args.destination,
+                dynamic_date=parsed_args.dynamic_date,
+                courses=parsed_args.courses,
             )
             parsed_args.logger.info(
                 msg.format(f=fname, w='Done splitting')
@@ -107,23 +109,32 @@ def split_sql_files(parsed_args):
             to_decrypt = sqls.process_sql_archive(
                 archive=fname, ddir=parsed_args.destination,
                 include_edge=parsed_args.include_edge,
+                courses=parsed_args.courses,
             )
             parsed_args.logger.info(
                 msg.format(f=fname, w='Done splitting')
             )
             if parsed_args.no_decryption:
                 continue
+            parsed_args.logger.info(
+                msg.format(f=fname, w='Decrypting the contents in')
+            )
             sqls.batch_decrypt_files(
                 all_files=to_decrypt, size=100,
                 verbose=parsed_args.verbose, logger=parsed_args.logger,
                 timeout=parsed_args.decryption_timeout,
                 keepfiles=parsed_args.keep_encrypted
             )
+            parsed_args.logger.info(
+                msg.format(f=fname, w='Done decrypting the contents in')
+            )
         except Exception as excp:
             # _, _, tb = sys.exc_info()
             # traces = '\n'.join(map(str.strip, traceback.format_tb(tb)))
             failed = True
-            msg = 'Failed to split {f}: {e}'.format(f=fname, e=excp)
+            msg = 'Failed to split and decrypt {f}: {e}'.format(
+                f=fname, e=excp
+            )
             parsed_args.logger.error(msg)
     sys.exit(0 if not failed else 1)
 
@@ -184,17 +195,21 @@ def download_files(parsed_args):
                         logger=parsed_args.logger,
                         timeout=parsed_args.decryption_timeout,
                     )
+                    if parsed_args.verbose:
+                        parsed_args.logger.info(
+                            'Downloaded and decrypted {f}'.format(f=fullname)
+                        )
                 elif parsed_args.file_type == 'log':
                     downutils.decrypt_files(
                         fnames=fullname, verbose=parsed_args.verbose,
                         logger=parsed_args.logger,
                         timeout=parsed_args.decryption_timeout,
                     )
+                    if parsed_args.verbose:
+                        parsed_args.logger.info(
+                            'Downloaded and decrypted {f}'.format(f=fullname)
+                        )
                 downloads[fullname] += 1
-                if parsed_args.verbose:
-                    parsed_args.logger.info(
-                        'Downloaded and decrypted {f}'.format(f=fullname)
-                    )
             except Exception as excp:
                 parsed_args.logger.error(excp)
     if not downloads:
@@ -206,6 +221,9 @@ def download_files(parsed_args):
                 k, _ = os.path.splitext(k)
                 parsed_args.downloaded_files.append(k)
         split_log_files(parsed_args)
+    elif parsed_args.file_type == 'sql' and parsed_args.split:
+        parsed_args.downloaded_files = list(downloads)
+        split_sql_files(parsed_args)
     rc = 0 if all(v == 2 for v in downloads.values()) else 1
     sys.exit(rc)
 
@@ -462,6 +480,29 @@ def main():
         help='Number of seconds to wait for the decryption of files.',
         type=int,
     )
+    downloader.add_argument(
+        '--courses', '-c',
+        help=(
+            'A list of white space separated course IDs whose data files '
+            'are unpacked and decrypted.'
+        ),
+        type=cli_utils.course_listings,
+    )
+    downloader.add_argument(
+        '--no-decryption', '-D',
+        help='Don\'t decrypt the unpacked SQL files.',
+        action='store_true',
+    )
+    downloader.add_argument(
+        '--include-edge', '-E',
+        help='Include the edge site files when splitting SQL data packages.',
+        action='store_true',
+    )
+    downloader.add_argument(
+        '--keep-encrypted', '-k',
+        help='Keep the encrypted files after decrypting them',
+        action='store_true',
+    )
     lister = subparsers.add_parser(
         'list',
         help='List edX research data with the given criteria',
@@ -537,7 +578,7 @@ def main():
         action='store_true',
     )
     splitter.add_argument(
-        '--include-edge', '-e',
+        '--include-edge', '-E',
         help='Include the edge site files when splitting SQL data packages.',
         action='store_true',
     )
@@ -558,6 +599,14 @@ def main():
             ' Default: %(default)s'
         ),
         default=os.getcwd(),
+    )
+    splitter.add_argument(
+        '--courses', '-c',
+        help=(
+            'A list of white space separated course IDs whose data files '
+            'are unpacked and decrypted.'
+        ),
+        type=cli_utils.course_listings,
     )
     splitter.add_argument(
         '--dynamic-date', '-m',

@@ -67,7 +67,10 @@ def process_line(
     return {'data': record, 'filename': outfile}
 
 
-def split_tracking_log(filename: str, ddir: str, dynamic_date: bool=False):
+def split_tracking_log(
+    filename: str, ddir: str, dynamic_date: bool=False,
+    courses: List[str]=None,
+):
     """
     Split the records in the given GZIP tracking log file
 
@@ -78,9 +81,12 @@ def split_tracking_log(filename: str, ddir: str, dynamic_date: bool=False):
     :type dynamic_date: bool
     :param dynamic_date: Use dates from the JSON records to make
         output file names
+    :type courses: Union[List[str], None]
+    :param courses: A list of course IDs whose records are exported
     :rtype: None
     :return: Writes records to generated file names
     """
+    courses = set(courses) if courses else set()
     fhandles = dict()
     if not dynamic_date:
         date = utils.get_file_date(filename)
@@ -95,6 +101,9 @@ def split_tracking_log(filename: str, ddir: str, dynamic_date: bool=False):
                 fhandles[fname] = utils.make_file_handle(fname, is_gzip=True)
             fhandle = fhandles[fname]
             data = line_info['data']
+            if isinstance(data, dict):
+                if not data.get('course_id') in courses:
+                    continue
             if not isinstance(data, str):
                 data = json.dumps(data)
             if isinstance(fhandle, gzip.GzipFile):

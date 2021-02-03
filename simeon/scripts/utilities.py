@@ -132,3 +132,13 @@ def find_config(fname="simeon.ini"):
         return load_config(cwd)
     elif os.path.exists(home):
         return load_config(home)
+
+
+def course_listings(courses_str):
+    """
+    Given a list of white space separated course IDs,
+    split it into a list.
+    """
+    if courses_str is None:
+        return None
+    return [c.strip() for c in courses_str.split(' ')]
