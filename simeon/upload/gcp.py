@@ -12,6 +12,11 @@ from google.cloud import storage
 
 from simeon.upload import utilities as uputils
 
+FILE_FORMATS = {
+    'log': ['json'],
+    'sql': ['csv', 'txt', 'sql']
+}
+
 
 class BigqueryClient(bigquery.Client):
     """
@@ -42,14 +47,15 @@ class BigqueryClient(bigquery.Client):
         :raises: Propagates exceptions from self.load_table_from_file and
         self.load_table_from_uri
         """
-        format_ = 'json' if file_type == 'log' else 'csv'
+        formats = FILE_FORMATS.get(file_type, [])
         patts = (
-            os.path.join(dirname, '*.{f}.gz'.format(f=format_)),
-            os.path.join(dirname, '*', '*.{f}.gz'.format(f=format_))
+            os.path.join(dirname, '*.{f}*.gz'),
+            os.path.join(dirname, '*', '*.{f}*.gz')
         )
         files = []
         for patt in patts:
-            files.extend(glob.glob(patt))
+            for format_ in formats:
+                files.extend(glob.glob(patt.format(f=format_)))
         jobs = []
         for file_ in files:
             jobs.append(
@@ -156,13 +162,14 @@ class GCSClient(storage.Client):
         :return: Nothing
         :raises: Propagates everything from the underlying package
         """
-        format_ = 'json' if file_type == 'log' else 'csv'
+        formats = FILE_FORMATS.get(file_type, [])
         patts = (
-            os.path.join(dirname, '*.{f}.gz'.format(f=format_)),
-            os.path.join(dirname, '*', '*.{f}.gz'.format(f=format_))
+            os.path.join(dirname, '*.{f}*.gz'),
+            os.path.join(dirname, '*', '*.{f}*.gz')
         )
         files = []
         for patt in patts:
-            files.extend(glob.glob(patt))
+            for format_ in formats:
+                files.extend(glob.glob(patt.format(f=format_)))
         for fname in files:
             self.load_on_file_to_gcs(fname, file_type, bucket, overwrite)

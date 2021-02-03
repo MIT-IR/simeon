@@ -130,7 +130,7 @@ def local_to_bq_table(fname: str, file_type: str, project: str) -> str:
     else:
         suffix = 'logs'
         table = 'tracklog_' + ''.join(re.findall(r'\d+', bname))
-    dataset = os.path.basename(dname).replace('.', '_')
+    dataset = os.path.basename(dname).replace('.', '_').replace('-', '_')
     if not table.replace('tracklog_', '') or not dataset:
         raise BigQueryNameException(
             'A BigQuery table name could not be constructed with {f}'.format(
@@ -188,7 +188,7 @@ def get_bq_schema(table: str, schema_dir: str=SCHEMA_DIR):
 
 def make_bq_config(
     table: str, append: bool=False,
-    create: bool=True, file_format: str='json'
+    create: bool=True, file_format: str='json', delim='\t'
 ):
     """
     Make a bigquery.LoadConfig object
@@ -196,6 +196,7 @@ def make_bq_config(
     schema = get_bq_schema(table)
     if 'json' in file_format.lower():
         file_format = bigquery.SourceFormat.NEWLINE_DELIMITED_JSON
+        delim = None
     else:
         file_format = bigquery.SourceFormat.CSV
     if create:
@@ -209,5 +210,5 @@ def make_bq_config(
     return bigquery.LoadJobConfig(
         schema=schema, source_format=file_format,
         create_disposition=create, write_disposition=append,
-
+        field_delimiter=delim,
     )
