@@ -24,8 +24,20 @@ def _batch_them(items, size):
         yield bucket
 
 
+def _delete_all(items):
+    """
+    Delete the given items from the local file system
+    """
+    for item in items:
+        try:
+            os.remove(item)
+        except:
+            continue
+
+
 def batch_decrypt_files(
-    all_files, size=100, verbose=False, logger=None, timeout=None
+    all_files, size=100, verbose=False, logger=None,
+    timeout=None, keepfiles=False,
 ):
     """
     Batch the files by the given size and pass each batch to gpg to decrypt.
@@ -34,22 +46,31 @@ def batch_decrypt_files(
     :param all_files: List of file names
     :type size: int
     :param size: The batch size
+    :type verbose: bool
+    :param verbose: Print the command to be run
+    :type logger: logging.Logger
+    :param logger: A logging.Logger object to print the command with
+    :type timeout: Union[int, None]
+    :param timeout: Number of seconds to wait for the decryption to finish
+    :type keepfiles: bool
+    :param keepfiles: Keep the encrypted files after decrypting them.
     :rtype: None
     :return: Nothing
     """
     with ThreadPool(10) as pool:
-        futures = []
+        results = dict()
         for batch in _batch_them(all_files, size):
-            futures.append(
-                pool.apply_async(
+            async_result = pool.apply_async(
                     func=decrypt_files, kwds=dict(
                         fnames=batch, verbose=verbose,
                         logger=logger, timeout=timeout
                     )
-                )
             )
-        for future in futures:
-            future.get()
+            results[async_result] = batch
+        for result in results:
+            result.get()
+            if not keepfiles:
+                _delete_all(results[result])
 
 
 def unpacker(zfile, name, ddir):
@@ -85,13 +106,13 @@ def process_sql_archive(archive, ddir=None):
     with zipfile.ZipFile(archive) as zf:
         names = zf.namelist()
         with ThreadPool(10) as pool:
-            futures = []
+            results = []
             for name in names:
-                futures.append(
+                results.append(
                     pool.apply_async(unpacker, args=(zf, name, ddir))
                 )
-            for future in futures:
-                result = future.get()
+            for result in results:
+                result = result.get()
                 if not result:
                     continue
                 out.append(result)
