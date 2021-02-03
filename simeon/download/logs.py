@@ -95,15 +95,15 @@ def split_tracking_log(
     with gzip.open(filename) as zfh:
         for i, line in enumerate(zfh):
             line_info = process_line(line, i + 1, date=date)
+            data = line_info['data']
+            if isinstance(data, dict):
+                if courses and data.get('course_id') not in courses:
+                    continue
             fname = line_info.get('filename')
             fname = os.path.join(ddir, fname)
             if fname not in fhandles:
                 fhandles[fname] = utils.make_file_handle(fname, is_gzip=True)
             fhandle = fhandles[fname]
-            data = line_info['data']
-            if isinstance(data, dict):
-                if not data.get('course_id') in courses:
-                    continue
             if not isinstance(data, str):
                 data = json.dumps(data)
             if isinstance(fhandle, gzip.GzipFile):
