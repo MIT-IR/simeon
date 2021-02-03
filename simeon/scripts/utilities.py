@@ -101,7 +101,7 @@ def make_config_file(dest_path=None):
     config = configparser.ConfigParser()
     config['GoogleCloud'] = {'Project': 'default-project',
                              'Bucket': 'default-bucket',
-                             'Account': 'account@email.com'}
+                             'ServiceAccountFile': '/path/to/credentials.json'}
     config['AmazonWebServices'] = {}
     config['AmazonWebServices']['Credentials'] = "/path/to/credentials.json"
     with open(dest_fname, 'w') as configfile:
