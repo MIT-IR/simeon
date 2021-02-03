@@ -106,6 +106,7 @@ def split_sql_files(parsed_args):
         try:
             to_decrypt = sqls.process_sql_archive(
                 archive=fname, ddir=parsed_args.destination,
+                include_edge=parsed_args.include_edge,
             )
             parsed_args.logger.info(
                 msg.format(f=fname, w='Done splitting')
@@ -116,6 +117,7 @@ def split_sql_files(parsed_args):
                 all_files=to_decrypt, size=100,
                 verbose=parsed_args.verbose, logger=parsed_args.logger,
                 timeout=parsed_args.decryption_timeout,
+                keepfiles=parsed_args.keep_encrypted
             )
         except Exception as excp:
             # _, _, tb = sys.exc_info()
@@ -520,7 +522,7 @@ def main():
     splitter.set_defaults(command='split')
     splitter.add_argument(
         'downloaded_files',
-        help='List of tracking log or SQL files to split',
+        help='List of tracking log or SQL archives to split',
         nargs='+'
     )
     splitter.add_argument(
@@ -532,6 +534,16 @@ def main():
     splitter.add_argument(
         '--no-decryption', '-D',
         help='Don\'t decrypt the unpacked SQL files.',
+        action='store_true',
+    )
+    splitter.add_argument(
+        '--include-edge', '-e',
+        help='Include the edge site files when splitting SQL data packages.',
+        action='store_true',
+    )
+    splitter.add_argument(
+        '--keep-encrypted', '-k',
+        help='Keep the encrypted files after decrypting them',
         action='store_true',
     )
     splitter.add_argument(

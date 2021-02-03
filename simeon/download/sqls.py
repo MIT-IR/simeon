@@ -89,7 +89,7 @@ def unpacker(zfile, name, ddir):
     return target_name
 
 
-def process_sql_archive(archive, ddir=None):
+def process_sql_archive(archive, ddir=None, include_edge=False):
     """
     Unpack and decrypt files inside the given archive
 
@@ -97,6 +97,8 @@ def process_sql_archive(archive, ddir=None):
     :param archive: SQL data package (a ZIP archive)
     :type ddir: str
     :param ddir: The destination directory of the unpacked files
+    :type include: bool
+    :param include_edge: Include the files from the edge site
     :rtype: List[str]
     :return: List of file names
     """
@@ -104,7 +106,10 @@ def process_sql_archive(archive, ddir=None):
         ddir, _ = os.path.split(archive)
     out = []
     with zipfile.ZipFile(archive) as zf:
-        names = zf.namelist()
+        if include_edge:
+            names = zf.namelist()
+        else:
+            names = filter(lambda f: '-edge' not in f, zf.namelist())
         with ThreadPool(10) as pool:
             results = []
             for name in names:
