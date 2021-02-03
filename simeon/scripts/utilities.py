@@ -4,6 +4,7 @@ Utility functions for the simeon CLI tool
 import logging
 import os
 import sys
+import configparser
 from argparse import ArgumentTypeError
 
 from dateutil.parser import parse as dateparse
@@ -84,3 +85,50 @@ def make_logger(verbose=True, stream=None):
     logger = logging.Logger('SIMEON', level)
     logger.addHandler(handler)
     return logger
+
+
+def make_config_file(dest_path=None):
+    """
+    Create a config file named 'simeon.ini' that will have the expected
+    configuration values
+    :type dest_path: str
+    :param dest_path: path to save the config file to, if blank uses cwd
+    """
+    if dest_path is None:
+        dest_fname = "simeon.ini"
+    else:
+        dest_fname = os.path.join(dest_path, "simeon.ini")
+    config = configparser.ConfigParser()
+    config['GoogleCloud'] = {'Project': 'default-project',
+                             'Bucket': 'default-bucket',
+                             'ServiceAccountFile': '/path/to/credentials.json'}
+    config['AmazonWebServices'] = {}
+    config['AmazonWebServices']['Credentials'] = "/path/to/credentials.json"
+    with open(dest_fname, 'w') as configfile:
+        config.write(configfile)
+
+
+def load_config(fname="simeon.ini"):
+    """
+    Load the config file and return the configparser object.
+    :type fname: str
+    :param fname: filename of config file, default "simeon.ini"
+    :return: Returns a ConfigParser object that is dictionary-like
+    """
+    config = configparser.ConfigParser()
+    config.read(fname)
+    return config
+
+
+def find_config(fname="simeon.ini"):
+    """
+    searches common locations for a config file
+    :param fname: filename of config file, default "simeon.ini"
+    :return: Returns a ConfigParser object that is dictionary-like
+    """
+    cwd = os.path.join(os.getcwd(), fname)
+    home = os.path.expanduser("~/{f}".format(f=fname))
+    if os.path.exists(cwd):
+        return load_config(cwd)
+    elif os.path.exists(home):
+        return load_config(home)
