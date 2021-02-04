@@ -14,7 +14,7 @@ from simeon.upload import utilities as uputils
 
 FILE_FORMATS = {
     'log': ['json'],
-    'sql': ['csv', 'txt', 'sql']
+    'sql': ['csv', 'txt', 'sql', 'json']
 }
 
 
@@ -97,7 +97,9 @@ class BigqueryClient(bigquery.Client):
             loader = self.load_table_from_uri
         else:
             loader = self.load_table_from_file
-        format_ = 'json' if file_type == 'log' else 'csv'
+        # format_ = 'json' if file_type == 'log' else 'csv'
+        # We'll force all formats to JSON
+        format_ = 'json'
         job_prefix = '{t}_data_load_{dt}-'.format(
             t=file_type, dt=datetime.now().strftime('%Y%m%d%H%M%S%f')
         )

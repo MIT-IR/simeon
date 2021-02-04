@@ -188,17 +188,19 @@ def get_bq_schema(table: str, schema_dir: str=SCHEMA_DIR):
 
 def make_bq_config(
     table: str, append: bool=False,
-    create: bool=True, file_format: str='json', delim='\t'
+    create: bool=True, file_format: str='json', delim=','
 ):
     """
     Make a bigquery.LoadConfig object
     """
     schema = get_bq_schema(table)
     if 'json' in file_format.lower():
-        file_format = bigquery.SourceFormat.NEWLINE_DELIMITED_JSON
+        format_ = bigquery.SourceFormat.NEWLINE_DELIMITED_JSON
         delim = None
+        skips = None
     else:
-        file_format = bigquery.SourceFormat.CSV
+        format_ = bigquery.SourceFormat.CSV
+        skips = 1
     if create:
         create = bigquery.CreateDisposition.CREATE_IF_NEEDED
     else:
@@ -207,8 +209,13 @@ def make_bq_config(
         append = bigquery.WriteDisposition.WRITE_APPEND
     else:
         append = bigquery.WriteDisposition.WRITE_TRUNCATE
+    if 'json' in file_format.lower():
+        return bigquery.LoadJobConfig(
+            schema=schema, source_format=format_,
+            create_disposition=create, write_disposition=append,
+        )
     return bigquery.LoadJobConfig(
-        schema=schema, source_format=file_format,
+        schema=schema, source_format=format_,
         create_disposition=create, write_disposition=append,
-        field_delimiter=delim,
+        field_delimiter=delim, skip_leading_rows=skips,
     )
