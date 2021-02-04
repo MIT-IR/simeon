@@ -12,6 +12,7 @@ from simeon.download import (
     aws, emails, logs, sqls, utilities as downutils
 )
 from simeon.exceptions import AWSException
+from simeon.report import make_user_info_combo
 from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
 
@@ -128,6 +129,17 @@ def split_sql_files(parsed_args):
             parsed_args.logger.info(
                 msg.format(f=fname, w='Done decrypting the contents in')
             )
+            parsed_args.logger.info('Making user info combo reports')
+            dirnames = set(
+                os.path.dirname(f) for f in to_decrypt if 'ora/' not in f
+            )
+            for folder in dirnames:
+                msg = 'Making a user info combo report with files in {d}'
+                parsed_args.logger.info(msg.format(d=folder))
+                make_user_info_combo(folder)
+                parsed_args.logger.info(
+                    'Report generated for files in {d}'.format(d=folder)
+                )
         except Exception as excp:
             # _, _, tb = sys.exc_info()
             # traces = '\n'.join(map(str.strip, traceback.format_tb(tb)))
