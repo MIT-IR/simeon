@@ -733,6 +733,8 @@ def main():
         COMMANDS.get(args.command)(args)
     except:
         _, excp, tb = sys.exc_info()
+        if isinstance(excp, SystemExit):
+            raise excp
         msg = 'The command {c} failed: {e}'
         if args.debug:
             traces = ['{e}'.format(e=excp)]

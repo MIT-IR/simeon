@@ -619,25 +619,6 @@ def is_float(val):
         return False
 
 
-def check_record_schema(record: dict, schema: list, coerce=True):
-    """
-    Given one of the schemas in simeon.upload.schemas,
-    check and coerce (if True), the corresponding values
-
-    :NOTE: Implement and test me!
-
-    :type record: dict
-    :param record: Dictionary whose values are modified
-    :type schema: Iterable[Dict[str, Union[str, Dict]]]
-    :param schema: A list of dicts with info on BigQuery table fields
-    :type coerce: bool
-    :param coerce: Whether or not to coerce values
-    :rtype: None
-    :return: Modifies the record if needed
-    """
-    pass
-
-
 def move_field_to_mongoid(record: dict, path: list):
     """
     Move the values associated with the given path

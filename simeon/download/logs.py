@@ -10,6 +10,7 @@ from typing import Dict, List, Union
 from dateutil.parser import parse as parse_date
 
 import simeon.download.utilities as utils
+from simeon.report.utilities import SCHEMA_DIR, drop_extra_keys
 
 
 
@@ -86,6 +87,11 @@ def split_tracking_log(
     :rtype: None
     :return: Writes records to generated file names
     """
+    schema_file = os.path.join(
+        SCHEMA_DIR, 'schema_tracking_log.json'
+    )
+    with open(schema_file) as sfh:
+        schema = json.load(sfh).get('tracking_log')
     courses = set(courses) if courses else set()
     fhandles = dict()
     if not dynamic_date:
@@ -105,6 +111,7 @@ def split_tracking_log(
                 fhandles[fname] = utils.make_file_handle(fname, is_gzip=True)
             fhandle = fhandles[fname]
             if not isinstance(data, str):
+                drop_extra_keys(data, schema)
                 data = json.dumps(data)
             if isinstance(fhandle, gzip.GzipFile):
                 fhandle.write(data.encode('utf8', 'ignore') + b'\n')

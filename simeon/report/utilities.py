@@ -10,6 +10,7 @@ from functools import reduce
 from multiprocessing.pool import ThreadPool
 
 from simeon.download import utilities as downutils
+from simeon.exceptions import MissingSchemaException
 
 
 csv.field_size_limit(13107200)
@@ -60,6 +61,68 @@ ADDED_COLS = [
     'edxinstructordash_Grade', 'edxinstructordash_Grade_timestamp',
     'y1_anomalous'
 ]
+SCHEMA_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    'upload', 'schemas'
+)
+
+
+def check_record_schema(record, schema, coerce=True):
+    """
+    Check that the given record matches the same keys found in the given
+    schema list of fields. The latter is one of the schemas in
+    simeon/upload/schemas/
+
+    :type record: dict
+    :param record: Dictionary whose values are modified
+    :type schema: Iterable[Dict[str, Union[str, Dict]]]
+    :param schema: A list of dicts with info on BigQuery table fields
+    :type coerce: bool
+    :param coerce: Whether or not to coerce values
+    :rtype: None
+    :return: Modifies the record if needed
+    """
+    for field in schema:
+        if field.get('field_type') != 'RECORD':
+            if field.get('name') not in record:
+                if not coerce:
+                    raise MissingSchemaException(
+                        '{f} is missing from the record'.format(
+                            f=field.get('name')
+                        )
+                    )
+                record[field.get('name')] = ''
+        else:
+            subfields = field.get('fields')
+            subrecord = record.get(field.get('name'), {})
+            check_record_schema(subrecord, subfields, coerce)
+
+
+def drop_extra_keys(record, schema):
+    """
+    Walk through the record and drop key-value pairs that are not in the
+    given schema
+
+    :type record: dict
+    :param record: Dictionary whose values are modified
+    :type schema: Iterable[Dict[str, Union[str, Dict]]]
+    :param schema: A list of dicts with info on BigQuery table fields
+    :rtype: None
+    :return: Modifies the record if needed
+    """
+    keys = list(record)
+    for k in keys:
+        if not isinstance(record.get(k), dict):
+            if k not in (f.get('name') for f in schema):
+                del record[k]
+        else:
+            subrecord = record.get(k, {})
+            target = next((f for f in schema if f.get('name') == k), None)
+            if target is None:
+                subfields = []
+            else:
+                subfields = target.get('fields')
+            drop_extra_keys(subrecord, subfields)
 
 
 def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
@@ -73,6 +136,11 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
     :rtype: None
     :return: Nothing
     """
+    schema_file = os.path.join(
+        SCHEMA_DIR, 'schema_user_info_combo.json'
+    )
+    with open(schema_file) as sfh:
+        schema = json.load(sfh).get('user_info_combo')
     users = dict()
     user_file = 'auth_user-analytics.sql'
     user_cols = USER_INFO_COLS.get((user_file, None))
@@ -129,6 +197,8 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
             id_cols = ('user_id', 'certificate_user_id')
             if all(not outrow.get(k) for k in id_cols):
                 continue
+            check_record_schema(outrow, schema, True)
+            drop_extra_keys(outcols, schema)
             zh.write(json.dumps(outrow) + '\n')
 
 
