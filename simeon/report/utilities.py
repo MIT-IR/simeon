@@ -112,10 +112,9 @@ def drop_extra_keys(record, schema):
     """
     keys = list(record)
     for k in keys:
-        if not isinstance(record.get(k), dict):
-            if k not in (f.get('name') for f in schema):
-                del record[k]
-        else:
+        if k not in (f.get('name') for f in schema):
+            del record[k]
+        elif isinstance(record.get(k), dict):
             subrecord = record.get(k, {})
             target = next((f for f in schema if f.get('name') == k), None)
             if target is None:
