@@ -114,7 +114,7 @@ def drop_extra_keys(record, schema):
     for k in keys:
         if k not in (f.get('name') for f in schema):
             del record[k]
-        elif isinstance(record.get(k), dict):
+        elif isinstance(record, dict) and isinstance(record.get(k), dict):
             subrecord = record.get(k, {})
             target = next((f for f in schema if f.get('name') == k), None)
             if target is None:
@@ -170,11 +170,12 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
                 quotechar='\'', fieldnames=header
             )
             for row in reader:
-                target = users.get(row.get(uid_col))
-                if target is None:
-                    continue
-                tmp = dict((k, row.get(k)) for k in cols)
-                target.update(tmp)
+                if uid_col not in row:
+                    row[uid_col] = row.get('{p}_id'.format(p=prefix))
+                user_id = row.get(uid_col)
+                target = users.setdefault(user_id, {})
+                target['user_id'] = user_id
+                target.update(dict((k, row.get(k)) for k in cols))
     outcols = reduce(lambda l, r: l + r, USER_INFO_COLS.values())
     outcols += ADDED_COLS
     with gzip.open(os.path.join(dirname, outname), 'wt') as zh:
