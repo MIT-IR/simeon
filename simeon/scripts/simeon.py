@@ -413,6 +413,11 @@ def main():
         action='store_true',
     )
     parser.add_argument(
+        '--debug', '-B',
+        help='Show some stacktrace if simeon stops because of a fatal error',
+        action='store_true',
+    )
+    parser.add_argument(
         '--config-file', '-C',
         help=(
             'The INI configuration file to use for default arguments.'
@@ -724,7 +729,19 @@ def main():
     args = parser.parse_args()
     args.verbose = not args.quiet
     args.logger = cli_utils.make_logger(args.verbose, args.log_file)
-    COMMANDS.get(args.command)(args)
+    try:
+        COMMANDS.get(args.command)(args)
+    except:
+        _, excp, tb = sys.exc_info()
+        msg = 'The command {c} failed: {e}'
+        if args.debug:
+            traces = ['{e}'.format(e=excp)]
+            traces += map(str.strip, traceback.format_tb(tb))
+            msg = msg.format(c=args.command, e='\n'.join(traces))
+        else:
+            msg = msg.format(c=args.command, e=excp)
+        args.logger.error(msg)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
