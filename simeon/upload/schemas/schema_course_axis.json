@@ -103,7 +103,7 @@
 	    "description": "module-id of chapter within which this module element exists"
         },
         {
-            "field_type": "STRING",
+            "field_type": "BOOLEAN",
             "name": "graded",
 	    "description": "boolean specifying if the seciton (aka sequential) has graded content or not"
         },

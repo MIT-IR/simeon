@@ -35,3 +35,10 @@ class BigQueryNameException(Exception):
     can't be created.
     """
     pass
+
+
+class BadSQLFileException(Exception):
+    """
+    Raised when a SQL file is not in its expected format
+    """
+    pass

@@ -5,12 +5,15 @@ import csv
 import gzip
 import json
 import os
+import re
 from collections import OrderedDict
 from functools import reduce
 from multiprocessing.pool import ThreadPool
 
 from simeon.download import utilities as downutils
-from simeon.exceptions import MissingSchemaException
+from simeon.exceptions import (
+    BadSQLFileException, MissingSchemaException
+)
 
 
 csv.field_size_limit(13107200)
@@ -220,6 +223,11 @@ def batch_user_info_combos(
     :rtype: None
     :return: Nothing
     """
+    if not dirnames:
+        if verbose and logger is not None:
+            msg = 'No directories provided for course axis generation'
+            logger.warn(msg)
+        return
     with ThreadPool(10) as pool:
         results = dict()
         for dirname in dirnames:
@@ -228,6 +236,231 @@ def batch_user_info_combos(
                 logger.info(msg.format(d=dirname))
             async_result = pool.apply_async(
                     func=make_user_info_combo, kwds=dict(
+                        dirname=dirname, outname=outname,
+                    )
+            )
+            results[async_result] = dirname
+        for result in results:
+            result.get()
+            if verbose and logger is not None:
+                msg = 'Report generated for files in {d}'
+                logger.info(msg.format(d=dirname))
+
+
+def course_from_block(block):
+    """
+    Extract a course ID from the given block ID
+    """
+    if block.startswith('i4x://'):
+        return block.split('//')[-1].replace('course/', '')
+    return '/'.join(block.split(':')[-1].split('+', 3)[:3])
+
+
+def module_from_block(block):
+    """
+    Extract a module ID from the given block
+    """
+    if block.startswith('i4x://'):
+        return block.lstrip('i4x://')
+    segments = block.split(':')[-1].split('+')
+    return '/'.join(map(lambda s: s.split('@')[-1], segments))
+
+
+def get_youtube_id(record):
+    """
+    Given a course structure record, extract the YouTube ID
+    associated with the video element.
+    """
+    youtubes = []
+    for k, v in record.get('metadata', {}).items():
+        if 'youtube_id' in k and v:
+            return ':'.join(re.findall(r'\d+', k) + [v])
+
+
+def get_axis_itype(record):
+    """
+    Extract stuff from course structure records
+    to make data.itype
+    """
+    if 'problem' not in record.get('category', ''):
+        return None
+    meta = record.get('metadata', {})
+    return meta.get('display_name', '').lower().replace(' ', '')
+
+
+def get_has_solution(record):
+    """
+    Extract whether the given record is a problem that has showanswer.
+    If it's present and its associated value is not "never", then return True.
+    Otherwise, return False.
+    """
+    meta = record.get('metadata')
+    if 'showanswer' not in meta:
+        return False
+    return meta['showanswer'] != 'never'
+
+
+def get_problem_nitems(record):
+    """
+    Get a value for data.num_items in course_axis
+    """
+    if 'problem' in record.get('category'):
+        return len(record.get('children', [])) + 1
+    return None
+
+
+def process_course_structure(data, start, parent=None):
+    """
+    The course structure data dictionary and starting point,
+    loop through it and construct course axis data items
+
+    :type data: dict
+    :param data: The data from the course_structure-analytics.json file
+    :type start: str
+    :param start: The key from data to start looking up children
+    :type parent: Union[None, str]
+    :param parent: Parent of start
+    :rtype: List[Dict]
+    :return: Returns the list of constructed data items
+    """
+    out = []
+    record = data.get(start, {})
+    sep = '/' if start.startswith('i4x:') else '@'
+    children = record.get('children', [])
+    item = dict(
+        parent=parent.split(sep)[-1] if parent else None,
+        split_url_name=None,
+    )
+    item['category'] = record.get('category', '')
+    item['url_name'] = start.split(sep)[-1]
+    item['name'] = record.get('metadata', {}).get('display_name', '')
+    item['gformat'] = record.get('metadata', {}).get(
+        'format',
+        data.get(parent, {}).get('metadata', {}).get('format', '')
+    )
+    item['due'] = record.get('metadata', {}).get(
+        'due',
+        data.get(parent, {}).get('metadata', {}).get('due', '')
+    )
+    item['start'] = record.get('metadata', {}).get(
+        'start',
+        data.get(parent, {}).get('metadata', {}).get('start', '')
+    )
+    item['graded'] = bool(
+        record.get('metadata', {}).get(
+            'graded',
+            data.get(parent, {}).get('metadata', {}).get('graded', '')
+        )
+    )
+    item['is_split'] = any([
+        'split_test' in item['category'],
+        'split_test' in data.get(parent, {}).get('category', '')
+    ])
+    if item['is_split']:
+        if 'split_test' in start:
+            item['split_url_name'] = item['url_name']
+        else:
+            item['split_url_name'] = item['parent']
+    item['module_id'] = module_from_block(start)
+    item['data'] = dict(
+        ytid=get_youtube_id(record),
+        weight=record.get('metadata', {}).get('weight'),
+        group_id_to_child=None,
+        user_partition_id=None,
+        itype=get_axis_itype(record),
+        num_items=get_problem_nitems(record),
+        has_solution=get_has_solution(record),
+        has_image=False,
+    )
+    out.append(item)
+    if children:
+        for child in children:
+            out.extend(
+                process_course_structure(
+                    data, child, start,
+                )
+            )
+    return out
+
+
+def make_course_axis(dirname, outname='course_axis.json.gz'):
+    """
+    Given a course's SQL directory, make a course_axis report
+
+    :type dirname: str
+    :param dirname: Name of a course's directory of SQL files
+    :type outname: str
+    :param outname: The filename to give it to the generated report
+    :rtype: None
+    :return: Nothing
+    """
+    # Find the course object (i.e. root object)
+    fname = os.path.join(dirname, 'course_structure-analytics.json')
+    with open(fname) as fh:
+        structure: dict = json.load(fh)
+    root_block = None
+    root_val = None
+    for block, val in structure.items():
+        if val.get('category') == 'course':
+            root_block = block
+            root_val = val
+            break
+    if not root_block:
+        msg = (
+            'The given course structure file {f!r} does not have a root'
+            'course block. Please reach out to edX to have them fix it.'
+        )
+        raise BadSQLFileException(msg.format(f=fname))
+    course_id = course_from_block(root_block)
+    data = process_course_structure(structure, root_block)
+    outname = os.path.join(dirname, 'course_axis.json.gz')
+    with gzip.open(outname, 'wt') as zh:
+        chapter_mid = None
+        for index, record in enumerate(data, 1):
+            if record.get('category') == 'chapter':
+                chapter_mid = record.get('module_id')
+            record['course_id'] = course_id
+            record['chapter_mid'] = chapter_mid
+            record['index'] = index
+            if record['gformat']:
+                if not record.get('due'):
+                    record['due'] = root_val.get('end')
+                if not record.get('start'):
+                    record['start'] = root_val.get('start')
+            zh.write(json.dumps(record) + '\n')
+
+
+def batch_course_axes(
+    dirnames, outname='course_axis.json.gz',
+    verbose=False, logger=None
+):
+    """
+    Call make_course_axis in a ThreadPool
+
+    :type dirnames: Iterable[str]
+    :param dirnames: Iterable of course directories
+    :type outname: str
+    :param outname: The filename to give it to a generated report
+    :type verbose: bool
+    :param verbose: Print a message when a report is being made
+    :type logger: logging.Logger
+    :param logger: A logging.Logger object to print messages with
+    :rtype: None
+    :return: Nothing
+    """
+    if not dirnames:
+        if verbose and logger is not None:
+            msg = 'No directories provided for course axis generation'
+            logger.warn(msg)
+        return
+    with ThreadPool(10) as pool:
+        results = dict()
+        for dirname in dirnames:
+            if verbose and logger is not None:
+                msg = 'Making a course axis report with files in {d}'
+                logger.info(msg.format(d=dirname))
+            async_result = pool.apply_async(
+                    func=make_course_axis, kwds=dict(
                         dirname=dirname, outname=outname,
                     )
             )
