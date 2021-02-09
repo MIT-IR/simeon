@@ -12,10 +12,7 @@ from simeon.download import (
     aws, emails, logs, sqls, utilities as downutils
 )
 from simeon.exceptions import AWSException
-from simeon.report import (
-    batch_user_info_combos, batch_course_axes,
-    make_course_axis, make_user_info_combo
-)
+from simeon.report import make_reports
 from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
 
@@ -136,29 +133,33 @@ def split_sql_files(parsed_args):
             dirnames = set(
                 os.path.dirname(f) for f in to_decrypt if 'ora/' not in f
             )
-            if len(dirnames) >= 10:
-                batch_user_info_combos(
-                    dirnames=dirnames, verbose=parsed_args.verbose,
-                    logger=parsed_args.logger
-                )
-                batch_course_axes(
-                    dirnames=dirnames, verbose=parsed_args.verbose,
-                    logger=parsed_args.logger
-                )
-            else:
-                for folder in dirnames:
-                    msg = 'Making a user info combo report with files in {d}'
-                    parsed_args.logger.info(msg.format(d=folder))
-                    make_user_info_combo(folder)
-                    parsed_args.logger.info(
-                        'Report generated for files in {d}'.format(d=folder)
-                    )
-                    msg = 'Making a course axis report with files in {d}'
-                    parsed_args.logger.info(msg.format(d=folder))
-                    make_course_axis(folder)
-                    parsed_args.logger.info(
-                        'Report generated for files in {d}'.format(d=folder)
-                    )
+            # if len(dirnames) >= 10:
+            #     batch_user_info_combos(
+            #         dirnames=dirnames, verbose=parsed_args.verbose,
+            #         logger=parsed_args.logger
+            #     )
+            #     batch_course_axes(
+            #         dirnames=dirnames, verbose=parsed_args.verbose,
+            #         logger=parsed_args.logger
+            #     )
+            # else:
+            #     for folder in dirnames:
+            #         msg = 'Making a user info combo report with files in {d}'
+            #         parsed_args.logger.info(msg.format(d=folder))
+            #         make_user_info_combo(folder)
+            #         parsed_args.logger.info(
+            #             'Report generated for files in {d}'.format(d=folder)
+            #         )
+            #         msg = 'Making a course axis report with files in {d}'
+            #         parsed_args.logger.info(msg.format(d=folder))
+            #         make_course_axis(folder)
+            #         parsed_args.logger.info(
+            #             'Report generated for files in {d}'.format(d=folder)
+            #         )
+            parsed_args.logger.info('Making reports from course SQL files')
+            for folder in dirnames:
+                make_reports(folder, parsed_args.verbose, parsed_args.logger)
+            parsed_args.logger.info('Course reports generated')
         except Exception as excp:
             # _, _, tb = sys.exc_info()
             # traces = '\n'.join(map(str.strip, traceback.format_tb(tb)))

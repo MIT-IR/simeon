@@ -470,3 +470,75 @@ def batch_course_axes(
             if verbose and logger is not None:
                 msg = 'Report generated for files in {d}'
                 logger.info(msg.format(d=dirname))
+
+
+def make_grades_persistent(
+    dirname,
+    first_outname='grades_persistent.json.gz',
+    second_outname='grades_persistent_subsection.json.gz'
+):
+    """
+    Given a course's SQL directory, make the grades_persistent
+    and grades_persistent_subsection reports.
+
+    :type dirname: str
+    :param dirname: Name of a course's directory of SQL files
+    :type outname: str
+    :param outname: The filename to give it to the generated report
+    :rtype: None
+    :return: Nothing
+    """
+    infiles = dict([
+        (
+            'grades_persistentcoursegrade-analytics.sql',
+            'grades_persistent.json.gz',
+        ),
+        (
+            'grades_persistentsubsectiongrade-analytics.sql',
+            'grades_persistent_subsection.json.gz',
+        )
+    ])
+    for file_ in infiles:
+        outname = os.path.join(dirname, infiles[file_])
+        file_ = os.path.join(dirname, file_)
+        with open(file_) as gh, gzip.open(outname, 'wt') as zh:
+            header = [c.strip() for c in gh.readline().split('\t')]
+            reader = csv.DictReader(
+                gh, delimiter='\t', quotechar='\'',
+                lineterminator='\n', fieldnames=header
+            )
+            for record in reader:
+                for k in record:
+                    if 'course_id' in k:
+                        record[k] = downutils.get_sql_course_id(record[k])
+                    if record[k] == 'NULL':
+                        record[k] = None
+                zh.write(json.dumps(record) + '\n')
+
+
+def make_reports(dirname, verbose=False, logger=None):
+    """
+    Given a SQL directory, make the reports
+    defined in this module.
+
+    :type dirname: str
+    :param dirname: Name of a course's SQL directory
+    :type verbose: bool
+    :param verbose: Print a message when a report is being made
+    :type logger: logging.Logger
+    :param logger: A logging.Logger object to print messages with
+    :rtype: None
+    :return: Nothing
+    """
+    reports = (
+        make_course_axis, make_grades_persistent,
+        make_user_info_combo
+    )
+    for maker in reports:
+        if verbose and logger is not None:
+            msg = 'Calling routine {f} on {d}'
+            logger.info(msg.format(f=maker.__name__, d=dirname))
+        maker(dirname)
+        if verbose and logger is not None:
+            msg = '{f} made a report from files in {d}'
+            logger.info(msg.format(f=maker.__name__, d=dirname))
