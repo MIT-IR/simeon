@@ -29,7 +29,10 @@ setup(
         'google-cloud-storage>=1.35.0',
         'python-dateutil>=2.8.1',
     ],
-    package_data={'simeon.upload': ['schemas/*.json'] },
+    package_data={
+        'simeon.upload': ['schemas/*.json'],
+        'simeon.report': ['queries/*.sql'],
+    },
     test_suite="simeon.tests",
     classifiers=[
         'Development Status :: 4 - Beta',
