@@ -186,12 +186,25 @@ def get_bq_schema(table: str, schema_dir: str=SCHEMA_DIR):
     return out
 
 
-def make_bq_config(
+def make_bq_load_config(
     table: str, append: bool=False,
     create: bool=True, file_format: str='json', delim=','
 ):
     """
-    Make a bigquery.LoadConfig object
+    Make a bigquery.LoadJobConfig object
+
+    :type table: str
+    :param table: Fully qualified table name
+    :type append: bool
+    :param append: Whether to append the loaded to the table
+    :type create: bool
+    :param create: Whether to create the target table if it does not exist
+    :type file_format: str
+    :param file_format: One of sql, json, csv, txt
+    :type delim: str
+    :param delim: The delimiter of the file being loaded
+    :rtype: bigquery.LoadJobConfig
+    :return: Makes a bigquery.LoadJobConfig object
     """
     schema = get_bq_schema(table)
     if 'json' in file_format.lower():
@@ -219,3 +232,22 @@ def make_bq_config(
         create_disposition=create, write_disposition=append,
         field_delimiter=delim, skip_leading_rows=skips,
     )
+
+
+def make_bq_query_config(table: str, append: bool=False):
+    """
+    Make a bigquery.QueryJobConfig object
+
+    :type table: str
+    :param table: Fully qualified table name
+    :type append: bool
+    :param append: Whether to append the loaded to the table
+    """
+    if append:
+        append = bigquery.WriteDisposition.WRITE_APPEND
+    else:
+        append = bigquery.WriteDisposition.WRITE_TRUNCATE
+    config = bigquery.job.QueryJobConfig()
+    config.destination = table
+    config.write_disposition = append
+    return config

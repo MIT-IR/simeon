@@ -110,7 +110,7 @@ class BigqueryClient(bigquery.Client):
             fname = uputils.local_to_gcs_path(fname, file_type, bucket)
         else:
             fname = gzip.open(fname, 'rb')
-        config = uputils.make_bq_config(dest, append, create, format_)
+        config = uputils.make_bq_load_config(dest, append, create, format_)
         return loader(
             fname, dest, job_config=config, job_id_prefix=job_prefix
         )

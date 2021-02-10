@@ -7,6 +7,7 @@ import json
 import os
 import re
 from collections import OrderedDict
+from datetime import datetime
 from functools import reduce
 from multiprocessing.pool import ThreadPool
 
@@ -14,6 +15,7 @@ from simeon.download import utilities as downutils
 from simeon.exceptions import (
     BadSQLFileException, MissingSchemaException
 )
+from simeon.upload import utilities as uputils
 
 
 csv.field_size_limit(13107200)
@@ -68,6 +70,30 @@ SCHEMA_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     'upload', 'schemas'
 )
+QUERY_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    'queries',
+)
+
+
+def wait_for_bq_jobs(job_list):
+    """
+    Given a list of BigQuery load or query jobs,
+    wait for them all to finish.
+
+    :type job_list: Iterable[LoadJob]
+    :param job_list: An Iterable of job objects from the bigquery package
+    :rtype: None
+    :return: Nothing
+    :TODO: Improve this function to behave a little less like a tight loop
+    """
+    done = 0
+    while done < len(job_list):
+        for job in job_list:
+            state = job.done()
+            if not state:
+                job.reload()
+            done += state
 
 
 def check_record_schema(record, schema, coerce=True):
@@ -491,11 +517,11 @@ def make_grades_persistent(
     infiles = dict([
         (
             'grades_persistentcoursegrade-analytics.sql',
-            'grades_persistent.json.gz',
+            first_outname,
         ),
         (
             'grades_persistentsubsectiongrade-analytics.sql',
-            'grades_persistent_subsection.json.gz',
+            second_outname,
         )
     ])
     for file_ in infiles:
@@ -542,3 +568,43 @@ def make_reports(dirname, verbose=False, logger=None):
         if verbose and logger is not None:
             msg = '{f} made a report from files in {d}'
             logger.info(msg.format(f=maker.__name__, d=dirname))
+
+
+def make_video_axis(
+    dirname, client, project, query_dir=QUERY_DIR, wait=False,
+):
+    """
+    Use the given SQL directory name to extract a dataset name
+    and run a query to generate the video_axis table.
+
+    :type dirname: str
+    :param dirname: A course's local SQL directory
+    :type client: bigquery.Client
+    :param client: An authenticated bigquery.Client object
+    :type project: str
+    :param project: GCP project id where the video_axis table is loaded.
+    :type query_dir: str
+    :param query_dir: Directory where query files are saved.
+    :type wait: bool
+    :param wait: Whether to wait for the query job to finish running
+    :rtype: bigquery.QueryJob
+    """
+    table = uputils.local_to_bq_table(
+        fname=os.path.join(dirname, 'video_axis.json.gz'),
+        file_type='sql', project=project
+    )
+    config = uputils.make_bq_query_config(table=table, append=False)
+    with open(os.path.join(query_dir, 'video_axis.sql')) as qf:
+        query = qf.read()
+    _, dataset, _ = table.split('.')
+    job = client.query(
+        query.format(dataset=dataset),
+        job_id='{ds}_videos_axis_{dt}'.format(
+            ds=dataset,
+            dt=datetime.now().strftime('%Y%m%d%H%M%S')
+        ),
+        job_config=config,
+    )
+    if wait:
+        wait_for_bq_jobs([job])
+    return job

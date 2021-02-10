@@ -12,29 +12,11 @@ from simeon.download import (
     aws, emails, logs, sqls, utilities as downutils
 )
 from simeon.exceptions import AWSException
-from simeon.report import make_reports
+from simeon.report import (
+    make_reports, make_video_axis, wait_for_bq_jobs
+)
 from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
-
-
-def wait_for_bq_jobs(job_list):
-    """
-    Given a list of BigQuery data load jobs,
-    wait for them all to finish.
-
-    :type job_list: Iterable[LoadJob]
-    :param job_list: An Iterable of LoadJob objects from the bigquery package
-    :rtype: None
-    :return: Nothing
-    :TODO: Improve this function to behave a little less like a tight loop
-    """
-    done = 0
-    while done < len(job_list):
-        for job in job_list:
-            state = job.done()
-            if not state:
-                job.reload()
-            done += state
 
 
 def list_files(parsed_args):
@@ -129,7 +111,6 @@ def split_sql_files(parsed_args):
             parsed_args.logger.info(
                 msg.format(f=fname, w='Done decrypting the contents in')
             )
-            parsed_args.logger.info('Making user info combo reports')
             dirnames = set(
                 os.path.dirname(f) for f in to_decrypt if 'ora/' not in f
             )
@@ -408,6 +389,57 @@ def push_generated_files(parsed_args):
         push_to_gcs(parsed_args)
 
 
+def make_secondary_tables(parsed_args):
+    """
+    Generate secondary datasets that rely on existing datasets
+    and tables.
+    """
+    if not parsed_args.items:
+        parsed_args.logger.info('No items to process')
+        sys.exit(0)
+    parsed_args.logger.info('Connecting to BigQuery')
+    try:
+        if parsed_args.service_account_file is not None:
+            client = gcp.BigqueryClient.from_service_account_json(
+                parsed_args.service_account_file,
+                project=parsed_args.project
+            )
+        else:
+            client = client = gcp.BigqueryClient(
+                project=parsed_args.project
+            )
+    except Exception as excp:
+        errmsg = 'Failed to connect to BigQuery: {e}'
+        parsed_args.logger.error(errmsg.format(e=excp))
+        sys.exit(1)
+    all_jobs = []
+    dirs = [d for d in parsed_args.items if os.path.isdir(d)]
+    for dirname in dirs:
+        all_jobs.append(make_video_axis(
+            dirname=dirname, client=client, project=parsed_args.project,
+        ))
+    if parsed_args.wait_for_loads:
+        wait_for_bq_jobs(all_jobs)
+    errors = []
+    for job in all_jobs:
+        if job.errors:
+            parsed_args.logger.error(
+                'Error encountered: {e}'.format(e=job.errors)
+            )
+            errors.extend(job.errors)
+    if errors:
+        sys.exit(1)
+    if parsed_args.wait_for_loads:
+        msg = '{c} queries run and destination tables have been refreshed'
+        parsed_args.logger.info(msg.format(c=len(all_jobs)))
+        sys.exit(0)
+    msg = (
+        '{c} BigQuery query jobs started. Please consult your '
+        'BigQuery console for more details about the status of said jobs.'
+    )
+    parsed_args.logger.info(msg.format(c=len(all_jobs)))
+
+
 def main():
     """
     Entry point
@@ -417,6 +449,7 @@ def main():
         'download': download_files,
         'split': split_files,
         'push': push_generated_files,
+        'report': make_secondary_tables,
     }
     parser = ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -735,6 +768,52 @@ def main():
         help=(
             'Wait for asynchronous BigQuery load jobs to finish. '
             'Otherwise, simeon creates load jobs and exits.'
+        ),
+        action='store_true',
+    )
+    reporter = subparsers.add_parser(
+        'report',
+        help='Make course reports using the datasets and tables in BigQuery',
+        description=(
+            'Make course reports using the datasets and tables in BigQuery'
+        ),
+    )
+    reporter.set_defaults(command='report')
+    reporter.add_argument(
+        'items',
+        help='Courses\' SQL directories',
+        nargs='+',
+    )
+    reporter.add_argument(
+        '--project', '-p',
+        help='GCP project associated the tables to query',
+        required=True
+    )
+    reporter.add_argument(
+        '--service-account-file', '-S',
+        help='The service account to carry out the data load',
+        type=cli_utils.optional_file
+    )
+    reporter.add_argument(
+        '--append', '-a',
+        help=(
+            'Whether to append to destination tables if they exist'
+        ),
+        action='store_true',
+    )
+    reporter.add_argument(
+        '--fail-fast', '-F',
+        help=(
+            'Force simeon to quit as soon as an error is encountered'
+            ' with any of the given items.'
+        ),
+        action='store_true',
+    )
+    reporter.add_argument(
+        '--wait-for-loads', '-w',
+        help=(
+            'Wait for asynchronous BigQuery query jobs to finish. '
+            'Otherwise, simeon creates query jobs and exits.'
         ),
         action='store_true',
     )
