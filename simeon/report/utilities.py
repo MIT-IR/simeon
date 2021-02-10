@@ -571,7 +571,8 @@ def make_reports(dirname, verbose=False, logger=None):
 
 
 def make_video_axis(
-    dirname, client, project, query_dir=QUERY_DIR, wait=False,
+    dirname, client, project, append=False,
+    query_dir=QUERY_DIR, wait=False,
 ):
     """
     Use the given SQL directory name to extract a dataset name
@@ -593,7 +594,7 @@ def make_video_axis(
         fname=os.path.join(dirname, 'video_axis.json.gz'),
         file_type='sql', project=project
     )
-    config = uputils.make_bq_query_config(table=table, append=False)
+    config = uputils.make_bq_query_config(table=table, append=append)
     with open(os.path.join(query_dir, 'video_axis.sql')) as qf:
         query = qf.read()
     _, dataset, _ = table.split('.')

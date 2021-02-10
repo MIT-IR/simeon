@@ -416,7 +416,8 @@ def make_secondary_tables(parsed_args):
     dirs = [d for d in parsed_args.items if os.path.isdir(d)]
     for dirname in dirs:
         all_jobs.append(make_video_axis(
-            dirname=dirname, client=client, project=parsed_args.project,
+            dirname=dirname, client=client,
+            project=parsed_args.project, append=parsed_args.append,
         ))
     if parsed_args.wait_for_loads:
         wait_for_bq_jobs(all_jobs)

@@ -249,5 +249,6 @@ def make_bq_query_config(table: str, append: bool=False):
         append = bigquery.WriteDisposition.WRITE_TRUNCATE
     config = bigquery.job.QueryJobConfig()
     config.destination = table
+    config.create_disposition = bigquery.CreateDisposition.CREATE_IF_NEEDED
     config.write_disposition = append
     return config
