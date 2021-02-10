@@ -42,3 +42,9 @@ class BadSQLFileException(Exception):
     Raised when a SQL file is not in its expected format
     """
     pass
+
+
+class MissingFileException(Exception):
+    """
+    Raised when a necessary file is missing
+    """

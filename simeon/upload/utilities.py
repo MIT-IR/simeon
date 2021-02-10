@@ -251,4 +251,5 @@ def make_bq_query_config(table: str, append: bool=False):
     config.destination = table
     config.create_disposition = bigquery.CreateDisposition.CREATE_IF_NEEDED
     config.write_disposition = append
+    config.allow_large_results = True
     return config

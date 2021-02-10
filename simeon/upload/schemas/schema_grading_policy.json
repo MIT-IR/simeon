@@ -1,0 +1,49 @@
+{
+    "grading_policy": [
+        {
+            "field_type": "STRING",
+            "name": "assignment_type",
+            "description": "The type of assignment associated with the grading policy record"
+        },
+        {
+            "field_type": "STRING",
+            "name": "name",
+            "description": "The name of the assignment associated with the grading policy record"
+        },
+        {
+            "field_type": "FLOAT",
+            "name": "fraction_of_overall_grade",
+            "description": "The weight of this assignment in relation to the overall course grade"
+        },
+        {
+            "field_type": "INTEGER",
+            "name": "min_count",
+            "description": "The minimum number of assignments of this type required to generate final grades"
+        },
+        {
+            "field_type": "INTEGER",
+            "name": "drop_count",
+            "description": "How many times assignments of this type can be dropped from the final grade"
+        },
+        {
+            "field_type": "STRING",
+            "name": "short_label",
+            "description": "The short label given to assignments of this type"
+        },
+        {
+            "field_type": "FLOAT",
+            "name": "overall_cutoff_for_a",
+            "description": "The cutoff grade needed to get an A"
+        },
+        {
+            "field_type": "FLOAT",
+            "name": "overall_cutoff_for_b",
+            "description": "The cutoff grade needed to get a B"
+        },
+        {
+            "field_type": "FLOAT",
+            "name": "overall_cutoff_for_c",
+            "description": "The cutoff grade needed to get a C"
+        }
+    ]
+}

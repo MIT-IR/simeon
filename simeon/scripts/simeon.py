@@ -394,7 +394,7 @@ def make_secondary_tables(parsed_args):
     Generate secondary datasets that rely on existing datasets
     and tables.
     """
-    if not parsed_args.items:
+    if not parsed_args.course_ids:
         parsed_args.logger.info('No items to process')
         sys.exit(0)
     parsed_args.logger.info('Connecting to BigQuery')
@@ -413,10 +413,9 @@ def make_secondary_tables(parsed_args):
         parsed_args.logger.error(errmsg.format(e=excp))
         sys.exit(1)
     all_jobs = []
-    dirs = [d for d in parsed_args.items if os.path.isdir(d)]
-    for dirname in dirs:
+    for course_id in parsed_args.course_ids:
         all_jobs.append(make_video_axis(
-            dirname=dirname, client=client,
+            course_id=course_id, client=client,
             project=parsed_args.project, append=parsed_args.append,
         ))
     if parsed_args.wait_for_loads:
@@ -781,8 +780,8 @@ def main():
     )
     reporter.set_defaults(command='report')
     reporter.add_argument(
-        'items',
-        help='Courses\' SQL directories',
+        'course_ids',
+        help='Course IDs whose secondary datasets are generated',
         nargs='+',
     )
     reporter.add_argument(

@@ -3,22 +3,22 @@
         {
             "field_type": "STRING",
             "name": "course_id",
-	    "description": "course ID"
+            "description": "course ID"
         },
         {
             "field_type": "STRING",
             "name": "username",
-	    "description": "username"
+            "description": "username"
         },
         {
             "field_type": "STRING",
             "name": "name",
-	    "description": "Full name"
+            "description": "Full name"
         },
         {
             "field_type": "STRING",
             "name": "role",
-	    "description": "course role, e.g. instructor, staff"
+            "description": "course role, e.g. instructor, staff"
         }
     ]
 }

@@ -6,6 +6,7 @@ import gzip
 import json
 import os
 import re
+import tarfile
 from collections import OrderedDict
 from datetime import datetime
 from functools import reduce
@@ -13,7 +14,8 @@ from multiprocessing.pool import ThreadPool
 
 from simeon.download import utilities as downutils
 from simeon.exceptions import (
-    BadSQLFileException, MissingSchemaException
+    BadSQLFileException, MissingFileException,
+    MissingSchemaException, 
 )
 from simeon.upload import utilities as uputils
 
@@ -542,6 +544,49 @@ def make_grades_persistent(
                 zh.write(json.dumps(record) + '\n')
 
 
+def make_grading_policy(dirname, outname='grading_policy.json.gz'):
+    """
+    Generate a file to be loaded into the grading_policy table
+    of the given SQL directory.
+
+    :type dirname: str
+    :param dirname: Name of a course's directory of SQL files
+    :type outname: str
+    :param outname: The filename to give it to the generated report
+    :rtype: None
+    :return: Nothing
+    """
+    file_ = os.path.join(dirname, 'course-analytics.xml.tar.gz')
+    with open(file_) as tar:
+        policy = next(
+            (m for m in tar.getmembers() if 'grading_policy.json' in m.name),
+            None
+        )
+        if policy is None:
+            raise MissingFileException(
+                'No grading policy found in {f!r}'.format(f=file_)
+            )
+        with tar.extractfile(policy) as jh:
+            grading_policy = json.load(jh)
+        outname = os.path.join(dirname, outname)
+        cols = (
+            'assignment_type', 'name', 'fraction_of_overall_grade',
+            'min_count', 'drop_count', 'short_label',
+            'overall_cutoff_for_a', 'overall_cutoff_for_b',
+            'overall_cutoff_for_c',
+        )
+        with gzip.open(outname, 'wt') as zh:
+            for grader in grading_policy.get('GRADER', []):
+                grader['assignment_type'] = grader.get('type', '')
+                grader['name'] = grader.get('type', '')
+                grader['fraction_of_overall_grade'] = grader.get('weight')
+                for k, v in grading_policy.get('GRADE_CUTOFFS', {}).items():
+                    grader['overall_cutoff_for_{k}'.format(k=k.lower())] = v
+                zh.write(
+                    json.dumps(dict((k, grader.get(k)) for k in cols)) + '\n'
+                )
+
+
 def make_reports(dirname, verbose=False, logger=None):
     """
     Given a SQL directory, make the reports
@@ -558,7 +603,7 @@ def make_reports(dirname, verbose=False, logger=None):
     """
     reports = (
         make_course_axis, make_grades_persistent,
-        make_user_info_combo
+        make_grading_policy, make_user_info_combo,
     )
     for maker in reports:
         if verbose and logger is not None:
@@ -571,15 +616,15 @@ def make_reports(dirname, verbose=False, logger=None):
 
 
 def make_video_axis(
-    dirname, client, project, append=False,
+    course_id, client, project, append=False,
     query_dir=QUERY_DIR, wait=False,
 ):
     """
     Use the given SQL directory name to extract a dataset name
     and run a query to generate the video_axis table.
 
-    :type dirname: str
-    :param dirname: A course's local SQL directory
+    :type course_id: str
+    :param course_id: Course ID whose secondary reports are being generated
     :type client: bigquery.Client
     :param client: An authenticated bigquery.Client object
     :type project: str
@@ -590,18 +635,15 @@ def make_video_axis(
     :param wait: Whether to wait for the query job to finish running
     :rtype: bigquery.QueryJob
     """
-    table = uputils.local_to_bq_table(
-        fname=os.path.join(dirname, 'video_axis.json.gz'),
-        file_type='sql', project=project
-    )
+    dataset = uputils.course_to_bq_dataset(course_id, 'sql', project)
+    table = '{d}.{t}'.format(d=dataset, t='video_axis')
     config = uputils.make_bq_query_config(table=table, append=append)
     with open(os.path.join(query_dir, 'video_axis.sql')) as qf:
         query = qf.read()
-    _, dataset, _ = table.split('.')
     job = client.query(
         query.format(dataset=dataset),
         job_id='{ds}_videos_axis_{dt}'.format(
-            ds=dataset,
+            ds=dataset.replace('.', '_'),
             dt=datetime.now().strftime('%Y%m%d%H%M%S')
         ),
         job_config=config,
