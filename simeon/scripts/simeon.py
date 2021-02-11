@@ -476,12 +476,6 @@ def main():
         type=FileType('w'),
         default=sys.stdout,
     )
-    parser.add_argument(
-        '--tables', '-t',
-        help='table or tables to be processed',
-        nargs=*,
-        type=str,
-    )
     subparsers = parser.add_subparsers(
         description='Choose a subcommand to carry out a task with simeon',
         dest='command'
@@ -808,6 +802,14 @@ def main():
             'Whether to append to destination tables if they exist'
         ),
         action='store_true',
+    )
+    reporter.add_argument(
+        '--tables', '-t',
+        help='table or tables to be processed. Default: %(default)s',
+        nargs='*',
+        default=[
+            'video_axis', 'forum_events',
+        ]
     )
     reporter.add_argument(
         '--fail-fast', '-F',

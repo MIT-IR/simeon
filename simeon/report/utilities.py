@@ -141,6 +141,8 @@ def drop_extra_keys(record, schema):
     :rtype: None
     :return: Modifies the record if needed
     """
+    if not schema:
+        return
     keys = list(record)
     for k in keys:
         if k not in (f.get('name') for f in schema):
@@ -587,6 +589,94 @@ def make_grading_policy(dirname, outname='grading_policy.json.gz'):
                 )
 
 
+def _extract_mongo_values(record, key, subkey):
+    """
+    Given a forum data dictionary with immediate and sub keys,
+    extract the value(s) at subkey and jsonify them, if need be.
+    """
+    target = record.get(key)
+    if not target:
+        return target
+    if isinstance(target, dict):
+        return target.get(subkey)
+    if isinstance(target, list):
+        out = []
+        for subrec in target:
+            if subkey in subrec:
+                out.append(subrec[subkey])
+        return json.dumps(out)
+    return None
+
+
+def make_forum_table(dirname, outname='forum.json.gz'):
+    """
+    Generate a file to load into the forum table
+    using the given SQL directory
+
+    :type dirname: str
+    :param dirname: Name of a course's directory of SQL files
+    :type outname: str
+    :param outname: The filename to give it to the generated report
+    :rtype: None
+    :return: Nothing
+    """
+    outname = os.path.join(dirname, outname)
+    file_ = os.path.join(dirname, 'forum.mongo')
+    cols = {
+        '$oid': (
+            '_id', 'parent_id', 'parent_ids', 'comment_thread_id',
+        ),
+        '$date': (
+            ('endorsement', 'time'), 'updated_at',
+            'created_at', 'last_activity_at'
+        ),
+        None: (
+            '_type', 'abuse_flaggers', 'anonymous', 'anonymous_to_peers',
+            'at_position_list', 'author_id', 'author_username', 'body',
+            'child_count', 'closed', 'comment_count', 'commentable_id',
+            'context', 'course_id', 'depth', 'endorsed',
+            'historical_abuse_flaggers', 'pinned', 'retired_username',
+            'sk', 'thread_type', 'title', 'visible', 'votes'
+        ),
+    }
+    schema_file = os.path.join(
+        SCHEMA_DIR, 'schema_forum.json'
+    )
+    with open(schema_file) as sfh:
+        schema = json.load(sfh).get('forum')
+    with open(file_) as fh, gzip.open(outname, 'wt') as zh:
+        for line in fh:
+            record = json.loads(line)
+            for subkey, keys in cols.items():
+                for col in keys:
+                    if isinstance(col, (tuple, list)):
+                        col, subcol = col[:2]
+                    else:
+                        subcol = None
+                    if subkey is not None:
+                        if subcol:
+                            val = _extract_mongo_values(
+                                (record.get(col, {}) or {}), col, subkey
+                            )
+                            if not isinstance(record.get(col), dict):
+                                record[col] = {}
+                            record[col][subcol] = val
+                        else:
+                            record[col] = _extract_mongo_values(
+                                record, subcol, subkey
+                            )
+                    if record.get(col, '') == 'NULL':
+                        record[col] = None
+                    if isinstance(record.get(col), list):
+                        record[col] = json.dumps(record[col])
+                    if isinstance(record.get(col), dict):
+                        for k in record[col]:
+                            if isinstance(record[col][k], list):
+                                record[col][k] = json.dumps(record[col][k])
+            drop_extra_keys(record, schema)
+            zh.write(json.dumps(record) + '\n')
+
+
 def make_student_module(dirname, outname='studentmodule.json.gz'):
     """
     Generate a file to load into studentmodule
@@ -635,8 +725,8 @@ def make_sql_tables(dirname, verbose=False, logger=None):
     :return: Nothing
     """
     reports = (
-        make_course_axis, make_grades_persistent, make_grading_policy,
-        make_student_module, make_user_info_combo,
+        make_course_axis, make_forum_table, make_grades_persistent,
+        make_grading_policy, make_student_module, make_user_info_combo,
     )
     for maker in reports:
         if verbose and logger is not None:
@@ -648,7 +738,7 @@ def make_sql_tables(dirname, verbose=False, logger=None):
             logger.info(msg.format(f=maker.__name__, d=dirname))
 
 def make_table_from_sql(
-    table, course_id, client, project, 
+    table, course_id, client, project,
     append=False,
     query_dir=QUERY_DIR, wait=False,
 ):
@@ -671,15 +761,14 @@ def make_table_from_sql(
     :rtype: bigquery.QueryJob
     """
     dataset = uputils.course_to_bq_dataset(course_id, 'sql', project)
-    table = '{d}.{t}'.format(d=dataset, t=table)
-    config = uputils.make_bq_query_config(table=table, append=append)
     with open(os.path.join(query_dir, '{t}.sql'.format(t=table))) as qf:
         query = qf.read()
+    table = '{d}.{t}'.format(d=dataset, t=table)
+    config = uputils.make_bq_query_config(table=table, append=append)
     job = client.query(
         query.format(dataset=dataset, course_id=course_id),
-        job_id='{ds}_{t}_{dt}'.format(
-            ds=dataset.replace('.', '_'),
-            t=table,
+        job_id='{t}_{dt}'.format(
+            t=table.replace('.', '_'),
             dt=datetime.now().strftime('%Y%m%d%H%M%S')
         ),
         job_config=config,
