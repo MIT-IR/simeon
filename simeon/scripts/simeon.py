@@ -13,7 +13,7 @@ from simeon.download import (
 )
 from simeon.exceptions import AWSException
 from simeon.report import (
-    make_sql_tables, make_video_axis, wait_for_bq_jobs
+    make_sql_tables, make_table_from_sql, wait_for_bq_jobs
 )
 from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
@@ -414,7 +414,8 @@ def make_secondary_tables(parsed_args):
         sys.exit(1)
     all_jobs = []
     for course_id in parsed_args.course_ids:
-        all_jobs.append(make_video_axis(
+        all_jobs.append(make_table_from_sql(
+            table="video_axis",
             course_id=course_id, client=client,
             project=parsed_args.project, append=parsed_args.append,
         ))
