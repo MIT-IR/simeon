@@ -13,7 +13,7 @@ from simeon.download import (
 )
 from simeon.exceptions import AWSException
 from simeon.report import (
-    make_sql_tables, make_video_axis, wait_for_bq_jobs
+    make_sql_tables, make_table_from_sql, wait_for_bq_jobs
 )
 from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
@@ -414,10 +414,12 @@ def make_secondary_tables(parsed_args):
         sys.exit(1)
     all_jobs = []
     for course_id in parsed_args.course_ids:
-        all_jobs.append(make_video_axis(
-            course_id=course_id, client=client,
-            project=parsed_args.project, append=parsed_args.append,
-        ))
+        for table_name in parsed_args.tables:
+            all_jobs.append(make_table_from_sql(
+                table=table_name,
+                course_id=course_id, client=client,
+                project=parsed_args.project, append=parsed_args.append,
+            ))
     if parsed_args.wait_for_loads:
         wait_for_bq_jobs(all_jobs)
     errors = []
@@ -473,6 +475,12 @@ def main():
         help='Log file to use when simeon prints messages. Default: stdout',
         type=FileType('w'),
         default=sys.stdout,
+    )
+    parser.add_argument(
+        '--tables', '-t',
+        help='table or tables to be processed',
+        nargs=*,
+        type=str,
     )
     subparsers = parser.add_subparsers(
         description='Choose a subcommand to carry out a task with simeon',

@@ -647,15 +647,17 @@ def make_sql_tables(dirname, verbose=False, logger=None):
             msg = '{f} made a report from files in {d}'
             logger.info(msg.format(f=maker.__name__, d=dirname))
 
-
-def make_video_axis(
-    course_id, client, project, append=False,
+def make_table_from_sql(
+    table, course_id, client, project, 
+    append=False,
     query_dir=QUERY_DIR, wait=False,
 ):
     """
     Use the given SQL directory name to extract a dataset name
     and run a query to generate the video_axis table.
 
+    :type table: str
+    :param table: table name
     :type course_id: str
     :param course_id: Course ID whose secondary reports are being generated
     :type client: bigquery.Client
@@ -669,14 +671,15 @@ def make_video_axis(
     :rtype: bigquery.QueryJob
     """
     dataset = uputils.course_to_bq_dataset(course_id, 'sql', project)
-    table = '{d}.{t}'.format(d=dataset, t='video_axis')
+    table = '{d}.{t}'.format(d=dataset, t=table)
     config = uputils.make_bq_query_config(table=table, append=append)
-    with open(os.path.join(query_dir, 'video_axis.sql')) as qf:
+    with open(os.path.join(query_dir, '{t}.sql'.format(t=table))) as qf:
         query = qf.read()
     job = client.query(
-        query.format(dataset=dataset),
-        job_id='{ds}_videos_axis_{dt}'.format(
+        query.format(dataset=dataset, course_id=course_id),
+        job_id='{ds}_{t}_{dt}'.format(
             ds=dataset.replace('.', '_'),
+            t=table,
             dt=datetime.now().strftime('%Y%m%d%H%M%S')
         ),
         job_config=config,
