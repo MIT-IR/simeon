@@ -11,7 +11,7 @@ SELECT
                 then CAST(JSON_EXTRACT_SCALAR(event,'$.speed') as FLOAT64) * CAST(JSON_EXTRACT_SCALAR(event, '$.currentTime') as FLOAT64) 
             else  CAST(JSON_EXTRACT_SCALAR(event, '$.currentTime') as FLOAT64) 
         end) as position,
-FROM `{dataset}.tracklog_*`
+FROM `{log_dataset}.tracklog_*`
 WHERE 
     (event_type = "play_video" or event_type = "pause_video" or event_type = "stop_video") 
     and event is not null

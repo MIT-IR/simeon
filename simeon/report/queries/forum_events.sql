@@ -54,7 +54,7 @@ SELECT
     REGEXP_EXTRACT(event_type, r'/courses/.*/forum/users/([^/]+)') as target_user_id,
     event_struct.query as search_query,   
     event_struct.GET as event_GET,        
-FROM `{dataset}.tracklog_*`
+FROM `{log_dataset}.tracklog_*`
               WHERE  (REGEXP_CONTAINS(event_type ,r'^edx\.forum\..*')
                       or event_type like "%/discussion/forum%"
                       or event_type like "%/discussion/threads%"

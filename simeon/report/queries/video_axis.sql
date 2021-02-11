@@ -10,12 +10,12 @@ FROM (
     SELECT index, category, course_id, name, chapter_mid,
     REGEXP_EXTRACT(REGEXP_REPLACE(module_id, '[.]', '_'), r'(?:.*\/)(.*)') as vid_id,
     REGEXP_EXTRACT(data.ytid, r'\:(.*)') as yt_id,
-    FROM `{dataset}.course_axis`
+    FROM `{latest_dataset}.course_axis`
     WHERE category = "video"
 ) as videos
 LEFT JOIN (
     SELECT name, module_id, index
-    FROM `{dataset}.course_axis`
+    FROM `{latest_dataset}.course_axis`
 ) as chapters
 ON videos.chapter_mid = chapters.module_id
 ORDER BY videos.index asc

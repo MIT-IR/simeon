@@ -13,5 +13,5 @@ SELECT
         when grade is null or grade = "NULL" then false 
         else true 
     end as attempted,
-FROM `{dataset}.studentmodule`
+FROM `{latest_dataset}.studentmodule`
 WHERE module_type = "problem"
