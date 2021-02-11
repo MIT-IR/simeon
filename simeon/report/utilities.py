@@ -557,7 +557,7 @@ def make_grading_policy(dirname, outname='grading_policy.json.gz'):
     :return: Nothing
     """
     file_ = os.path.join(dirname, 'course-analytics.xml.tar.gz')
-    with open(file_) as tar:
+    with tarfile.open(file_) as tar:
         policy = next(
             (m for m in tar.getmembers() if 'grading_policy.json' in m.name),
             None
@@ -587,9 +587,42 @@ def make_grading_policy(dirname, outname='grading_policy.json.gz'):
                 )
 
 
-def make_reports(dirname, verbose=False, logger=None):
+def make_student_module(dirname, outname='studentmodule.json.gz'):
     """
-    Given a SQL directory, make the reports
+    Generate a file to load into studentmodule
+    using the given SQL directory
+
+    :type dirname: str
+    :param dirname: Name of a course's directory of SQL files
+    :type outname: str
+    :param outname: The filename to give it to the generated report
+    :rtype: None
+    :return: Nothing
+    """
+    outname = os.path.join(dirname, outname)
+    file_ = os.path.join(dirname, 'courseware_studentmodule-analytics.sql')
+    with open(file_, encoding='UTF8', errors='ignore') as fh:
+        header = [c.strip() for c in fh.readline().split('\t')]
+        reader = csv.DictReader(
+            (l.replace('\0', '') for l in fh),
+            delimiter='\t', quotechar='\'', lineterminator='\n',
+            fieldnames=header
+        )
+        with gzip.open(outname, 'wt') as zh:
+            for record in reader:
+                for k, v in record.items():
+                    if k == 'course_id':
+                        record[k] = downutils.get_sql_course_id(v or '')
+                    if k == 'module_id':
+                        record[k] = module_from_block(v or '')
+                    if (v or '').lower() == 'null':
+                        record[k] = None
+                zh.write(json.dumps(record) + '\n')
+
+
+def make_sql_tables(dirname, verbose=False, logger=None):
+    """
+    Given a SQL directory, make the SQL tables
     defined in this module.
 
     :type dirname: str
@@ -602,8 +635,8 @@ def make_reports(dirname, verbose=False, logger=None):
     :return: Nothing
     """
     reports = (
-        make_course_axis, make_grades_persistent,
-        make_grading_policy, make_user_info_combo,
+        make_course_axis, make_grades_persistent, make_grading_policy,
+        make_student_module, make_user_info_combo,
     )
     for maker in reports:
         if verbose and logger is not None:

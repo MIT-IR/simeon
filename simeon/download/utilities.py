@@ -223,7 +223,7 @@ def format_sql_filename(fname: str) -> (str, str):
     components = bname.rsplit('-', limit)
     if '.mongo' in bname:
         cid, out = components
-        site, out, ending = out.replace('.mongo', ''), 'mongo.gpg', ''
+        site, out, ending = out.replace('.mongo', ''), 'forum.mongo.gpg', ''
     else:
         cid, out, site, ending = components
     out = '{o}-{e}.gpg'.format(o=out, e=ending) if ending else out

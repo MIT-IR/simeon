@@ -13,7 +13,7 @@ from simeon.download import (
 )
 from simeon.exceptions import AWSException
 from simeon.report import (
-    make_reports, make_video_axis, wait_for_bq_jobs
+    make_sql_tables, make_video_axis, wait_for_bq_jobs
 )
 from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
@@ -139,7 +139,7 @@ def split_sql_files(parsed_args):
             #         )
             parsed_args.logger.info('Making reports from course SQL files')
             for folder in dirnames:
-                make_reports(folder, parsed_args.verbose, parsed_args.logger)
+                make_sql_tables(folder, parsed_args.verbose, parsed_args.logger)
             parsed_args.logger.info('Course reports generated')
         except Exception as excp:
             # _, _, tb = sys.exc_info()

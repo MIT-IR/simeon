@@ -1,0 +1,48 @@
+{
+    "studentmodule": [
+        {
+            "field_type": "INTEGER",
+            "name": "id"
+        },
+        {
+            "field_type": "STRING",
+            "name": "module_type"
+        },
+        {
+            "field_type": "STRING",
+            "name": "module_id"
+        },
+        {
+            "field_type": "INTEGER",
+            "name": "student_id"
+        },
+        {
+            "field_type": "STRING",
+            "name": "state"
+        },
+        {
+            "field_type": "STRING",
+            "name": "grade"
+        },
+        {
+            "field_type": "TIMESTAMP",
+            "name": "created"
+        },
+        {
+            "field_type": "TIMESTAMP",
+            "name": "modified"
+        },
+        {
+            "field_type": "STRING",
+            "name": "max_grade"
+        },
+        {
+            "field_type": "STRING",
+            "name": "done"
+        },
+        {
+            "field_type": "STRING",
+            "name": "course_id"
+        }
+    ]
+}

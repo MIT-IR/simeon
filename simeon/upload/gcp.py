@@ -143,7 +143,9 @@ class GCSClient(storage.Client):
             client=self
         )
         gen_match = None if overwrite else 0
-        dest.upload_from_filename(fname, if_generation_match=gen_match)
+        dest.upload_from_filename(
+            fname, if_generation_match=gen_match, timeout=5 * 60
+        )
 
     def load_dir(
         self, dirname: str, file_type: str, bucket: str, overwrite: bool=True

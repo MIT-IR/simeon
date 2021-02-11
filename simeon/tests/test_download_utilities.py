@@ -333,7 +333,7 @@ class TestDownloadUtilities(unittest.TestCase):
             },
             {
                 'input': 'prod-foo.mongo.gpg',
-                'good-output': 'foo/prod/mongo.json.gpg'
+                'good-output': 'foo/prod/forum.mongo.gpg'
             }
         ]
         self.course_id_records = [
