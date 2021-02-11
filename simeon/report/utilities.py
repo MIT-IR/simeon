@@ -739,6 +739,7 @@ def make_sql_tables(dirname, verbose=False, logger=None):
 
 def make_table_from_sql(
     table, course_id, client, project,
+    ds_type='sql',
     append=False,
     query_dir=QUERY_DIR, wait=False,
 ):
@@ -754,13 +755,15 @@ def make_table_from_sql(
     :param client: An authenticated bigquery.Client object
     :type project: str
     :param project: GCP project id where the video_axis table is loaded.
+    :type ds_type: str
+    :param ds_type: the type of dataset, 'sql' for _latest or 'log'
     :type query_dir: str
     :param query_dir: Directory where query files are saved.
     :type wait: bool
     :param wait: Whether to wait for the query job to finish running
     :rtype: bigquery.QueryJob
     """
-    dataset = uputils.course_to_bq_dataset(course_id, 'sql', project)
+    dataset = uputils.course_to_bq_dataset(course_id, ds_type, project)
     with open(os.path.join(query_dir, '{t}.sql'.format(t=table))) as qf:
         query = qf.read()
     table = '{d}.{t}'.format(d=dataset, t=table)
