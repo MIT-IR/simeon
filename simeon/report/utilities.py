@@ -656,14 +656,14 @@ def make_forum_table(dirname, outname='forum.json.gz'):
                     if subkey is not None:
                         if subcol:
                             val = _extract_mongo_values(
-                                (record.get(col, {}) or {}), col, subkey
+                                (record.get(col, {}) or {}), subcol, subkey
                             )
                             if not isinstance(record.get(col), dict):
                                 record[col] = {}
                             record[col][subcol] = val
                         else:
                             record[col] = _extract_mongo_values(
-                                record, subcol, subkey
+                                record, col, subkey
                             )
                     if record.get(col, '') == 'NULL':
                         record[col] = None
@@ -673,6 +673,7 @@ def make_forum_table(dirname, outname='forum.json.gz'):
                         for k in record[col]:
                             if isinstance(record[col][k], list):
                                 record[col][k] = json.dumps(record[col][k])
+            record['mongoid'] = record['_id']
             drop_extra_keys(record, schema)
             zh.write(json.dumps(record) + '\n')
 
