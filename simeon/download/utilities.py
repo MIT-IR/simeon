@@ -286,7 +286,7 @@ def pluck_match_groups(match, names):
     mdict = match.groupdict()
     if not mdict:
         mdict = dict(enumerate(match.groups(), 1))
-    return '/'.join(mdict.get(n, n) for n in names)
+    return '/'.join(mdict.get(n, n) for n in names if n in mdict)
 
 
 def get_module_id(record: dict, org_keywords=('mit', 'vj')):
@@ -307,7 +307,7 @@ def get_module_id(record: dict, org_keywords=('mit', 'vj')):
         match = MI_PATT1.search(chunk)
         if match:
             return pluck_match_groups(
-                match, ['org', 'course', 'mtype', 'id']
+                match, ['org', 'course', 'semester', 'mtype', 'id']
             )
     conds = [
         all([
@@ -332,7 +332,7 @@ def get_module_id(record: dict, org_keywords=('mit', 'vj')):
                 submatch = MI_PATT2A.search(substr)
                 if submatch:
                     return pluck_match_groups(
-                        match, ['org', 'course', 'problem', 'id']
+                        match, ['org', 'course', 'semester', 'problem', 'id']
                     )
             if isinstance(event, list):
                 match = MI_PATT3A.search(event[0])
@@ -340,13 +340,13 @@ def get_module_id(record: dict, org_keywords=('mit', 'vj')):
                 match = MI_PATT3A.search(event)
             if match:
                 return pluck_match_groups(
-                    match, ['org', 'course', 'mtype', 'id']
+                    match, ['org', 'course', 'semester', 'mtype', 'id']
                 )
     for chunk in (event_type, path):
         match = MI_PATT4.search(chunk)
         if match:
             return pluck_match_groups(
-                match, ['org', 'course', 'mtype', 'id']
+                match, ['org', 'course', 'semester', 'mtype', 'id']
             )
     if not isinstance(event, dict):
         try:
@@ -360,24 +360,24 @@ def get_module_id(record: dict, org_keywords=('mit', 'vj')):
         match = MI_PATT5.search(event_id)
         if match:
             return pluck_match_groups(
-                match, ['org', 'course', 'mtype', 'id']
+                match, ['org', 'course', 'semester', 'mtype', 'id']
             )
         match = MI_PATT6A.search(event_id)
         if match:
             return pluck_match_groups(
-                match, ['org', 'course', 'mtype', 'id']
+                match, ['org', 'course', 'semester', 'mtype', 'id']
             )
         if event_type == 'play_video' and '/' not in event_id:
             match = MI_PATT6.search(page)
             if match:
                 return pluck_match_groups(
-                    match, ['org', 'course', 'video', event_id]
+                    match, ['org', 'course', 'semester', 'video', event_id]
                 )
     elif isinstance(event, str):
         match = MI_PATT5.search(event)
         if match:
             return pluck_match_groups(
-                match, ['org', 'course', 'mtype', 'id']
+                match, ['org', 'course', 'semester', 'mtype', 'id']
             )
     bad_events = ('add_resource', 'delete_resource', 'recommender_upvote')
     if event_type in bad_events:
@@ -430,7 +430,7 @@ def get_module_id(record: dict, org_keywords=('mit', 'vj')):
         (MI_PATT15, (1, 'sequential', 2, '')),
         (MI_PATT9, (1, 'chapter', 2)),
         (MI_PATT16, (1, 'jump_to_id', 2)),
-        (MI_PATT17, ('org', 'course', 'mtype', 'id')),
+        (MI_PATT17, ('org', 'course', 'semester', 'mtype', 'id')),
     )
     for patt, names in patt_names:
         match = patt.search(event_type)
@@ -439,13 +439,13 @@ def get_module_id(record: dict, org_keywords=('mit', 'vj')):
     match = MI_PATT17.search(path)
     if match:
         return pluck_match_groups(
-            match, ['org', 'course', 'mtype', 'id']
+            match, ['org', 'course', 'semester', 'mtype', 'id']
         )
     if isinstance(event, str) and event.startswith('input_'):
         match = MI_PATT3A.search(event)
         if match:
             return pluck_match_groups(
-            match, ['org', 'course', 'mtype', 'id']
+            match, ['org', 'course', 'semester', 'mtype', 'id']
         )
     match = MI_PATT7.search(event_type)
     if match:
@@ -457,11 +457,11 @@ def get_module_id(record: dict, org_keywords=('mit', 'vj')):
         return match.group(1)
     match = MI_PATT7B.search(event_type)
     if match:
-        return pluck_match_groups(match, ['org', 'course', 'mtype', 'id'])
+        return pluck_match_groups(match, ['org', 'course', 'semester', 'mtype', 'id'])
     if isinstance(event, str):
         match = MI_PATT7C.search(event)
         if match:
-            return pluck_match_groups(match, ['org', 'course', 'mtype', 'id'])
+            return pluck_match_groups(match, ['org', 'course', 'semester', 'mtype', 'id'])
     if isinstance(event, dict):
         keys = [
             ('problem_id', MI_PATT7, (1,)),
