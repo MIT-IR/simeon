@@ -7,7 +7,7 @@ import json
 import os
 import re
 import tarfile
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from datetime import datetime
 from functools import reduce
 from multiprocessing.pool import ThreadPool
@@ -711,6 +711,76 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
                 zh.write(json.dumps(record) + '\n')
 
 
+def _default_roles():
+    """
+    Generate a default roles record to give to a defaultdict
+    """
+    return {
+        'course_id': None, 'user_id': None, 'roles_isBetaTester': 0,
+        'roles_isInstructor': 0, 'roles_isStaff': 0,
+        'roles_isCCX': 0, 'roles_isFinance': 0,
+        'roles_isLibrary': 0, 'roles_isSales': 0,
+        'forumRoles_isAdmin': 0, 'forumRoles_isCommunityTA': 0,
+        'forumRoles_isModerator': 0, 'forumRoles_isStudent': 0,
+        'roles': None,
+    }
+
+
+def make_roles_table(dirname, outname='roles.json.gz'):
+    """
+    Generate a file to be loaded into 
+    """
+    files = {
+        'student_courseaccessrole-analytics.sql',
+        'django_comment_client_role_users-analytics.sql',
+    }
+    roles = {
+        'beta_testers': 'roles_isBetaTester',
+        'ccx_coach': 'roles_isCCX',
+        'finance_admin': 'roles_isFinance',
+        'instructor': 'roles_isInstructor',
+        'library_user': 'roles_isLibrary',
+        'sales_admin': 'roles_isSales',
+        'staff': 'roles_isStaff',
+        'Administrator': 'forumRoles_isAdmin',
+        'Community': 'forumRoles_isCommunityTA',
+        'Community TA': 'forumRoles_isCommunityTA',
+        'Moderator': 'forumRoles_isModerator',
+        'Student': 'forumRoles_isStudent',
+    }
+    with gzip.open(os.path.join(dirname, outname), 'wt') as zh:
+        data = defaultdict(_default_roles)
+        for file_ in map(lambda f: os.path.join(dirname, f), files):
+            with open(file_) as fh:
+                line = fh.readline().replace('\tname', '\trole')
+                header = []
+                for c in line.split('\t'):
+                    header.append(c.strip())
+                reader = csv.DictReader(
+                    fh, delimiter='\t', quotechar='\'', lineterminator='\n',
+                    fieldnames=header
+                )
+                for inrow in reader:
+                    outrow = data[inrow.get('user_id')]
+                    outrow['user_id'] = inrow.get('user_id')
+                    outrow['course_id'] = downutils.get_sql_course_id(
+                        inrow.get('course_id', '')
+                    )
+                    col = roles.get(inrow.get('role'))
+                    if col is not None:
+                        outrow[col] = 1
+                    if 'Student' in inrow.get('role', ''):
+                        rval = 'Student'
+                    else:
+                        rval = 'Staff'
+                    outrow['roles'] = rval
+        staff = set(k for k in roles.values() if k.startswith('roles_'))
+        for record in data.values():
+            if any(record.get(k) for k in staff):
+                record['roles'] = 'Staff'
+            zh.write(json.dumps(record) + '\n')
+
+
 def make_sql_tables(dirname, verbose=False, logger=None):
     """
     Given a SQL directory, make the SQL tables
@@ -727,7 +797,8 @@ def make_sql_tables(dirname, verbose=False, logger=None):
     """
     reports = (
         make_course_axis, make_forum_table, make_grades_persistent,
-        make_grading_policy, make_student_module, make_user_info_combo,
+        make_grading_policy, make_roles_table,
+        make_student_module, make_user_info_combo,
     )
     for maker in reports:
         if verbose and logger is not None:
@@ -737,6 +808,7 @@ def make_sql_tables(dirname, verbose=False, logger=None):
         if verbose and logger is not None:
             msg = '{f} made a report from files in {d}'
             logger.info(msg.format(f=maker.__name__, d=dirname))
+
 
 def make_table_from_sql(
     table, course_id, client, project, append=False,

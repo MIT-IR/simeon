@@ -3,12 +3,12 @@
         {
             "field_type": "INTEGER",
             "name": "id",
-	    "description": "user_parition table entry ID"
+            "description": "user_parition table entry ID"
         },
         {
             "field_type": "INTEGER",
             "name": "user_id",
-	    "description": "user_id"
+            "description": "user_id"
         },
         {
             "field_type": "STRING",
@@ -23,7 +23,7 @@
         {
             "field_type": "INTEGER",
             "name": "value",
-	    "description": "partition assignment value (which partition the user is assigned to)"
+            "description": "partition assignment value (which partition the user is assigned to)"
         }
     ]
 }

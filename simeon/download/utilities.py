@@ -183,7 +183,7 @@ def make_file_handle(fname: str, mode: str='w', is_gzip: bool=False):
         return gzip.open(fname, mode)
     return open(fname, mode)
 
-
+@lru_cache(maxsize=None)
 def get_sql_course_id(course_str: str) -> str:
     """
     Given a course ID string from the SQL files,

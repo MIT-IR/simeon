@@ -1,14 +1,14 @@
 {
-    "staff": [
+    "roles": [
         {
             "field_type": "STRING",
             "name": "course_id",
-	    "description": "course ID"
+            "description": "course ID"
         },
         {
-            "field_type": "STRING",
+            "field_type": "INTEGER",
             "name": "user_id",
-	    "description": "user_id"
+            "description": "user_id"
         },
         {
             "field_type": "INTEGER",
