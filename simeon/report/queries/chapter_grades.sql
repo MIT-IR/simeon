@@ -23,8 +23,8 @@ FROM
                     CA.gformat as gformat,
                     CA.chapter_mid as chapter_mid,
                     CA.due as due_date,
-                FROM `{dataset}.problem_grades` PG
-                JOIN `{dataset}.course_axis`  CA
+                FROM `{latest_dataset}.problem_grades` PG
+                JOIN `{latest_dataset}.course_axis`  CA
                     ON CA.module_id = PG.module_id
                 WHERE PG.grade is not null
                 ORDER BY due_date
