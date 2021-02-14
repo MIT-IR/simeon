@@ -15,7 +15,7 @@ from multiprocessing.pool import ThreadPool
 from simeon.download import utilities as downutils
 from simeon.exceptions import (
     BadSQLFileException, MissingFileException,
-    MissingSchemaException, 
+    MissingSchemaException,
 )
 from simeon.upload import utilities as uputils
 
@@ -301,7 +301,6 @@ def get_youtube_id(record):
     Given a course structure record, extract the YouTube ID
     associated with the video element.
     """
-    youtubes = []
     for k, v in record.get('metadata', {}).items():
         if 'youtube_id' in k and v:
             return ':'.join(re.findall(r'\d+', k) + [v])
@@ -678,9 +677,46 @@ def make_forum_table(dirname, outname='forum.json.gz'):
             zh.write(json.dumps(record) + '\n')
 
 
+def make_problem_analysis(state, **extras):
+    """
+    Use the state record from a studentmodule record to make
+    a record to load into the problem_analysis table.
+    The state is assumed to be from record of category "problem".
+
+    :type state: dict
+    :param state: Contents of the state field of studentmodule
+    :type extras: keyword arguments
+    :param extras: Things to be added to the generated record
+    :rtype: dict
+    :return: Return a record to be loaded in problem_analysis
+    """
+    maps = state.get('correct_map', {})
+    answers = state.get('student_answers', {})
+    items = []
+    for k, v in maps.items():
+        items.append(
+            {
+                'answer_id': k,
+                'correctness': v.get('correctness'),
+                'correct_bool' : v.get('correctness','') == 'correct',
+                'npoints': v.get('npoints'),
+                'msg': v.get('msg'),
+                'hint': v.get('hint'),
+                'response': json.dumps(answers.get(k, '')),
+            }
+        )
+    out = {
+        'item': items,
+        'attempts': state.get('attempts', 0),
+        'done': state.get('done'),
+    }
+    out.update(extras)
+    return out
+
+
 def make_student_module(dirname, outname='studentmodule.json.gz'):
     """
-    Generate a file to load into studentmodule
+    Generate files to load into studentmodule and problem_analysis
     using the given SQL directory
 
     :type dirname: str
@@ -691,7 +727,11 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
     :return: Nothing
     """
     outname = os.path.join(dirname, outname)
-    file_ = os.path.join(dirname, 'courseware_studentmodule-analytics.sql')
+    second = os.path.join(dirname, 'problem_analysis.json.gz')
+    file_ = os.path.join(
+        dirname, 'courseware_studentmodule-analytics.sql'
+    )
+    prob_cols = ('correct_map', 'student_answers')
     with open(file_, encoding='UTF8', errors='ignore') as fh:
         header = [c.strip() for c in fh.readline().split('\t')]
         reader = csv.DictReader(
@@ -699,7 +739,7 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
             delimiter='\t', quotechar='\'', lineterminator='\n',
             fieldnames=header
         )
-        with gzip.open(outname, 'wt') as zh:
+        with gzip.open(outname, 'wt') as zh, gzip.open(second, 'wt') as ph:
             for record in reader:
                 for k, v in record.items():
                     if k == 'course_id':
@@ -709,6 +749,24 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
                     if (v or '').lower() == 'null':
                         record[k] = None
                 zh.write(json.dumps(record) + '\n')
+                try:
+                    state = json.loads(
+                        record.get('state', '{}').replace('\\\\', '\\')
+                    )
+                except json.JSONDecodeError:
+                    continue
+                if not all(k in state for k in prob_cols):
+                    continue
+                url_name = record.get('module_id', '').split('/')[-1]
+                panalysis = make_problem_analysis(
+                    state, course_id=record.get('course_id'),
+                    user_id=record.get('student_id'),
+                    problem_url_name=url_name,
+                    grade=record.get('grade', 0),
+                    max_grade=record.get('max_grade', 0),
+                    created=record.get('created')
+                )
+                ph.write(json.dumps(panalysis) + '\n')
 
 
 def _default_roles():
@@ -728,7 +786,7 @@ def _default_roles():
 
 def make_roles_table(dirname, outname='roles.json.gz'):
     """
-    Generate a file to be loaded into 
+    Generate a file to be loaded into the roles table of a dataset
     """
     files = {
         'student_courseaccessrole-analytics.sql',
@@ -815,8 +873,10 @@ def make_table_from_sql(
     query_dir=QUERY_DIR, wait=False,
 ):
     """
-    Use the given SQL directory name to extract a dataset name
-    and run a query to generate the video_axis table.
+    Generate a BigQuery table using the given table name,
+    course ID and a matching SQL query file in the query_dir folder.
+    The query file contains placeholder for course ID, dataset name and
+    other details.
 
     :type table: str
     :param table: table name
