@@ -13,7 +13,7 @@ import simeon.download.utilities as utils
 from simeon.report.utilities import SCHEMA_DIR, drop_extra_keys
 
 
-
+# pylint:disable=unsubscriptable-object
 def process_line(
     line: Union[str, bytes], lcount: int,
     date: Union[None, datetime]=None, is_gzip=True
@@ -68,6 +68,7 @@ def process_line(
     return {'data': record, 'filename': outfile}
 
 
+# pylint:enable=unsubscriptable-object
 def split_tracking_log(
     filename: str, ddir: str, dynamic_date: bool=False,
     courses: List[str]=None,
@@ -84,8 +85,8 @@ def split_tracking_log(
         output file names
     :type courses: Union[List[str], None]
     :param courses: A list of course IDs whose records are exported
-    :rtype: None
-    :return: Writes records to generated file names
+    :rtype: bool
+    :return: True if files have generated. False, otherwise
     """
     schema_file = os.path.join(
         SCHEMA_DIR, 'schema_tracking_log.json'
@@ -117,3 +118,4 @@ def split_tracking_log(
                 fhandle.write(data.encode('utf8', 'ignore') + b'\n')
             else:
                 fhandle.write(data + '\n')
+    return bool(fhandles)

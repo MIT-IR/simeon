@@ -210,7 +210,7 @@ def format_sql_filename(fname: str) -> (str, str):
         return None, None
     file_ = fname.replace('prod-edge', 'edge').replace('ora/', '')
     if fname.endswith('.gpg'):
-        file_, gext = os.path.splitext(file_)
+        file_, _ = os.path.splitext(file_)
     dirname, bname = os.path.split(file_)
     _, ext = os.path.splitext(bname)
     limit = SQL_FILE_EXTS.get(ext)

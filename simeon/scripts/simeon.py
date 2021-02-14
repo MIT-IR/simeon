@@ -61,14 +61,22 @@ def split_log_files(parsed_args):
             msg.format(f=fname, w='Splitting')
         )
         try:
-            logs.split_tracking_log(
+            rc = logs.split_tracking_log(
                 filename=fname, ddir=parsed_args.destination,
                 dynamic_date=parsed_args.dynamic_date,
                 courses=parsed_args.courses,
             )
-            parsed_args.logger.info(
-                msg.format(f=fname, w='Done splitting')
-            )
+            if not rc:
+                errmsg = (
+                    'No files were extracted while splitting the tracking '
+                    'log file {f!r} with the given criteria. Moving on...'
+                )
+                parsed_args.logger.warn(errmsg.format(f=fname))
+                parsed_args.logger.warn(msg.format(
+                    f=fname, w='Done splitting'
+                ))
+                continue
+            parsed_args.logger.info(msg.format(f=fname, w='Done splitting'))
         except Exception as excp:
             # _, _, tb = sys.exc_info()
             # traces = '\n'.join(map(str.strip, traceback.format_tb(tb)))
@@ -94,6 +102,17 @@ def split_sql_files(parsed_args):
                 include_edge=parsed_args.include_edge,
                 courses=parsed_args.courses,
             )
+            if not to_decrypt:
+                errmsg = (
+                    'No files extracted while splitting the '
+                    'contents of {f!r} with the given criteria. '
+                    'Moving on'
+                )
+                parsed_args.logger.warn(errmsg.format(f=fname))
+                parsed_args.logger.warn(msg.format(
+                    f=fname, w='Done splitting'
+                ))
+                continue
             parsed_args.logger.info(
                 msg.format(f=fname, w='Done splitting')
             )
