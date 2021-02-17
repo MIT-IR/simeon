@@ -17,88 +17,15 @@ from dateutil.parser import parse as parse_date
 from simeon.exceptions import DecryptionError
 
 
-CID_PATT1 = re.compile(r'^http[s]*://[^/]+/courses/([^/]+/[^/]+/[^/]+)/', re.I)
-CID_PATT2 = re.compile(r'/courses/([^/]+/[^/]+/[^/]+)/', re.I)
-# The following are patterns from edx2bigquery that try to pluck out
-# the module ID of an event
-MI_PATT1 = re.compile(
-    r'/courses/course-v1:(?P<org>[^+]+)\+(?P<course>[^+]+)\+'
-    r'(?P<semester>[^+]+)/xblock/block-v1:[^+]+\+[^+]+\+[^+]+\+type@'
-    r'(?P<mtype>[^+]+)\+block@(?P<id>[^/]+)/handler'
-)
-MI_PATT2 = re.compile(
-    r'/courses/course-v1:(?P<org>[^+]+)\+(?P<course>[^+]+)\+'
-    r'(?P<semester>[^+]+)/[bc]'
-)
-MI_PATT2A = re.compile(r'input_(?P<id>[^=]+)_[0-9]+_[^=]+=')
-MI_PATT3 = re.compile(
-    r'/courses/(?P<org>[^/]+)/(?P<course>[^/]+)/(?P<semester>[^+]+)'
-    r'/courseware/(?P<chapter>[^/]+)/(?P<sequential>[^/]+)/'
-)
-MI_PATT3A = re.compile(
-    r'input_i4x-(?P<org>[^-]+?)-(?P<course>[^-]+?)-'
-    r'(?P<mtype>[^-]+?)-(?P<id>.+?)_[0-9]+_[^=]+=.*'
-)
-MI_PATT4 = re.compile(
-    r'/courses/course-v1:(?P<org>[^+]+)\+(?P<course>[^+]+)\+'
-    r'(?P<semester>[^+]+)/xblock/block-v1:[^+]+\+[^+]+\+[^+]+\+type@'
-    r'(?P<mtype>[^+]+)\+block@(?P<id>[^/]+)'
-)
-MI_PATT5 = re.compile(
-    r'block-v1:(?P<org>[^+]+)\+(?P<course>[^+]+)\+(?P<semester>[^+]+)\+type@'
-    r'(?P<mtype>[^+]+)\+block@(?P<id>[^/]+)'
-)
-MI_PATT6 = re.compile(
-    r'/courses/course-v1:(?P<org>[^+]+)\+(?P<course>[^+]+)\+'
-    r'(?P<semester>[^+]+)/courseware/(?P<chapter>[^/]+)/(?P<id>[^/]+)/'
-)
-MI_PATT6A = re.compile(
-    r'i4x-(?P<org>[^-]+)-(?P<course>[^+]+)-(?P<mtype>[^-]+)-(?P<id>[^-]+)'
-)
-MI_PATT7 = re.compile(r'i4x://([^/]+/[^/]+/[^/]+/[^/]+)')
-MI_PATT7A = re.compile(r'i4x://([^/]+/[^/]+/[^/]+/[^/]+)/goto_position')
-MI_PATT7B = re.compile(
-    r'i4x://(?P<org>[^/]+)/(?P<course>[^/]+)/'
-    r'(?P<mtype>[^/]+)/(?P<id>[^/]+)/(?P<action>[^/]+)'
-)
-MI_PATT7C = re.compile(
-    r'i4x://(?P<org>[^/]+)/(?P<course>[^/]+)/'
-    r'(?P<mtype>[^/]+)/(?P<id>[^/]+)'
-)
-MI_PATT8 = re.compile(
-    r'/courses/([^/]+/[^/]+)/[^/]+/courseware/[^/]+/([^/]+)/(|[#]*)$'
-)
-MI_PATT9 = re.compile(
-    r'/courses/([^/]+/[^/]+)/[^/]+/courseware/([^/]+)/$'
-)
-MI_PATT10 = re.compile(
-    r'^input_i4x-([^\-]+)-([^\-]+)-problem-([^ =]+)'
-    r'_([0-9]+)_([0-9]+)(|_comment|_dynamath)='
-)
-MI_PATT11 = re.compile(
-    r'^/courses/([^/]+/[^/]+)/([^/]+)/discussion/threads/([^/]+)'
-)
-MI_PATT12 = re.compile(
-    r'^/courses/([^/]+/[^/]+)/([^/]+)/discussion/forum/i4x([^/]+)/threads/([^/]+)'
-)
-MI_PATT13 = re.compile(
-    r'^/courses/([^/]+/[^/]+)/([^/]+)/discussion/i4x([^/]+)/threads/create'
-)
-MI_PATT14 = re.compile(
-    r'^/courses/([^/]+/[^/]+)/([^/]+)/discussion/forum/([^/]+)/threads/([^/]+)'
-)
-MI_PATT15 = re.compile(
-    r'/courses/([^/]+/[^/]+)/[^/]+/courseware/[^/]+/([^/]+)/$'
-)
-MI_PATT16 = re.compile(
-    r'/courses/([^/]+/[^/]+)/[^/]+/jump_to_id/([^/]+)(/|)$'
-)
-MI_PATT17 = re.compile(
-    r'/courses/(?P<org>[^/]+)/(?P<course>[^/]+)/'
-    r'(?P<semester>[^+]+)/xblock/i4x:;_;_[^/]+;_[^/]+;_'
-    r'(?P<mtype>[^;]+);_(?P<id>[^/]+)/handler/.*'
-)
-MI_PATT18 = re.compile(r'i4x-([^\-]+)-([^\-]+)-video-([^ ]+)')
+COURSE_PATHS = [
+    ('page',), ('event_type',), ('context', 'path'), ('name',)
+]
+MODULE_PATHS = [
+    ('context', 'module', 'usage_key'), ('page',),
+    ('context', 'path'), ('event', 'event_type'),
+    ('name',), ('event', 'id'), ('event', 'problem_id'),
+    ('event_type',)
+]
 SQL_FILE_EXTS = {
     '.failed': 3,
     '.gz': 3,
@@ -106,6 +33,24 @@ SQL_FILE_EXTS = {
     '.mongo': 1,
     '.sql': 3,
 }
+
+
+def _extract_values(record, paths):
+    """
+    Given a list of JSON paths (tuples), extract
+    all the values associated with the given paths
+    """
+    values = []
+    for path in paths:
+        subrec = record or {}
+        start = path[:-1]
+        end = path[-1]
+        for k in start:
+            subrec = record.get(k, {}) or {}
+        if not isinstance(subrec, dict):
+            continue
+        values.append(subrec.get(end, ''))
+    return values
 
 
 def decrypt_files(fnames, verbose=True, logger=None, timeout=60):
@@ -162,7 +107,7 @@ def get_file_date(fname):
         return None
 
 
-def make_file_handle(fname: str, mode: str='w', is_gzip: bool=False):
+def make_file_handle(fname: str, mode: str='wt', is_gzip: bool=False):
     """
     Create a file handle pointing the given file name.
     If the directory of the file does not exist, create it.
@@ -182,6 +127,7 @@ def make_file_handle(fname: str, mode: str='w', is_gzip: bool=False):
     if is_gzip:
         return gzip.open(fname, mode)
     return open(fname, mode)
+
 
 @lru_cache(maxsize=None)
 def get_sql_course_id(course_str: str) -> str:
@@ -203,8 +149,6 @@ def format_sql_filename(fname: str) -> (str, str):
     Reformat the given edX SQL encrypted file name into a name indicative
     of where the file should end up after the SQL archive is unpacked.
     site/folder/filename.ext.gext
-
-    :NOTE: Please unit test me!
     """
     if fname.endswith('/'):
         return None, None
@@ -239,239 +183,54 @@ def format_sql_filename(fname: str) -> (str, str):
     )
 
 
-def get_course_id(record: dict, org_keywords=('mit', 'vj')) -> str:
+def get_course_id(record: dict, paths=COURSE_PATHS) -> str:
     """
     Given a JSON record, try getting the course_id out of it.
 
-    :NOTE: Please unit test me!
     :type record: dict
     :param record: A deserialized JSON record
-    :type org_keywords: Iterable[str]
-    :param org_keywords: Iterable of keywords pertaining to your organization
+    :type paths: Iterable[Iterable[str]]
+    :param paths: Paths to follow to find a matching course ID string
     :rtype: str
     :return: A valid edX course ID or an empty string
     """
-    course = record.get(
-        'course_id',
-        record.get('context', {}).get('course_id', '')
-    )
-    if not course:
-        if 'browser' in record.get('event_source', '').lower():
-            course = urlparser.urlparse(record.get('page')).path
-        else:
-            course = urlparser.urlparse(record.get('event_type', '')).path
-    chunks = its.dropwhile(
-        lambda c: not c.strip(),
-        course.replace('courses', '').strip('/').split(':')
-    )
-    course = next(chunks, '')
-    if not any(k in course.lower() for k in org_keywords):
-        course = next(chunks, '')
-    return '/'.join(course.split('+')[:3])
+    course_id = record.get('course_id')
+    if not course_id:
+        course_id = record.get('context', {}).get('course_id') or ''
+    if not course_id:
+        for course_id in _extract_values(record, paths):
+            course_id = urlparser.urlparse(course_id or '').path
+            if course_id:
+                break
+    return '/'.join((course_id or '').split(':', 1)[-1].split('+')[:3])
 
 
-def pluck_match_groups(match, names):
-    """
-    Pluck the strings matching the given names
-    out of the given SRE_Match object.
-    Make a string with the matched strings
-
-    :type match: SRE_Match
-    :param match: A regex match object from re.search or re.match
-    :type names: Union[Tuple, List]
-    :param names: A list of group names to pluck out of the match object
-    :rtype: str
-    :return: A concatenated string from the found matches
-    """
-    mdict = match.groupdict()
-    if not mdict:
-        mdict = dict(enumerate(match.groups(), 1))
-    return '/'.join(mdict.get(n, n) for n in names if n in mdict)
-
-
-def get_module_id(record: dict, org_keywords=('mit', 'vj')):
+def get_module_id(record: dict, paths=MODULE_PATHS):
     """
     Get the module ID of the given record
 
     :type record: dict
     :param record: A deserialized JSON record
-    :type org_keywords: Iterable[str]
-    :param org_keywords: Iterable of keywords pertaining to your organization
+    :type paths: Iterable[Iterable[str]]
+    :param paths: Paths to follow to find a matching course ID string
     :rtype: str
     :return: A valid edX course ID or an empty string
     """
-    event = record['event']
-    event_type = record['event_type']
-    path = record.get('context', {}).get('path', '')
-    for chunk in (event_type, path):
-        match = MI_PATT1.search(chunk)
-        if match:
-            return pluck_match_groups(
-                match, ['org', 'course', 'semester', 'mtype', 'id']
-            )
-    conds = [
-        all([
-            'problem' in event_type,
-            isinstance(event, str) and event.startswith('input_'),
-        ]),
-        all([
-            event_type == 'problem_graded',
-            bool(event),
-            isinstance(event, list) and event[0].startswith('input_')
-        ])
-    ]
-    page = record.get('page', '') or ''
-    for cond in conds:
-        if cond:
-            match = MI_PATT2.search(page)
-            if match:
-                if isinstance(event, list):
-                    substr = event[0]
-                else:
-                    substr = event.split('&', 1)[0]
-                submatch = MI_PATT2A.search(substr)
-                if submatch:
-                    return pluck_match_groups(
-                        match, ['org', 'course', 'semester', 'problem', 'id']
-                    )
-            if isinstance(event, list):
-                match = MI_PATT3A.search(event[0])
-            else:
-                match = MI_PATT3A.search(event)
-            if match:
-                return pluck_match_groups(
-                    match, ['org', 'course', 'semester', 'mtype', 'id']
-                )
-    for chunk in (event_type, path):
-        match = MI_PATT4.search(chunk)
-        if match:
-            return pluck_match_groups(
-                match, ['org', 'course', 'semester', 'mtype', 'id']
-            )
-    if not isinstance(event, dict):
-        try:
-            event_dict = json.loads(event)
-        except:
-            event_dict = None
-        if isinstance(event_dict, dict) and 'id' in event_dict:
-            event = event_dict
-    if isinstance(event, dict) and isinstance(event.get('id'), str):
-        event_id = event['id']
-        match = MI_PATT5.search(event_id)
-        if match:
-            return pluck_match_groups(
-                match, ['org', 'course', 'semester', 'mtype', 'id']
-            )
-        match = MI_PATT6A.search(event_id)
-        if match:
-            return pluck_match_groups(
-                match, ['org', 'course', 'semester', 'mtype', 'id']
-            )
-        if event_type == 'play_video' and '/' not in event_id:
-            match = MI_PATT6.search(page)
-            if match:
-                return pluck_match_groups(
-                    match, ['org', 'course', 'semester', 'video', event_id]
-                )
-    elif isinstance(event, str):
-        match = MI_PATT5.search(event)
-        if match:
-            return pluck_match_groups(
-                match, ['org', 'course', 'semester', 'mtype', 'id']
-            )
-    bad_events = ('add_resource', 'delete_resource', 'recommender_upvote')
-    if event_type in bad_events:
-        return None
-    if isinstance(event, dict):
-        if 'id' in event and not isinstance(event.get('id'), str):
-            return None
-    if record.get('event_source') == 'browser':
-        try:
-            match = MI_PATT7.search(event.get('id', ''))
-            if match:
-                if event_type == 'seq_goto' or event_type == 'seq_next':
-                    return match.group(1) + '/' + event.get('new', '')
-                return match.group(1)
-        except:
-            pass
-        if event_type == 'page_close':
-            match = MI_PATT8.search(page)
-            if match:
-                return match.group(1) + '/sequential/' + match.group(2) + '/'
-            match = MI_PATT9.search(page)
-            if match:
-                return match.group(1) + '/chapter/' + match.group(2) + '/'
-        try:
-            match = MI_PATT7.search(event.get('problem', ''))
-            if match:
-                return match.group(1)
-        except:
-            pass
-        if isinstance(event, str):
-            substr = event
-        elif isinstance(event, (list, tuple)):
-            substr = event[0]
-        else:
-            substr = ''
-        try:
-            match = MI_PATT10.search(substr)
-            if match:
-                return '/'.join((
-                    match.group(1), match.group(2),
-                    'problem', match.group(3)
-                ))
-        except:
-            pass
-    patt_names = (
-        (MI_PATT11, (1, 'forum', 3)),
-        (MI_PATT12, (1, 'forum', 4)),
-        (MI_PATT13, (1, 'forum', 'new')),
-        (MI_PATT14, (1, 'forum', 4)),
-        (MI_PATT15, (1, 'sequential', 2, '')),
-        (MI_PATT9, (1, 'chapter', 2)),
-        (MI_PATT16, (1, 'jump_to_id', 2)),
-        (MI_PATT17, ('org', 'course', 'semester', 'mtype', 'id')),
-    )
-    for patt, names in patt_names:
-        match = patt.search(event_type)
-        if match:
-            return pluck_match_groups(match, names)
-    match = MI_PATT17.search(path)
-    if match:
-        return pluck_match_groups(
-            match, ['org', 'course', 'semester', 'mtype', 'id']
-        )
-    if isinstance(event, str) and event.startswith('input_'):
-        match = MI_PATT3A.search(event)
-        if match:
-            return pluck_match_groups(
-            match, ['org', 'course', 'semester', 'mtype', 'id']
-        )
-    match = MI_PATT7.search(event_type)
-    if match:
-        if MI_PATT7A.search(event_type):
-            try:
-                return match.group(1) + '/' + event['POST']['position'][0]
-            except:
-                pass
-        return match.group(1)
-    match = MI_PATT7B.search(event_type)
-    if match:
-        return pluck_match_groups(match, ['org', 'course', 'semester', 'mtype', 'id'])
-    if isinstance(event, str):
-        match = MI_PATT7C.search(event)
-        if match:
-            return pluck_match_groups(match, ['org', 'course', 'semester', 'mtype', 'id'])
-    if isinstance(event, dict):
-        keys = [
-            ('problem_id', MI_PATT7, (1,)),
-            ('id', MI_PATT18, (1, 2, 'video', 3)),
-        ]
-        for key, patt, names in keys:
-            if event.get(key):
-                match = patt.search(event[key])
-                if match:
-                    return pluck_match_groups(match, names)
+    values = _extract_values(record, paths)
+    for value in values:
+        if not value:
+            continue
+        if not any(k in value for k in '/-+@'):
+            continue
+        if value.startswith('i4x://'):
+            value = value.lstrip('i4x://')
+        if not value:
+            continue
+        block = urlparser.urlparse(value).path
+        block = block.split('course-v1:')[-1]
+        segments = block.split(':', 1)[-1].split('+')
+        segments = '/'.join(map(lambda s: s.split('@')[-1], segments))
+        return '/'.join(segments.split('/', 5)[:-1])
     return None
 
 
@@ -669,7 +428,7 @@ def drop_empties(record, *keys):
             drop_empties(record[key], *keys[1:])
 
 
-def rephrase_record(record: dict, org_keywords=('mit', 'vj')):
+def rephrase_record(record: dict):
     """
     Update the given record in place. The purpose of this function
     is to turn this record into something with the same schema as that of
@@ -680,23 +439,19 @@ def rephrase_record(record: dict, org_keywords=('mit', 'vj')):
     :rtype: None
     :return: Nothing
     """
-    if 'course_id' not in record:
-        record['course_id'] = get_course_id(record, org_keywords)
-    if 'module_id' not in record:
-        record['module_id'] = get_module_id(record, org_keywords)
+    record['course_id'] = get_course_id(record)
+    record['module_id'] = get_module_id(record)
     if 'event' not in record:
-        record['event'] = ''
-    if 'event_js' not in record:
-        event = record.get('event')
-        try:
-            if not isinstance(event, dict):
-                event = json.loads(event)
-            event_js = True
-        except:
-            event_js = False
-        record['event'] = event
-        record['event_js'] = event_js
-    event = None
+        record['event'] = {}
+    event = record.get('event')
+    try:
+        if not isinstance(event, dict):
+            event = json.loads(event)
+        event_js = True
+    except:
+        event_js = False
+    record['event'] = event
+    record['event_js'] = event_js
     event = record.get('event')
     if event is not None:
         record['event'] = json.dumps(event)

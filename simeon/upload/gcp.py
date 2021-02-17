@@ -121,7 +121,7 @@ class GCSClient(storage.Client):
     Make a client to load data files to GCS
     """
     def load_on_file_to_gcs(
-        self, fname: str, file_type: str, bucket: str, overwrite: bool=True
+        self, fname: str, file_type: str, bucket: str
     ):
         """
         Load the given file to GCS
@@ -142,13 +142,10 @@ class GCSClient(storage.Client):
             uputils.local_to_gcs_path(fname, file_type, bucket),
             client=self
         )
-        gen_match = None if overwrite else 0
-        dest.upload_from_filename(
-            fname, if_generation_match=gen_match, timeout=5 * 60
-        )
+        dest.upload_from_filename(fname, timeout=20 * 60)
 
     def load_dir(
-        self, dirname: str, file_type: str, bucket: str, overwrite: bool=True
+        self, dirname: str, file_type: str, bucket: str
     ):
         """
         Load all the files in the given directory or
@@ -160,8 +157,6 @@ class GCSClient(storage.Client):
         :param: file_type: One of sql, email, log, rdx
         :type bucket: str
         :param bucket: GCS bucket name
-        :type overwrite: bool
-        :param overwrite: Overwrite the target blobs if they exist
         :rtype: None
         :return: Nothing
         :raises: Propagates everything from the underlying package
@@ -176,4 +171,4 @@ class GCSClient(storage.Client):
             for format_ in formats:
                 files.extend(glob.glob(patt.format(f=format_)))
         for fname in files:
-            self.load_on_file_to_gcs(fname, file_type, bucket, overwrite)
+            self.load_on_file_to_gcs(fname, file_type, bucket)

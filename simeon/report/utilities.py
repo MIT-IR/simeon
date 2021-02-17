@@ -292,7 +292,7 @@ def module_from_block(block):
     """
     if block.startswith('i4x://'):
         return block.lstrip('i4x://')
-    segments = block.split(':')[-1].split('+')
+    segments = block.split(':', 1)[-1].split('+')
     return '/'.join(map(lambda s: s.split('@')[-1], segments))
 
 

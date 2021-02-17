@@ -77,12 +77,19 @@ def split_log_files(parsed_args):
                 ))
                 continue
             parsed_args.logger.info(msg.format(f=fname, w='Done splitting'))
-        except Exception as excp:
-            # _, _, tb = sys.exc_info()
-            # traces = '\n'.join(map(str.strip, traceback.format_tb(tb)))
-            failed = True
-            msg = 'Failed to split {f}: {e}'.format(f=fname, e=excp)
+        except:
+            _, excp, tb = sys.exc_info()
+            if isinstance(excp, SystemExit):
+                raise excp
+            msg = 'Failed to split {f}: {e}'
+            if parsed_args.debug:
+                traces = ['{e}'.format(e=excp)]
+                traces += map(str.strip, traceback.format_tb(tb))
+                msg = msg.format(f=fname, e='\n'.join(traces))
+            else:
+                msg = msg.format(f=fname, e=excp)
             parsed_args.logger.error(msg)
+            failed = True
     sys.exit(0 if not failed else 1)
 
 
@@ -160,14 +167,19 @@ def split_sql_files(parsed_args):
             for folder in dirnames:
                 make_sql_tables(folder, parsed_args.verbose, parsed_args.logger)
             parsed_args.logger.info('Course reports generated')
-        except Exception as excp:
-            # _, _, tb = sys.exc_info()
-            # traces = '\n'.join(map(str.strip, traceback.format_tb(tb)))
-            failed = True
-            msg = 'Failed to split and decrypt {f}: {e}'.format(
-                f=fname, e=excp
-            )
+        except:
+            _, excp, tb = sys.exc_info()
+            if isinstance(excp, SystemExit):
+                raise excp
+            msg = 'Failed to split and decrypt {f}: {e}'
+            if parsed_args.debug:
+                traces = ['{e}'.format(e=excp)]
+                traces += map(str.strip, traceback.format_tb(tb))
+                msg = msg.format(f=fname, e='\n'.join(traces))
+            else:
+                msg = msg.format(f=fname, e=excp)
             parsed_args.logger.error(msg)
+            failed = True
     sys.exit(0 if not failed else 1)
 
 
@@ -382,7 +394,7 @@ def push_to_gcs(parsed_args):
             )
             loader(
                 item, parsed_args.file_type,
-                parsed_args.bucket, parsed_args.overwrite
+                parsed_args.bucket,
             )
             parsed_args.logger.info(
                 'Done loading {f} to GCS'.format(f=item)
@@ -760,14 +772,6 @@ def main():
         help=(
             'Whether to append to destination tables if they exist'
             ' when pushing data to BigQuery'
-        ),
-        action='store_true',
-    )
-    pusher.add_argument(
-        '--overwrite', '-o',
-        help=(
-            'Overwrite the destination when loading '
-            'items to Google Cloud Storage'
         ),
         action='store_true',
     )

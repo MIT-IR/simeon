@@ -5,6 +5,7 @@ import gzip
 import json
 import os
 from datetime import datetime
+from json.decoder import JSONDecodeError
 from typing import Dict, List, Union
 
 from dateutil.parser import parse as parse_date
@@ -41,13 +42,20 @@ def process_line(
             line = line[26:]
     try:
         record = json.loads(line)
-    except json.decoder.JSONDecodeError:
+    except (JSONDecodeError, TypeError):
         return {'data': line, 'filename': 'dead_letter_queue.json.gz'}
+    if not isinstance(record.get('event'), dict):
+        try:
+            record['event'] = json.loads(record.get('event', '{}'))
+        except (JSONDecodeError, TypeError):
+            record['event'] = {'event': record['event']}
     course_id = utils.get_course_id(record)
     record['course_id'] = course_id
     try:
         utils.rephrase_record(record)
     except KeyError:
+        return {'data': line, 'filename': 'dead_letter_queue.json.gz'}
+    if any(k not in record for k in ('event', 'event_type')):
         return {'data': line, 'filename': 'dead_letter_queue.json.gz'}
     if not date:
         try:
@@ -103,6 +111,10 @@ def split_tracking_log(
         for i, line in enumerate(zfh):
             line_info = process_line(line, i + 1, date=date)
             data = line_info['data']
+            user_id = (data.get('context') or {}).get('user_id')
+            username = data.get('username')
+            if not all([user_id, username]):
+                continue
             if isinstance(data, dict):
                 if courses and data.get('course_id') not in courses:
                     continue

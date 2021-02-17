@@ -55,14 +55,14 @@ class TestDownloadUtilities(unittest.TestCase):
         ]
         self.good_module_id_recs = [
             {
-                'event': '',
+                'event': {},
                 'event_type': (
                     '/courses/course-v1:ORGx+Course1x+4T2099/xblock/block-v1'
                     ':ORGx+Course1x+4T2099+type@foo+block@bar/handler'
                 )
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': '',
                 'context': {
                     'path': (
@@ -72,32 +72,32 @@ class TestDownloadUtilities(unittest.TestCase):
                 }
             },
             {
-                'event': 'input_foo_0_0=',
+                'event': {},
                 'event_type': 'problem',
                 'page': '/courses/course-v1:ORGx+Course1x+4T2099/b'
             },
             {
-                'event': 'input_i4x-ORGx-Course1x-foo-bar_0_a=',
+                'event': {'id': 'input_i4x-ORGx-Course1x-foo-bar_0_a='},
                 'event_type': 'problem'
             },
             {
-                'event': ['input_foo_0_0='],
+                'event': {'ids': ['input_foo_0_0=']},
                 'event_type': 'problem_graded',
                 'page': '/courses/course-v1:ORGx+Course1x+4T2099/b'
             },
             {
-                'event': ['input_i4x-ORGx-Course1x-foo-bar_0_a='],
+                'event': {'id': 'input_i4x-ORGx-Course1x-foo-bar_0_a='},
                 'event_type': 'problem_graded'
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': (
                     '/courses/course-v1:ORGx+Course1x+4T2099/xblock/'
                     'block-v1:a+a+a+type@foo+block@bar'
                 )
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': '',
                 'context': {
                     'path': (
@@ -117,7 +117,10 @@ class TestDownloadUtilities(unittest.TestCase):
                 'event_type': ''
             },
             {
-                'event': {'id': 'foo'},
+                'event': {'id': (
+                    '/courses/course-v1:ORGx+Course1x+4T2099'
+                    '/courseware/chapter0/bar/'
+                )},
                 'event_type': 'play_video',
                 'page': (
                     '/courses/course-v1:ORGx+Course1x+4T2099'
@@ -125,7 +128,9 @@ class TestDownloadUtilities(unittest.TestCase):
                 )
             },
             {
-                'event': 'block-v1:ORGx+Course1x+4T2099+type@foo+block@bar',
+                'event': {
+                    'id': 'block-v1:ORGx+Course1x+4T2099+type@foo+block@bar'
+                },
                 'event_type': ''
             },
             {
@@ -150,36 +155,40 @@ class TestDownloadUtilities(unittest.TestCase):
                 'event_source': 'browser'
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': 'page_close',
                 'event_source': 'browser',
                 'page': '/courses/ORGx/Course1x/4T2099/courseware/foo/bar/'
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': 'page_close',
                 'event_source': 'browser',
                 'page': '/courses/ORGx/Course1x/4T2099/courseware/foo/'
             },
             {
-                'event': 'input_i4x-ORGx-Course1x-problem-foo_0_0=',
+                'event': {
+                    'id': 'input_i4x-ORGx-Course1x-problem-foo_0_0='
+                },
                 'event_type': '',
                 'event_source': 'browser',
             },
             {
-                'event': ['input_i4x-ORGx-Course1x-problem-foo_0_0='],
+                'event': {
+                    'id': 'input_i4x-ORGx-Course1x-problem-foo_0_0='
+                },
                 'event_type': '',
                 'event_source': 'browser',
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': (
                     '/courses/ORGx/Course1x/4T2019/discussion/threads/foo'
                 ),
                 'event_source': ''
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': (
                     '/courses/ORGx/Course1x/4T2019/discussion/'
                     'forum/i4xfoo/threads/bar'
@@ -187,12 +196,15 @@ class TestDownloadUtilities(unittest.TestCase):
                 'event_source': ''
             },
             {
-                'event': '',
-                'event_type': '/courses/ORGx/Course1x/4T2019/discussion/i4xfoo/threads/create',
+                'event': {},
+                'event_type': (
+                    '/courses/ORGx/Course1x/4T2019/'
+                    'discussion/i4xfoo/threads/create'
+                ),
                 'event_source': ''
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': (
                     '/courses/ORGx/Course1x/4T2019/'
                     'discussion/forum/foo/threads/bar'
@@ -200,26 +212,26 @@ class TestDownloadUtilities(unittest.TestCase):
                 'event_source': ''
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': (
                     '/courses/ORGx/Course1x/4T2019/courseware/foo/bar/'
                 ),
                 'event_source': ''
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': (
                     '/courses/ORGx/Course1x/4T2019/courseware/foo/'
                 ),
                 'event_source': ''
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': '/courses/ORGx/Course1x/4T2019/jump_to_id/foo',
                 'event_source': ''
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': (
                     '/courses/ORGx/Course1x/4T2019/xblock/'
                     'i4x:;_;_a;_a;_foo;_bar/handler/'
@@ -227,7 +239,7 @@ class TestDownloadUtilities(unittest.TestCase):
                 'event_source': ''
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': '',
                 'event_source': '',
                 'context': {
@@ -238,12 +250,12 @@ class TestDownloadUtilities(unittest.TestCase):
                 }
             },
             {
-                'event': 'input_i4x-ORGx-Course1x-foo-bar_0_a=',
+                'event': {'id': 'input_i4x-ORGx-Course1x-foo-bar_0_a='},
                 'event_type': '',
                 'event_source': ''
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': 'i4x://ORGx/Course1x/foo/bar',
                 'event_source': ''
             },
@@ -255,12 +267,14 @@ class TestDownloadUtilities(unittest.TestCase):
                 'event_source': ''
             },
             {
-                'event': '',
+                'event': {},
                 'event_type': 'i4x://ORGx/Course1x/foo/bar/baz',
                 'event_source': ''
             },
             {
-                'event': 'i4x://ORGx/Course1x/foo/bar',
+                'event': {
+                    'id': 'i4x://ORGx/Course1x/foo/bar'
+                },
                 'event_type': '',
                 'event_source': ''
             },
@@ -304,9 +318,9 @@ class TestDownloadUtilities(unittest.TestCase):
             },
         ]
         self.good_sql_course_ids = [
-                                    'filename:MITx+CourseX+9T9999',
-                                    'file:more_file:ORGx+Course.1x+1T1000',
-                                    'file+description:MITx+Course3x+3T3333'
+            'filename:MITx+CourseX+9T9999',
+            'file:more_file:ORGx+Course.1x+1T1000',
+            'file+description:MITx+Course3x+3T3333'
         ]
         self.sql_file_name_directory = 'this/is/not/a/filename/'
         self.sql_file_unexpected_ext = 'prod-foo-bar-baz-bif.doc.gpg'
@@ -337,24 +351,24 @@ class TestDownloadUtilities(unittest.TestCase):
             }
         ]
         self.course_id_records = [
-              {
+            {
                 'course_id': 'MITx+CourseX+1T2000'
-              },
-              {
+            },
+            {
                 'context': {
-                            'course_id': 'MITx+CourseX+1T2000'
-                            }
-              },
-              {
+                    'course_id': 'MITx+CourseX+1T2000'
+                }
+            },
+            {
                 'event_source': 'browser',
                 'page': 'https://edx.org/MITx+CourseX+1T2020'
-              },
-              {
-                'event_type': 'https://edx.org/MITx+CourseX+1T2020'
-              },
-              {
-                'event_type': 'https://edx.org/courses:v1:MITx+CourseX+1T2020/'
-              }
+            },
+            {
+            'event_type': 'https://edx.org/MITx+CourseX+1T2020'
+            },
+            {
+            'event_type': 'https://edx.org/courses:v1:MITx+CourseX+1T2020/'
+            }
         ]
 
     def test_good_file_dates(self):
