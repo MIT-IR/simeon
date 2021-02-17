@@ -323,7 +323,7 @@ def get_has_solution(record):
     If it's present and its associated value is not "never", then return True.
     Otherwise, return False.
     """
-    meta = record.get('metadata')
+    meta = record.get('metadata') or dict()
     if 'showanswer' not in meta:
         return False
     return meta['showanswer'] != 'never'
@@ -333,12 +333,35 @@ def get_problem_nitems(record):
     """
     Get a value for data.num_items in course_axis
     """
-    if 'problem' in record.get('category'):
+    if 'problem' in record.get('category', ''):
         return len(record.get('children', [])) + 1
     return None
 
 
-def process_course_structure(data, start, parent=None):
+def _get_axis_path(block, mapping):
+    """
+    Extract the path to the given block from the root
+    of the course structure.
+
+    :type block: str
+    :param block: One of the block IDs or names from the course structure file
+    :type mapping: dict
+    :param mapping: A dict mapping child blocks to their parents
+    :rtype: str
+    :return: A constructed path from root to the given block with hashes
+    """
+    if '/course/' in block:
+        return '/'
+    path = []
+    while block:
+        path.append(module_from_block(block))
+        block = mapping.get(block)
+    return '/{p}'.format(p='/'.join(
+        map(lambda s: s.split('/')[-1], path[-2::-1])
+    ))
+
+
+def process_course_structure(data, start, mapping, parent=None):
     """
     The course structure data dictionary and starting point,
     loop through it and construct course axis data items
@@ -347,6 +370,8 @@ def process_course_structure(data, start, parent=None):
     :param data: The data from the course_structure-analytics.json file
     :type start: str
     :param start: The key from data to start looking up children
+    :type mapping: dict
+    :param mapping: A dict mapping child blocks to their parents
     :type parent: Union[None, str]
     :param parent: Parent of start
     :rtype: List[Dict]
@@ -360,6 +385,7 @@ def process_course_structure(data, start, parent=None):
         parent=parent.split(sep)[-1] if parent else None,
         split_url_name=None,
     )
+    item['path'] = _get_axis_path((start or '/course/'), mapping)
     item['category'] = record.get('category', '')
     item['url_name'] = start.split(sep)[-1]
     item['name'] = record.get('metadata', {}).get('display_name', '')
@@ -406,7 +432,8 @@ def process_course_structure(data, start, parent=None):
         for child in children:
             out.extend(
                 process_course_structure(
-                    data, child, start,
+                    data=data, start=child,
+                    parent=start, mapping=mapping,
                 )
             )
     return out
@@ -423,10 +450,10 @@ def make_course_axis(dirname, outname='course_axis.json.gz'):
     :rtype: None
     :return: Nothing
     """
-    # Find the course object (i.e. root object)
     fname = os.path.join(dirname, 'course_structure-analytics.json')
     with open(fname) as fh:
         structure: dict = json.load(fh)
+    # Find the course object (i.e. root object)
     root_block = None
     root_val = None
     for block, val in structure.items():
@@ -441,7 +468,16 @@ def make_course_axis(dirname, outname='course_axis.json.gz'):
         )
         raise BadSQLFileException(msg.format(f=fname))
     course_id = course_from_block(root_block)
-    data = process_course_structure(structure, root_block)
+    # Map child items to their parents
+    child_to_parent = dict()
+    for k, v in structure.items():
+        children = v.get('children') or []
+        for child in children:
+            child_to_parent[child] = k
+    data = process_course_structure(
+        data=structure, start=root_block,
+        mapping=child_to_parent,
+    )
     outname = os.path.join(dirname, 'course_axis.json.gz')
     with gzip.open(outname, 'wt') as zh:
         chapter_mid = None

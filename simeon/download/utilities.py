@@ -202,7 +202,8 @@ def get_course_id(record: dict, paths=COURSE_PATHS) -> str:
             course_id = urlparser.urlparse(course_id or '').path
             if course_id:
                 break
-    return '/'.join((course_id or '').split(':', 1)[-1].split('+')[:3])
+    course_id = (course_id or '').split('courses/')[-1]
+    return '/'.join(course_id.split(':', 1)[-1].split('+')[:3])
 
 
 def get_module_id(record: dict, paths=MODULE_PATHS):
