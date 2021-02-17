@@ -361,6 +361,24 @@ def _get_axis_path(block, mapping):
     ))
 
 
+def _get_first_axis_meta(block, name, struct, mapping):
+    """
+    Get the first non-null or non-empty value
+    of the given metadata name from the data dictionary
+    starting at the given block.
+    Use the mapping dictionary to find the parents of items
+    to consider
+    """
+    struct = (struct or dict())
+    out = None
+    while block:
+        out = struct.get(block, {}).get('metadata', {}).get(name)
+        if out:
+            break
+        block = mapping.get(block)
+    return out
+
+
 def process_course_structure(data, start, mapping, parent=None):
     """
     The course structure data dictionary and starting point,
@@ -388,25 +406,16 @@ def process_course_structure(data, start, mapping, parent=None):
     item['path'] = _get_axis_path((start or '/course/'), mapping)
     item['category'] = record.get('category', '')
     item['url_name'] = start.split(sep)[-1]
-    item['name'] = record.get('metadata', {}).get('display_name', '')
-    item['gformat'] = record.get('metadata', {}).get(
-        'format',
-        data.get(parent, {}).get('metadata', {}).get('format', '')
+    targets = (
+        ('name', 'display_name'), ('gformat', 'format'),
+        ('due', 'due'), ('start', 'start'), ('graded', 'graded'),
     )
-    item['due'] = record.get('metadata', {}).get(
-        'due',
-        data.get(parent, {}).get('metadata', {}).get('due', '')
-    )
-    item['start'] = record.get('metadata', {}).get(
-        'start',
-        data.get(parent, {}).get('metadata', {}).get('start', '')
-    )
-    item['graded'] = bool(
-        record.get('metadata', {}).get(
-            'graded',
-            data.get(parent, {}).get('metadata', {}).get('graded', '')
+    for (key, target) in targets:
+        item[key] = _get_first_axis_meta(
+            block=start, name=target,
+            struct=data, mapping=mapping
         )
-    )
+    item['graded'] = bool(item.get('graded'))
     item['is_split'] = any([
         'split_test' in item['category'],
         'split_test' in data.get(parent, {}).get('category', '')
