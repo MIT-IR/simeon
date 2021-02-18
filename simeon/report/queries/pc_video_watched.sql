@@ -30,7 +30,7 @@ FROM
         CROSS JOIN 
         (
             SELECT count(*) as n_total_videos
-            FROM `{latest_datasets}.video_axis`
+            FROM `{latest_dataset}.video_axis`
         ) NV
         WHERE ((ROL.roles = 'Student') OR (ROL.roles is NULL))
     )
