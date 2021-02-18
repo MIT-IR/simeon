@@ -831,7 +831,13 @@ def main():
         help='table or tables to be processed. Default: %(default)s',
         nargs='*',
         default=[
-            'video_axis', 'forum_events',
+            'video_axis', 'forum_events', 
+            'problem_grades', 'chapter_grades', 
+            'show_answer', 'video_stats_day',
+            'show_answer_stats_by_user', 'show_answer_stats_by_course',
+            'course_item', 'person_item', 
+            'person_problem', 'course_problem',
+            'person_course_day', 'pc_video_watched'
         ]
     )
     reporter.add_argument(
