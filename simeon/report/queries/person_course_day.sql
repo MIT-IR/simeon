@@ -13,21 +13,21 @@ SELECT
     SUM(bseek_video) AS nseek_video,
     SUM(bpause_video) AS npause_video,
     COUNT(DISTINCT video_id) AS nvideos_viewed, # New Video - Unique videos viewed
-	SUM(case when position is not null then cast(position as float64) else cast(0.0 as float64) end) AS nvideos_watched_sec, # New Video - # sec watched using max video position
-    SUM(case when read is not null then read else 0 end) AS nforum_reads, # New discussion - Forum reads
-    SUM(case when write is not null then write else 0 end) AS nforum_posts, # New discussion - Forum posts
+	SUM(cast(position as float64)) end) AS nvideos_watched_sec, # New Video - # sec watched using max video position
+    SUM(read) AS nforum_reads, # New discussion - Forum reads
+    SUM(write) AS nforum_posts, # New discussion - Forum posts
     COUNT(DISTINCT thread_id ) AS nforum_threads, # New discussion - Unique forum threads interacted with
     COUNT(DISTINCT case when problem_nid != 0 then problem_nid else null end) AS nproblems_answered, # New Problem - Unique problems attempted
-    SUM(case when n_attempts is not null then n_attempts else 0 end) AS nproblems_attempted, # New Problem - Total attempts
-    SUM(case when ncount_problem_multiplechoice is not null then ncount_problem_multiplechoice else 0 end) as nproblems_multiplechoice,
-    SUM(case when ncount_problem_choice is not null then ncount_problem_choice else 0 end) as nproblems_choice,
-    SUM(case when ncount_problem_numerical is not null then ncount_problem_numerical else 0 end) as nproblems_numerical,
-    SUM(case when ncount_problem_option is not null then ncount_problem_option else 0 end) as nproblems_option,
-    SUM(case when ncount_problem_custom is not null then ncount_problem_custom else 0 end) as nproblems_custom,
-    SUM(case when ncount_problem_string is not null then ncount_problem_string else 0 end) as nproblems_string,
-    SUM(case when ncount_problem_mixed is not null then ncount_problem_mixed else 0 end) as nproblems_mixed,
-    SUM(case when ncount_problem_formula is not null then ncount_problem_formula else 0 end) as nproblems_forumula,
-    SUM(case when ncount_problem_other is not null then ncount_problem_other else 0 end) as nproblems_other,
+    SUM(n_attempts) AS nproblems_attempted, # New Problem - Total attempts
+    SUM(ncount_problem_multiplechoice) as nproblems_multiplechoice,
+    SUM(ncount_problem_choice) as nproblems_choice,
+    SUM(ncount_problem_numerical) as nproblems_numerical,
+    SUM(ncount_problem_option) as nproblems_option,
+    SUM(ncount_problem_custom) as nproblems_custom,
+    SUM(ncount_problem_string) as nproblems_string,
+    SUM(ncount_problem_mixed) as nproblems_mixed,
+    SUM(ncount_problem_formula) as nproblems_forumula,
+    SUM(ncount_problem_other) as nproblems_other,
     MIN(time) AS first_event,
     MAX(time) AS last_event,
     AVG( CASE WHEN (UNIX_MICROS(time) - unix_micros(last_time))/1.0E6 > 5*60 THEN NULL ELSE (UNIX_MICROS(time) - unix_micros(last_time))/1.0E6 END ) AS avg_dt,
@@ -44,16 +44,16 @@ FROM (
                     time,
                     '{course_id}' as course_id,
                     username,
-                    CASE WHEN event_type = "play_video" THEN 1 ELSE 0 END AS bvideo,
-                    CASE WHEN event_type = "problem_check" THEN 1 ELSE 0 END AS bproblem_check,
-                    CASE WHEN username != "" THEN 1 ELSE 0 END AS bevent,
-                    CASE WHEN REGEXP_CONTAINS(event_type, "^/courses/{course_id}/discussion/.*") then 1 else 0 end as bforum,
-                    CASE WHEN REGEXP_CONTAINS(event_type, "^/courses/{course_id}/progress") then 1 else 0 end as bprogress,
-                    CASE WHEN event_type IN ("show_answer", "showanswer") THEN 1 ELSE 0 END AS bshow_answer,
-                    CASE WHEN event_type = 'show_transcript' THEN 1 ELSE 0 END AS bshow_transcript,
-                    CASE WHEN event_type = 'seq_goto' THEN 1 ELSE 0 END AS bseq_goto,
-                    CASE WHEN event_type = 'seek_video' THEN 1 ELSE 0 END AS bseek_video,
-                    CASE WHEN event_type = 'pause_video' THEN 1 ELSE 0 END AS bpause_video,
+                    IF(event_type = "play_video", 1, 0) AS bvideo,
+                    IF(event_type = "problem_check", 1, 0) AS bproblem_check,
+                    IF(username != "", 1, 0) AS bevent,
+                    IF(REGEXP_CONTAINS(event_type, "^/courses/{course_id}/discussion/.*"), 1, 0) as bforum,
+                    IF(REGEXP_CONTAINS(event_type, "^/courses/{course_id}/progress"), 1, 0) as bprogress,
+                    IF(event_type IN ("show_answer", "showanswer"), 1, 0) AS bshow_answer,
+                    IF(event_type = 'show_transcript', 1, 0) AS bshow_transcript,
+                    IF(event_type = 'seq_goto', 1, 0) AS bseq_goto,
+                    IF(event_type = 'seek_video', 1, 0) AS bseek_video,
+                    IF(event_type = 'pause_video', 1, 0) AS bpause_video,
                     LAG(time, 1) OVER (PARTITION BY username ORDER BY time) last_time,
                     "" as video_id,
                     0 as position,
@@ -189,28 +189,29 @@ FROM (
 				   FROM (
 					   (
 					      SELECT PP.user_id as user_id,
-						     PP.problem_nid AS problem_nid,
-						     PP.n_attempts as n_attempts,
-						     PP.date as time,
-						     (Case when CP_CA.data_itype = "multiplechoiceresponse" then 1 else 0 end) as ncount_problem_multiplechoice, # Choice
-					             (Case when CP_CA.data_itype = "choiceresponse" then 1 else 0 end) as ncount_problem_choice,       # Choice
-						     (Case when CP_CA.data_itype = "numericalresponse" then 1 else 0 end) as ncount_problem_numerical, #input
-						     (Case when CP_CA.data_itype = "optionresponse" then 1 else 0 end) as ncount_problem_option,       # Choice
-					             (Case when CP_CA.data_itype = "customresponse" then 1 else 0 end) as ncount_problem_custom,       # Custom
-					             (Case when CP_CA.data_itype = "stringresponse" then 1 else 0 end) as ncount_problem_string,       # Input
-					             (Case when CP_CA.data_itype = "mixed" then 1 else 0 end) as ncount_problem_mixed,                 # Mixed
-					             (Case when CP_CA.data_itype = "forumula" then 1 else 0 end) as ncount_problem_formula,            # Input
-					             (Case when CP_CA.data_itype != "multiplechoiceresponse" and
-							        CP_CA.data_itype != "choiceresponse" and
-							        CP_CA.data_itype != "numericalresponse" and
-							        CP_CA.data_itype != "optionresponse" and
-							        CP_CA.data_itype != "customresponse" and
-							        CP_CA.data_itype != "stringresponse" and
-							        CP_CA.data_itype != "mixed" and
-							        CP_CA.data_itype != "forumula"
-							   then 1 else 0 end) as ncount_problem_other, # Input
-						     #MAX(n_attempts) AS n_attempts,
-						     #MAX(date) AS time,
+                            PP.problem_nid AS problem_nid,
+                            PP.n_attempts as n_attempts,
+                            PP.date as time,
+                            IF(CP_CA.data_itype = "multiplechoiceresponse", 1, 0) as ncount_problem_multiplechoice, # Choice
+                            IF(CP_CA.data_itype = "choiceresponse", 1, 0) as ncount_problem_choice,       # Choice
+                            IF(CP_CA.data_itype = "numericalresponse", 1, 0) as ncount_problem_numerical, #input
+                            IF(CP_CA.data_itype = "optionresponse", 1, 0) as ncount_problem_option,       # Choice
+                            IF(CP_CA.data_itype = "customresponse", 1, 0) as ncount_problem_custom,       # Custom
+                            IF(CP_CA.data_itype = "stringresponse", 1, 0) as ncount_problem_string,       # Input
+                            IF(CP_CA.data_itype = "mixed", 1, 0) as ncount_problem_mixed,                 # Mixed
+                            IF(CP_CA.data_itype = "forumula", 1, 0) as ncount_problem_formula,            # Input
+                            Case 
+                                when CP_CA.data_itype != "multiplechoiceresponse" and
+                                    CP_CA.data_itype != "choiceresponse" and
+                                    CP_CA.data_itype != "numericalresponse" and
+                                    CP_CA.data_itype != "optionresponse" and
+                                    CP_CA.data_itype != "customresponse" and
+                                    CP_CA.data_itype != "stringresponse" and
+                                    CP_CA.data_itype != "mixed" and
+                                    CP_CA.data_itype != "forumula"
+                                then 1 
+                                else 0 
+                            end as ncount_problem_other, # Input
 					      FROM `{latest_dataset}.person_problem` PP
 					      LEFT JOIN
 					      (

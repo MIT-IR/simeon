@@ -11,7 +11,7 @@ FROM
             item_id, 
             problem_id,
             max(if(item_number=1, x_item_nid, null)) over (partition by problem_id) as problem_nid,
-            CONCAT((case when GP.short_label is null then "" else GP.short_label end),
+            CONCAT((IFNULL(GP.short_label, ""),
             "_", cast(assignment_seq_num as string)) as assignment_short_id,
             (problem_weight * (case when GP.fraction_of_overall_grade is null then 1.0 else GP.fraction_of_overall_grade end)
                 / n_items / sum_problem_weight_in_assignment / n_assignments_of_type) as item_weight,
@@ -23,10 +23,7 @@ FROM
             CI.assignment_id as assignment_id,
             n_problems_in_assignment,
             CI.assignment_type as assignment_type,
-            case 
-                when GP.fraction_of_overall_grade is null then 1.0 
-                else GP.fraction_of_overall_grade 
-            end as assignment_type_weight,
+            IFNULL(GP.fraction_of_overall_grade, 1.0) as assignment_type_weight,
             n_assignments_of_type,
             assignment_seq_num,
             chapter_number,
@@ -104,7 +101,7 @@ FROM
                             CA.due as due_date,
                             CA.is_split as is_split,
                             CA.split_name as split_name,
-                            if(CA.weight is null, 1.0, CA.weight) as problem_weight,
+                            IFNULL(CA.weight, 1.0) as problem_weight,
                             item_points_possible,
                             problem_points_possible,
                             emperical_item_points_possible,
@@ -234,11 +231,8 @@ FROM
                                                                     module_id,
                                                                     url_name,
                                                                     index,
-                                                                    If(data.weight is null, 1.0, data.weight) as weight,
-                                                                    case 
-                                                                        when gformat is null then "" 
-                                                                        else gformat 
-                                                                    end as assignment_type,
+                                                                    IFNULL(data.weight, 1.0) as weight,
+                                                                    ifnull(gformat, "") as assignment_type,
                                                                     chapter_mid as chapter_mid,
                                                                     REGEXP_EXTRACT(path, '^/[^/]+/([^/]+)') as section_mid,
                                                                     name,
