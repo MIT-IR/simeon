@@ -1,163 +1,163 @@
 {
     "forum": [
         {
-            "field_type": "INTEGER", 
+            "field_type": "INTEGER",
             "name": "author_id"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "author_username"
-        }, 
+        },
         {
-            "field_type": "TIMESTAMP", 
+            "field_type": "TIMESTAMP",
             "name": "created_at"
-        }, 
+        },
         {
-            "field_type": "BOOLEAN", 
+            "field_type": "BOOLEAN",
             "name": "anonymous_to_peers"
-        }, 
+        },
         {
             "fields": [
                 {
-                    "field_type": "INTEGER", 
+                    "field_type": "INTEGER",
                     "name": "count"
-                }, 
+                },
                 {
-                    "field_type": "INTEGER", 
+                    "field_type": "INTEGER",
                     "name": "point"
-                }, 
+                },
                 {
-                    "field_type": "INTEGER", 
+                    "field_type": "INTEGER",
                     "name": "down_count"
-                }, 
+                },
                 {
-                    "field_type": "STRING", 
+                    "field_type": "STRING",
                     "name": "up"
-                }, 
+                },
                 {
-                    "field_type": "STRING", 
+                    "field_type": "STRING",
                     "name": "down"
-                }, 
+                },
                 {
-                    "field_type": "INTEGER", 
+                    "field_type": "INTEGER",
                     "name": "up_count"
                 }
-            ], 
-            "field_type": "RECORD", 
+            ],
+            "field_type": "RECORD",
             "name": "votes"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "parent_ids"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "historical_abuse_flaggers"
-        }, 
+        },
         {
-	    "field_type": "STRING", 
+	    "field_type": "STRING",
             "name": "comment_thread_id"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "_type"
-        }, 
+        },
         {
-            "field_type": "TIMESTAMP", 
+            "field_type": "TIMESTAMP",
             "name": "updated_at"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "abuse_flaggers"
-        }, 
+        },
         {
-            "field_type": "INTEGER", 
+            "field_type": "INTEGER",
             "name": "child_count"
-        }, 
+        },
         {
-            "field_type": "BOOLEAN", 
+            "field_type": "BOOLEAN",
             "name": "visible"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "sk"
-        }, 
+        },
         {
-            "field_type": "BOOLEAN", 
+            "field_type": "BOOLEAN",
             "name": "anonymous"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "course_id"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "at_position_list"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "mongoid"
-        }, 
+        },
         {
-            "field_type": "BOOLEAN", 
+            "field_type": "BOOLEAN",
             "name": "endorsed"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "parent_id"
-        }, 
+        },
         {
-            "field_type": "TIMESTAMP", 
+            "field_type": "TIMESTAMP",
             "name": "last_activity_at"
-        }, 
+        },
         {
-            "field_type": "BOOLEAN", 
+            "field_type": "BOOLEAN",
             "name": "closed"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "title"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "thread_type"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "commentable_id"
-        }, 
+        },
         {
-            "field_type": "INTEGER", 
+            "field_type": "INTEGER",
             "name": "group_id"
-        }, 
+        },
         {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "tags_array"
-        }, 
+        },
         {
             "fields": [
                 {
-                    "field_type": "INTEGER", 
+                    "field_type": "INTEGER",
                     "name": "user_id"
-                }, 
+                },
                 {
-                    "field_type": "TIMESTAMP", 
+                    "field_type": "TIMESTAMP",
                     "name": "time"
                 }
-            ], 	
-            "field_type": "RECORD", 
+            ],
+            "field_type": "RECORD",
             "name": "endorsement"
-        }, 
+        },
         {
-            "field_type": "INTEGER", 
+            "field_type": "INTEGER",
             "name": "comment_count"
-        }, 
+        },
         {
-            "field_type": "BOOLEAN", 
+            "field_type": "BOOLEAN",
             "name": "pinned"
         },
          {
-            "field_type": "STRING", 
+            "field_type": "STRING",
             "name": "body"
         }
    ]

@@ -56,46 +56,46 @@
 	    "description": "additional data associated with this element of the course, e.g. you-tube ID for videos",
                     "fields": [
                         {
-                            "field_type": "STRING", 
+                            "field_type": "STRING",
                             "name": "ytid",
 			                "description": "youtube ID of video element, or of youtube video within an iframe in an HTML element"
                         },
                         {
-                            "field_type": "FLOAT", 
+                            "field_type": "FLOAT",
                             "name": "weight",
 			                "description": "grading weight (for problems)"
                         },
                         {
-                            "field_type": "STRING", 
+                            "field_type": "STRING",
                             "name": "group_id_to_child",
 			                "description": "children in A/B test partition (for split_test)"
                         },
                         {
-                            "field_type": "STRING", 
+                            "field_type": "STRING",
                             "name": "user_partition_id",
 			                "description": "A/B user partition ID (for split_test)"
                         },
                         {
-                            "field_type": "STRING", 
+                            "field_type": "STRING",
                             "name": "itype",
                             "description": "Problem type for problems found in course.xml - only searches within a list of known problem types"
                         },
                         {
-                            "field_type": "INTEGER", 
+                            "field_type": "INTEGER",
                             "name": "num_items",
                             "description": "Number of problem sub-parts, or the number of ptypes found in a single problem"
                         },
                         {
-                            "field_type": "BOOLEAN", 
+                            "field_type": "BOOLEAN",
                             "name": "has_solution",
                             "description": "Boolean as to whether a solution exists in the problem."
                         },
                         {
-                            "field_type": "BOOLEAN", 
+                            "field_type": "BOOLEAN",
                             "name": "has_image",
                             "description": "Boolean as to whether the problem contains an image."
                         }
-                    ] 
+                    ]
         },
         {
             "field_type": "STRING",
