@@ -13,7 +13,7 @@ SELECT
     SUM(bseek_video) AS nseek_video,
     SUM(bpause_video) AS npause_video,
     COUNT(DISTINCT video_id) AS nvideos_viewed, # New Video - Unique videos viewed
-	SUM(cast(position as float64)) end) AS nvideos_watched_sec, # New Video - # sec watched using max video position
+	SUM(cast(position as float64)) AS nvideos_watched_sec, # New Video - # sec watched using max video position
     SUM(read) AS nforum_reads, # New discussion - Forum reads
     SUM(write) AS nforum_posts, # New discussion - Forum posts
     COUNT(DISTINCT thread_id ) AS nforum_threads, # New discussion - Unique forum threads interacted with
