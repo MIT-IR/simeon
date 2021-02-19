@@ -25,6 +25,7 @@ WITH FORUM_TEMP AS (
     FROM `{latest_dataset}.forum`
 )
     SELECT
+        ADDED_TITLE.username as username,
         ADDED_TITLE.course_id as course_id,
         ADDED_TITLE.slug_id as slug_id,
         ADDED_TITLE.slug_type as slug_type,
@@ -37,6 +38,7 @@ WITH FORUM_TEMP AS (
         ADDED_TITLE.body_preview as body_preview
     FROM (
         SELECT
+            IP.username as username,
             FA.course_id as course_id,
             FA.slug_id as slug_id,
             FA.slug_type as slug_type,
@@ -64,6 +66,7 @@ WITH FORUM_TEMP AS (
     ON ADDED_TITLE.parent_id = ADD_RESPOND_TO.slug_id
     UNION ALL
     SELECT
+        ADDED_TITLE.username as username,
         ADDED_TITLE.course_id as course_id,
         ADDED_TITLE.slug_id as slug_id,
         ADDED_TITLE.slug_type as slug_type,
@@ -76,6 +79,7 @@ WITH FORUM_TEMP AS (
         ADDED_TITLE.body_preview as body_preview
     FROM (
         SELECT
+            IP.username as username,
             FA.course_id as course_id,
             FA.slug_id as slug_id,
             FA.slug_type as slug_type,
@@ -106,6 +110,7 @@ WITH FORUM_TEMP AS (
     ON ADDED_TITLE.parent_id = ADD_RESPOND_TO.slug_id
     UNION ALL
     SELECT
+        IP.username as username,
         FA.course_id as course_id,
         FA.slug_id as slug_id,
         FA.slug_type as slug_type,
@@ -133,6 +138,7 @@ WITH FORUM_TEMP AS (
     ON FA.thread_id = IP.slug_id
     UNION ALL
     SELECT
+        username,
         course_id,
         slug_id,
         slug_type,
