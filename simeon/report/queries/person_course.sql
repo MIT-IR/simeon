@@ -3,7 +3,7 @@ select
     uic.username,
     '{course_id}' as course_id,
     True as registered,
-    IFNULL(pc_nchapters.nchapters, False, True) as viewed,
+    IF(pc_nchapters.nchapters is null, False, True) as viewed,
     IF(safe_divide(pc_nchapters.nchapters, 
         (SELECT COUNT(*) FROM `{latest_dataset}.course_axis` where category = "chapter")) >= 0.5, True, False) as explored,
     if(uic.certificate_status = "downloadable", true, false) as certified,
