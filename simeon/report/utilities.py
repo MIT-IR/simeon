@@ -191,7 +191,7 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
             continue
         with open(os.path.join(dirname, fname)) as rfh:
             header = []
-            for col in rfh.readline().split('\t'):
+            for col in map(str.strip, rfh.readline().split('\t')):
                 if prefix:
                     uid_col = '{p}_user_id'.format(p=prefix)
                     header.append('{p}_{c}'.format(p=prefix, c=col))
@@ -215,22 +215,22 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
         for record in users.values():
             outrow = dict()
             for k in outcols:
-                val = record.get(k) or ''
+                val = record.get(k)
                 if 'course_id' in k:
-                    val = downutils.get_sql_course_id(val) if val else ''
+                    val = downutils.get_sql_course_id(val or '') if val else ''
                 if 'certificate_grade' in k:
                     try:
                         val = str(float(val))
                     except (TypeError, ValueError):
-                        val = ''
+                        val = None
                 if val == 'NULL' or val == 'null':
-                    outrow[k] = ''
+                    outrow[k] = None
                 else:
                     outrow[k] = val
             id_cols = ('user_id', 'certificate_user_id')
             if all(not outrow.get(k) for k in id_cols):
                 continue
-            check_record_schema(outrow, schema, True)
+            # check_record_schema(outrow, schema, True)
             drop_extra_keys(outcols, schema)
             zh.write(json.dumps(outrow) + '\n')
 
