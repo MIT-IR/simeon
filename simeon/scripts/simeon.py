@@ -837,7 +837,11 @@ def main():
             'show_answer_stats_by_user', 'show_answer_stats_by_course',
             'course_item', 'person_item', 
             'person_problem', 'course_problem',
-            'person_course_day', 'pc_video_watched'
+            'person_course_day', 'pc_video_watched',
+            'pc_day_totals', 'pc_day_trlang',
+            'pc_day_ip_counts', 'language_multi_transcripts',
+            'course_modal_language', 'course_modal_ip',
+            'forum_posts'
         ]
     )
     reporter.add_argument(
