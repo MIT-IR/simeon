@@ -15,8 +15,9 @@ FROM
                         IFNULL(GP.short_label, ""),
                         "_", cast(assignment_seq_num as string)
                     ) as assignment_short_id,
-            (problem_weight * (IFNULL(GP.fraction_of_overall_grade, 1.0)
-                / n_items / sum_problem_weight_in_assignment / n_assignments_of_type) as item_weight,
+            problem_weight * 
+            (IFNULL(GP.fraction_of_overall_grade, 1.0)
+            / n_items / sum_problem_weight_in_assignment / n_assignments_of_type) as item_weight,
             n_user_responses,
             chapter_name,
             section_name,
