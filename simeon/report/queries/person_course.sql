@@ -2,11 +2,12 @@ select
     uic.user_id,
     uic.username,
     '{course_id}' as course_id,
-    NULL as registered,
-    NULL as viewed,
-    NULL as explored,
+    True as registered,
+    IFNULL(pc_nchapters.nchapters, False, True) as viewed,
+    IF(safe_divide(pc_nchapters.nchapters, 
+        (SELECT COUNT(*) FROM `{latest_dataset}.course_axis` where category = "chapter")) >= 0.5, True, False) as explored,
     if(uic.certificate_status = "downloadable", true, false) as certified,
-    if(uic.certificate_status in ("downloadable", "audit passing"), true, false) as completed,
+    if(grades.percent_grade >= (SELECT MAX(overall_cutoff_for_c) from `{latest_dataset}.grading_policy`), True, False) as completed,
     if(uic.enrollment_mode = "verified", true, false) as verified,
     modal_ip.modal_ip as ip,
     NULL as cc_by_ip,
@@ -79,12 +80,12 @@ select
     roles.forumRoles_isModerator,
     roles.forumRoles_isStudent
 from `{latest_dataset}.user_info_combo` uic
-join `{latest_dataset}.course_modal_ip` modal_ip using(username)
-join `{latest_dataset}.grades_persistent` grades using(user_id)
-join `{latest_dataset}.pc_day_totals` pc_day using(username)
-join `{latest_dataset}.pc_forum` pc_forum using(user_id)
-join `{latest_dataset}.pc_nchapters` pc_nchapters using(user_id)
-join `{latest_dataset}.roles` roles using(user_id)
-join `{latest_dataset}.course_modal_language` lang using(username)
-join `{latest_dataset}.pc_video_watched` video using(user_id)
-join `{latest_dataset}.person_enrollment_verified` enroll_verified using(user_id)
+left join `{latest_dataset}.course_modal_ip` modal_ip using(username)
+left join `{latest_dataset}.grades_persistent` grades using(user_id)
+left join `{latest_dataset}.pc_day_totals` pc_day using(username)
+left join `{latest_dataset}.pc_forum` pc_forum using(user_id)
+left join `{latest_dataset}.pc_nchapters` pc_nchapters using(user_id)
+left join `{latest_dataset}.roles` roles using(user_id)
+left join `{latest_dataset}.course_modal_language` lang using(username)
+left join `{latest_dataset}.pc_video_watched` video using(user_id)
+left join `{latest_dataset}.person_enrollment_verified` enroll_verified using(user_id)
