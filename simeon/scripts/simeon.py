@@ -811,7 +811,7 @@ def main():
     )
     reporter.add_argument(
         '--project', '-p',
-        help='GCP project associated the tables to query',
+        help='GCP project associated with the tables to query',
         required=True
     )
     reporter.add_argument(
@@ -858,7 +858,11 @@ def main():
     )
     args = parser.parse_args()
     args.verbose = not args.quiet
-    args.logger = cli_utils.make_logger(args.verbose, args.log_file)
+    args.logger = cli_utils.make_logger(
+        verbose=args.verbose,
+        stream=args.log_file,
+        user='SIMEON:{cmd}'.format(cmd=args.command.upper()),
+    )
     try:
         COMMANDS.get(args.command)(args)
     except:

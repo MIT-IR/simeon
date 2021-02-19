@@ -61,7 +61,7 @@ def optional_file(fname: str) -> str:
     return os.path.realpath(fname)
 
 
-def make_logger(verbose=True, stream=None):
+def make_logger(user='SIMEON', verbose=True, stream=None):
     """
     Create a Logger object pointing to the given stream
 
@@ -80,9 +80,9 @@ def make_logger(verbose=True, stream=None):
     )
     handler = logging.StreamHandler(stream=stream)
     handler.setLevel(level)
-    handler.set_name('SIMEON')
+    handler.set_name(user)
     handler.setFormatter(formatter)
-    logger = logging.Logger('SIMEON', level)
+    logger = logging.Logger(user, level)
     logger.addHandler(handler)
     return logger
 
