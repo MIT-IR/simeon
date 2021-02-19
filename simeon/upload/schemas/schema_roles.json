@@ -26,25 +26,25 @@
             "description":  "1 if user is course staff; null means user does not have course role assigned"
         },
         {
-            "field_type": "INTEGER", 
+            "field_type": "INTEGER",
             "name": "roles_isCCX",
             "description":  "1 if user is ccx coach; null means user does not have course role assigned"
-        }, 
+        },
         {
-            "field_type": "INTEGER", 
+            "field_type": "INTEGER",
             "name": "roles_isFinance",
             "description":  "1 if user is finance admin; null means user does not have course role assigned"
-        }, 
+        },
         {
-            "field_type": "INTEGER", 
+            "field_type": "INTEGER",
             "name": "roles_isLibrary",
             "description":  "1 if user is library user; null means user does not have course role assigned"
-        }, 
+        },
         {
-            "field_type": "INTEGER", 
+            "field_type": "INTEGER",
             "name": "roles_isSales",
             "description":  "1 if user is sales; null means user does not have course role assigned"
-        }, 
+        },
         {
             "field_type": "INTEGER",
             "name": "forumRoles_isAdmin",
