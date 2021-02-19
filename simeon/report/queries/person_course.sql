@@ -45,8 +45,8 @@ select
     uic.certificate_created_date as cert_created_date,
     uic.certificate_modified_date as certificate_modified_date,
     uic.certificate_status as cert_status,
-    NULL as verified_enroll_time,
-    NULL as verified_unenroll_time,
+    enroll_verified.verified_enroll_time,
+    enroll_verified.verified_unenroll_time,
     uic.profile_country,
     uic.y1_anomalous,
     array_reverse(split(uic.email, "@"))[ORDINAL(1)] as email_domain,
@@ -87,3 +87,4 @@ join `{latest_dataset}.pc_nchapters` pc_nchapters using(user_id)
 join `{latest_dataset}.roles` roles using(user_id)
 join `{latest_dataset}.course_modal_language` lang using(username)
 join `{latest_dataset}.pc_video_watched` video using(user_id)
+join `{latest_dataset}.person_enrollment_verified` enroll_verified using(user_id)
