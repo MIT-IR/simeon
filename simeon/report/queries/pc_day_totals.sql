@@ -20,6 +20,6 @@ select
     sum(n_dt) as n_dt,
     sum(sum_dt) as sum_dt
 from
-    `{latest_datasets}.person_course_day`
+    `{latest_dataset}.person_course_day`
 group by username
 order by sum_dt desc
