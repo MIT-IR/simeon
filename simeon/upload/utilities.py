@@ -18,6 +18,7 @@ SEGMENTS = {
     'email': 'EMAIL',
     'sql': 'SQL',
     'rdx': 'RDX',
+    'cold': 'COLD',
 }
 SCHEMA_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), 'schemas'
@@ -54,7 +55,7 @@ def local_to_gcs_path(fname: str, file_type: str, bucket: str) -> str:
     :type fname: str
     :param fname: A local file name
     :type file_type: str
-    :param file_type: One of sql, log, email, rdx
+    :param file_type: One of sql, log, email, rdx, cold
     :type bucket: str
     :param bucket: A GCS bucket name
     :rtype: str
@@ -62,16 +63,18 @@ def local_to_gcs_path(fname: str, file_type: str, bucket: str) -> str:
     """
     segment = SEGMENTS.get(file_type)
     if not segment:
-        raise ValueError(
-            'file_type is not one of these: {s}'.format(s=', '.join(SEGMENTS))
-        )
+        msg = 'file_type is not one of these: {s}'
+        raise ValueError(msg.format(s=', '.join(SEGMENTS)))
     if not bucket.startswith('gs://'):
         bucket = 'gs://{b}'.format(b=bucket)
     dname, bname = os.path.split(os.path.abspath(os.path.expanduser(fname)))
-    gcs_file = '{d}/{f}'.format(
-        d=os.path.basename(dname).replace('.', '_'),
-        f=bname
-    )
+    if segment == 'COLD':
+        gcs_file = bname
+    else:
+        gcs_file = '{d}/{f}'.format(
+            d=os.path.basename(dname).replace('.', '_'),
+            f=bname
+        )
     return '{b}/{s}/{f}'.format(b=bucket, s=segment, f=gcs_file)
 
 
@@ -89,11 +92,8 @@ def course_to_bq_dataset(course_id: str, file_type: str, project: str) -> str:
     :return: BigQuery dataset name with components separated by dots
     """
     if file_type not in SEGMENTS:
-        raise ValueError(
-            'file_type is not one of these: {s}'.format(
-                s=', '.join(s=SEGMENTS)
-            )
-        )
+        msg = 'file_type is not one of these: {s}'
+        raise ValueError(msg.format(s=', '.join(SEGMENTS)))
     suffix = 'logs'
     if file_type in ('sql', 'email'):
         suffix = 'latest'
@@ -234,22 +234,26 @@ def make_bq_load_config(
     )
 
 
-def make_bq_query_config(table: str, append: bool=False):
+def make_bq_query_config(append: bool=False, plain=True):
     """
     Make a bigquery.QueryJobConfig object
 
-    :type table: str
-    :param table: Fully qualified table name
     :type append: bool
     :param append: Whether to append the loaded to the table
+    :type plain: bool
+    :param plain: Make an empty QueryJobConfig object
+    :rtype bigquery.QueryJobConfig
+    :return: Make a bigquery.QueryJobConfig object
     """
+    if plain:
+        return bigquery.job.QueryJobConfig()
     if append:
         append = bigquery.WriteDisposition.WRITE_APPEND
     else:
         append = bigquery.WriteDisposition.WRITE_TRUNCATE
     config = bigquery.job.QueryJobConfig()
-    config.destination = table
-    config.create_disposition = bigquery.CreateDisposition.CREATE_IF_NEEDED
+    # config.create_disposition = bigquery.CreateDisposition.CREATE_IF_NEEDED
     config.write_disposition = append
     config.allow_large_results = True
+    config.use_legacy_sql = False
     return config

@@ -142,6 +142,8 @@ class GCSClient(storage.Client):
             uputils.local_to_gcs_path(fname, file_type, bucket),
             client=self
         )
+        if 'cold' in file_type.lower():
+            dest.storage_class = storage.constants.COLDLINE_STORAGE_CLASS
         dest.upload_from_filename(fname, timeout=20 * 60)
 
     def load_dir(
