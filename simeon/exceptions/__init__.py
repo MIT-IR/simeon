@@ -48,3 +48,12 @@ class MissingFileException(Exception):
     """
     Raised when a necessary file is missing
     """
+
+
+class MissingQueryFileException(Exception):
+    """
+    Raised when a report table does not have a query file
+    in the given query directory.
+    """
+    pass
+

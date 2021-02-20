@@ -10,17 +10,22 @@ import tarfile
 from collections import OrderedDict, defaultdict
 from datetime import datetime
 from functools import reduce
-from multiprocessing.pool import ThreadPool
 
 from simeon.download import utilities as downutils
 from simeon.exceptions import (
     BadSQLFileException, MissingFileException,
-    MissingSchemaException,
+    MissingQueryFileException, MissingSchemaException,
 )
 from simeon.upload import utilities as uputils
 
 
 csv.field_size_limit(13107200)
+BQ_DDL = """#standardSQL
+CREATE OR REPLACE TABLE {table}
+OPTIONS (
+    description = "{description}"
+) AS
+{query}"""
 USER_INFO_COLS = OrderedDict([
     (
         ('auth_user-analytics.sql', None),
@@ -157,6 +162,35 @@ def drop_extra_keys(record, schema):
             drop_extra_keys(subrecord, subfields)
 
 
+def _extract_table_query(table, query_dir):
+    """
+    Given a table name and a query directory,
+    extract both the query string and the table description.
+    The latter is assumed to be any line in the query file
+    that starts with # or --
+
+    :type table: str
+    :param table: BigQuery table name whose query info is extracted
+    :type query_dir: str
+    :param query_dir: The directory where the query file is expected to be
+    :rtype: Tuple[str, str]
+    :return: A tuple of strings (query string, table description)
+    """
+    table = table.split('.')[-1]
+    qfile = os.path.join(query_dir, '{t}.sql'.format(t=table))
+    if not os.path.exists(qfile):
+        msg = 'Table {t} does not have a query file in {d}'
+        raise MissingQueryFileException(msg.format(t=table, d=query_dir))
+    with open(qfile) as qf:
+        description = []
+        query = []
+        for line in qf:
+            if line.startswith('--') or line.startswith('#'):
+                description.append(line.lstrip('-# '))
+            query.append(line)
+    return (''.join(query), ''.join(description))
+
+
 def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
     """
     Given a course's SQL directory, make a user_info_combo report
@@ -233,48 +267,6 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
             # check_record_schema(outrow, schema, True)
             drop_extra_keys(outcols, schema)
             zh.write(json.dumps(outrow) + '\n')
-
-
-def batch_user_info_combos(
-    dirnames, outname='user_info_combo.json.gz',
-    verbose=False, logger=None
-):
-    """
-    Call make_user_info_combo in a ThreadPool
-
-    :type dirnames: Iterable[str]
-    :param dirnames: Iterable of course directories
-    :type outname: str
-    :param outname: The filename to give it to a generated report
-    :type verbose: bool
-    :param verbose: Print a message when a report is being made
-    :type logger: logging.Logger
-    :param logger: A logging.Logger object to print messages with
-    :rtype: None
-    :return: Nothing
-    """
-    if not dirnames:
-        if verbose and logger is not None:
-            msg = 'No directories provided for course axis generation'
-            logger.warn(msg)
-        return
-    with ThreadPool(10) as pool:
-        results = dict()
-        for dirname in dirnames:
-            if verbose and logger is not None:
-                msg = 'Making a user info combo report with files in {d}'
-                logger.info(msg.format(d=dirname))
-            async_result = pool.apply_async(
-                    func=make_user_info_combo, kwds=dict(
-                        dirname=dirname, outname=outname,
-                    )
-            )
-            results[async_result] = dirname
-        for result in results:
-            result.get()
-            if verbose and logger is not None:
-                msg = 'Report generated for files in {d}'
-                logger.info(msg.format(d=dirname))
 
 
 def course_from_block(block):
@@ -502,48 +494,6 @@ def make_course_axis(dirname, outname='course_axis.json.gz'):
                 if not record.get('start'):
                     record['start'] = root_val.get('start')
             zh.write(json.dumps(record) + '\n')
-
-
-def batch_course_axes(
-    dirnames, outname='course_axis.json.gz',
-    verbose=False, logger=None
-):
-    """
-    Call make_course_axis in a ThreadPool
-
-    :type dirnames: Iterable[str]
-    :param dirnames: Iterable of course directories
-    :type outname: str
-    :param outname: The filename to give it to a generated report
-    :type verbose: bool
-    :param verbose: Print a message when a report is being made
-    :type logger: logging.Logger
-    :param logger: A logging.Logger object to print messages with
-    :rtype: None
-    :return: Nothing
-    """
-    if not dirnames:
-        if verbose and logger is not None:
-            msg = 'No directories provided for course axis generation'
-            logger.warn(msg)
-        return
-    with ThreadPool(10) as pool:
-        results = dict()
-        for dirname in dirnames:
-            if verbose and logger is not None:
-                msg = 'Making a course axis report with files in {d}'
-                logger.info(msg.format(d=dirname))
-            async_result = pool.apply_async(
-                    func=make_course_axis, kwds=dict(
-                        dirname=dirname, outname=outname,
-                    )
-            )
-            results[async_result] = dirname
-        for result in results:
-            result.get()
-            if verbose and logger is not None:
-                msg = 'Report generated for files in {d}'
-                logger.info(msg.format(d=dirname))
 
 
 def make_grades_persistent(
@@ -943,10 +893,17 @@ def make_table_from_sql(
     log_dataset = uputils.course_to_bq_dataset(
         course_id, 'log', project
     )
-    with open(os.path.join(query_dir, '{t}.sql'.format(t=table))) as qf:
-        query = qf.read()
+    query, description = _extract_table_query(table, query_dir)
     table = '{d}.{t}'.format(d=latest_dataset, t=table)
-    config = uputils.make_bq_query_config(table=table, append=append)
+    if append:
+        config = uputils.make_bq_query_config(append=append)
+    else:
+        config = uputils.make_bq_query_config(plain=True)
+        query = BQ_DDL.format(
+            table=table,
+            description=description.strip(),
+            query=query,
+        )
     job = client.query(
         query.format(
             latest_dataset=latest_dataset,
