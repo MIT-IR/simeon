@@ -10,6 +10,7 @@ import tarfile
 from collections import OrderedDict, defaultdict
 from datetime import datetime
 from functools import reduce
+from xml.etree import ElementTree
 
 from simeon.download import utilities as downutils
 from simeon.exceptions import (
@@ -81,6 +82,12 @@ QUERY_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     'queries',
 )
+
+PROBLEM_TYPES = {
+    'multiplechoiceresponse', 'numericalresponse',
+    'choiceresponse', 'optionresponse', 'stringresponse',
+    'formularesponse', 'customresponse','fieldset',
+}
 
 
 def wait_for_bq_jobs(job_list):
@@ -298,15 +305,25 @@ def get_youtube_id(record):
             return ':'.join(re.findall(r'\d+', k) + [v])
 
 
-def get_axis_itype(record):
+def _get_itypes(fname, problem_types=PROBLEM_TYPES):
     """
-    Extract stuff from course structure records
-    to make data.itype
+    Extract values for the course_axis.data.itype field
+    from the given tar file.
     """
-    if 'problem' not in record.get('category', ''):
-        return None
-    meta = record.get('metadata', {})
-    return meta.get('display_name', '').lower().replace(' ', '')
+    out = dict()
+    with tarfile.open(fname) as tf:
+        problems = [m for m in tf.getmembers() if '/problem/' in m.name]
+        for problem in problems:
+            if problem.isdir():
+                continue
+            block = os.path.splitext(problem.name)[0].split('/')[-1]
+            pf = tf.extractfile(problem)
+            root = ElementTree.fromstring(pf.read())
+            for elm in root:
+                if elm.tag in problem_types:
+                    out[block] = elm.tag
+                    break
+    return out
 
 
 def get_has_solution(record):
@@ -423,7 +440,7 @@ def process_course_structure(data, start, mapping, parent=None):
         weight=record.get('metadata', {}).get('weight'),
         group_id_to_child=None,
         user_partition_id=None,
-        itype=get_axis_itype(record),
+        itype=None,
         num_items=get_problem_nitems(record),
         has_solution=get_has_solution(record),
         has_image=False,
@@ -452,6 +469,8 @@ def make_course_axis(dirname, outname='course_axis.json.gz'):
     :return: Nothing
     """
     fname = os.path.join(dirname, 'course_structure-analytics.json')
+    bundle = os.path.join(dirname, 'course-analytics.xml.tar.gz')
+    itypes = _get_itypes(bundle)
     with open(fname) as fh:
         structure: dict = json.load(fh)
     # Find the course object (i.e. root object)
@@ -488,6 +507,9 @@ def make_course_axis(dirname, outname='course_axis.json.gz'):
             record['course_id'] = course_id
             record['chapter_mid'] = chapter_mid
             record['index'] = index
+            record['data']['itype'] = itypes.get(
+                record.get('module_id', '').split('/')[-1]
+            )
             if record['gformat']:
                 if not record.get('due'):
                     record['due'] = root_val.get('end')
