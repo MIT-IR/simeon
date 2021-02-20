@@ -4,8 +4,13 @@ Module to process tracking log files from edX
 import gzip
 import json
 import os
+import sys
+import traceback
 from datetime import datetime
 from json.decoder import JSONDecodeError
+from multiprocessing.pool import (
+    Pool, TimeoutError
+)
 from typing import Dict, List, Union
 
 from dateutil.parser import parse as parse_date
@@ -131,3 +136,64 @@ def split_tracking_log(
             else:
                 fhandle.write(data + '\n')
     return bool(fhandles)
+
+
+def batch_split_tracking_logs(
+    filenames, ddir, dynamic_date=False,
+    courses=None, verbose=True, logger=None,
+):
+    """
+    Call split_tracking_log on each file inside a process or thread pool
+    """
+    size = 5 if len(filenames) >= 10 else 2
+    splits = 0
+    processed = 0
+    with Pool(size) as pool:
+        results = dict()
+        for fname in filenames:
+            if verbose and logger:
+                logger.info('Splitting {f}'.format(f=fname))
+            result = pool.apply_async(
+                func=split_tracking_log,
+                kwds=dict(
+                    filename=fname, ddir=ddir,
+                    dynamic_date=dynamic_date, courses=courses,
+                )
+            )
+            results[fname] = (result, False)
+        while processed < len(filenames):
+            for fname in results:
+                result, done = results[fname]
+                if done:
+                    continue
+                try:
+                    rc = result.get(timeout=1)
+                    splits += rc
+                    results[fname] = (result, True)
+                    processed += 1
+                    if rc:
+                        if verbose and logger:
+                            logger.info('Done splitting {f}'.format(f=fname))
+                        continue
+                    if logger:
+                        errmsg = (
+                            'No files were extracted while splitting the tracking '
+                            'log file {f!r} with the given criteria. Moving on...'
+                        )
+                        logger.warn(errmsg.format(f=fname))
+                        logger.warn('Done splitting {f}'.format(f=fname))
+                except TimeoutError:
+                    continue
+                except:
+                    results[fname] = (result, True)
+                    processed += 1
+                    _, excp, tb = sys.exc_info()
+                    msg = 'Failed to split {f}: {e}'
+                    if verbose:
+                        traces = ['{e}'.format(e=excp)]
+                        traces += map(str.strip, traceback.format_tb(tb))
+                        msg = msg.format(f=fname, e='\n'.join(traces))
+                    else:
+                        msg = msg.format(f=fname, e=excp)
+                    logger.error(msg)
+    return splits == len(filenames)
