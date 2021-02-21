@@ -99,12 +99,12 @@ def process_sql_archive(archive, ddir=None, include_edge=False, courses=None):
     :param ddir: The destination directory of the unpacked files
     :type include: bool
     :param include_edge: Include the files from the edge site
-    :type courses: Union[List[str], None]
+    :type courses: Union[Iterable[str], None]
     :param courses: A list of course IDs whose data files are unpacked
-    :rtype: List[str]
+    :rtype: Iterable[str]
     :return: List of file names
     """
-    courses = [c.replace('/', '-') for c in (courses or [])]
+    courses = set(c.replace('/', '-') for c in (courses or []))
     if ddir is None:
         ddir, _ = os.path.split(archive)
     out = []

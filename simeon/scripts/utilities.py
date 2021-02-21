@@ -141,4 +141,4 @@ def course_listings(courses_str):
     """
     if courses_str is None:
         return None
-    return [c.strip() for c in courses_str.split(' ')]
+    return set(c.strip() for c in courses_str.split(' '))

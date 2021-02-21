@@ -96,7 +96,7 @@ def split_tracking_log(
     :type dynamic_date: bool
     :param dynamic_date: Use dates from the JSON records to make
         output file names
-    :type courses: Union[List[str], None]
+    :type courses: Union[Iterable[str], None]
     :param courses: A list of course IDs whose records are exported
     :rtype: bool
     :return: True if files have generated. False, otherwise
