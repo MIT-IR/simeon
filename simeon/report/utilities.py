@@ -84,9 +84,10 @@ QUERY_DIR = os.path.join(
 )
 
 PROBLEM_TYPES = {
+    'choiceresponse', 'coderespons', 'customresponse',
+    'fieldset', 'formularesponse', 'imageresponse',
     'multiplechoiceresponse', 'numericalresponse',
-    'choiceresponse', 'optionresponse', 'stringresponse',
-    'formularesponse', 'customresponse','fieldset',
+    'optionresponse', 'stringresponse', 'schematicresponse',
 }
 
 
@@ -312,9 +313,8 @@ def _get_itypes(fname, problem_types=PROBLEM_TYPES):
     """
     out = dict()
     with tarfile.open(fname) as tf:
-        problems = [m for m in tf.getmembers() if '/problem/' in m.name]
-        for problem in problems:
-            if problem.isdir():
+        for problem in tf.getmembers():
+            if '/problem/' not in problem.name or problem.isdir():
                 continue
             block = os.path.splitext(problem.name)[0].split('/')[-1]
             pf = tf.extractfile(problem)
@@ -715,11 +715,11 @@ def make_problem_analysis(state, **extras):
             {
                 'answer_id': k,
                 'correctness': v.get('correctness'),
-                'correct_bool' : v.get('correctness','') == 'correct',
+                'correct_bool' : v.get('correctness', '') == 'correct',
                 'npoints': v.get('npoints'),
                 'msg': v.get('msg'),
                 'hint': v.get('hint'),
-                'response': json.dumps(answers.get(k, '')),
+                'response': json.dumps(answers.get(k)),
             }
         )
     out = {
