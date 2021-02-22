@@ -252,8 +252,50 @@ def make_bq_query_config(append: bool=False, plain=True):
     else:
         append = bigquery.WriteDisposition.WRITE_TRUNCATE
     config = bigquery.job.QueryJobConfig()
-    # config.create_disposition = bigquery.CreateDisposition.CREATE_IF_NEEDED
+    config.create_disposition = bigquery.CreateDisposition.CREATE_IF_NEEDED
     config.write_disposition = append
     config.allow_large_results = True
     config.use_legacy_sql = False
     return config
+
+
+def sqlify_bq_field(field, named=True):
+    """
+    Convert a bigquery.SchemaField object into a DDL
+    column definition
+    """
+    nullability = '' if field.is_nullable else 'NOT NULL'
+    type_ = 'INT64' if 'INTEGER' in field.field_type else field.field_type
+    if type_ != 'RECORD':
+        if field.mode != 'REPEATED':
+            return '{n} {t} {m} OPTIONS(description="{d}")'.format(
+                n=field.name if named else '',
+                t=type_,
+                m=nullability,
+                d=field.description or '',
+            )
+        else:
+            return '{n} ARRAY<{t}> {m} OPTIONS(description="{d}")'.format(
+                n=field.name if named else '',
+                t=type_,
+                m=nullability,
+                d=field.description or '',
+            )
+    if type_ == 'RECORD' and field.mode != 'REPEATED':
+        return '{n} STRUCT<{t}> {m} OPTIONS(description="{d}"'.format(
+            t=',\n\t'.join(sqlify_bq_field(f) for f in field.fields),
+            n=field.name if named else '',
+            m=nullability,
+            d=field.description or '',
+        )
+    field = bigquery.SchemaField(
+        name=field.name, field_type=field.field_type,
+        mode='NULLABLE' if field.is_nullable else 'REQUIRED',
+        description=field.description, fields=field.fields,
+    )
+    return '{n} ARRAY<{t}> {m} OPTIONS(description="{d}")'.format(
+        t=sqlify_bq_field(field, False).lstrip(' '),
+        n=field.name,
+        m=nullability,
+        d=field.description or '',
+    )

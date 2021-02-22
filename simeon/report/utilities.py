@@ -22,7 +22,7 @@ from simeon.upload import utilities as uputils
 
 csv.field_size_limit(13107200)
 BQ_DDL = """#standardSQL
-CREATE OR REPLACE TABLE {table}
+CREATE OR REPLACE TABLE {table} {cols}
 OPTIONS (
     description = "{description}"
 ) AS
@@ -915,6 +915,12 @@ def make_table_from_sql(
     log_dataset = uputils.course_to_bq_dataset(
         course_id, 'log', project
     )
+    try:
+        cols=',\n'.join(
+            uputils.sqlify_bq_field(f) for f in uputils.get_bq_schema(table)
+        )
+    except MissingSchemaException:
+        cols = ''
     query, description = _extract_table_query(table, query_dir)
     table = '{d}.{t}'.format(d=latest_dataset, t=table)
     if append:
@@ -925,6 +931,7 @@ def make_table_from_sql(
             table=table,
             description=description.strip(),
             query=query,
+            cols='({c})'.format(c=cols) if cols else ''
         )
     job = client.query(
         query.format(

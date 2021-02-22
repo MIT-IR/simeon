@@ -3,52 +3,52 @@
         {
             "field_type": "STRING",
             "name": "ip",
-	    "description": "IP address"
+            "description": "IP address"
         },
         {
             "field_type": "STRING",
             "name": "city",
-	    "description": "city name (unicode!)"
+            "description": "city name (unicode!)"
         },
         {
             "field_type": "STRING",
             "name": "countryLabel",
-	    "description": "country name"
+            "description": "country name"
         },
         {
             "field_type": "STRING",
             "name": "country",
-	    "description": "two-level country code"
+            "description": "two-level country code"
         },
         {
             "field_type": "STRING",
             "name": "postalCode",
-	    "description": "local postal code, e.g. zip code in the US"
+            "description": "local postal code, e.g. zip code in the US"
         },
         {
             "field_type": "STRING",
             "name": "continent",
-	    "description": "name of continent"
+            "description": "name of continent"
         },
         {
             "field_type": "STRING",
             "name": "subdivision",
-	    "description": "full name of subdivision, e.g. state in the US"
+            "description": "full name of subdivision, e.g. state in the US"
         },
         {
             "field_type": "STRING",
             "name": "region",
-	    "description": "iso_code name of region, e.g. state two-letter code in the US"
+            "description": "iso_code name of region, e.g. state two-letter code in the US"
         },
         {
             "field_type": "FLOAT",
             "name": "latitude",
-	    "description": "latitude"
+            "description": "latitude"
         },
         {
             "field_type": "FLOAT",
             "name": "longitude",
-	    "description": "longitude"
+            "description": "longitude"
         }
     ]
 }
