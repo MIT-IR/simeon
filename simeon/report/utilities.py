@@ -135,7 +135,7 @@ def check_record_schema(record, schema, coerce=True):
                             f=field.get('name')
                         )
                     )
-                record[field.get('name')] = ''
+                record[field.get('name')] = None
         else:
             subfields = field.get('fields')
             subrecord = record.get(field.get('name'), {})
@@ -259,7 +259,7 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
             for k in outcols:
                 val = record.get(k)
                 if 'course_id' in k:
-                    val = downutils.get_sql_course_id(val or '') if val else ''
+                    val = downutils.get_sql_course_id(val or '') or None
                 if 'certificate_grade' in k:
                     try:
                         val = str(float(val))
@@ -595,8 +595,8 @@ def make_grading_policy(dirname, outname='grading_policy.json.gz'):
         )
         with gzip.open(outname, 'wt') as zh:
             for grader in grading_policy.get('GRADER', []):
-                grader['assignment_type'] = grader.get('type', '')
-                grader['name'] = grader.get('type', '')
+                grader['assignment_type'] = grader.get('type')
+                grader['name'] = grader.get('type')
                 grader['fraction_of_overall_grade'] = grader.get('weight')
                 for k, v in grading_policy.get('GRADE_CUTOFFS', {}).items():
                     grader['overall_cutoff_for_{k}'.format(k=k.lower())] = v

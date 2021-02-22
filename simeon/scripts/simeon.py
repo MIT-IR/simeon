@@ -819,7 +819,7 @@ def main():
             'pc_day_totals', 'pc_day_trlang',
             'pc_day_ip_counts', 'language_multi_transcripts',
             'course_modal_language', 'course_modal_ip',
-            'forum_posts'
+            'forum_posts', 'forum_person',
         ]
     )
     reporter.add_argument(
