@@ -231,12 +231,12 @@
             "description": "1 if enrollment active on date of this data, else 0"
         },
         {
-            "field_type": "STRING",
+            "field_type": "TIMESTAMP",
             "name": "cert_created_date",
             "description": "date when certificate was generated (if applicable)"
         },
         {
-            "field_type": "STRING",
+            "field_type": "TIMESTAMP",
             "name": "cert_modified_date",
             "description": "date when certificate was modified (if applicable)"
         },

@@ -1,28 +1,29 @@
-select  
+-- Canonical dataset of learner details and activities per course
+select
+    '{course_id}' as course_id,
     uic.user_id,
     uic.username,
-    '{course_id}' as course_id,
     True as registered,
     IF(pc_nchapters.nchapters is null, False, True) as viewed,
     IF(safe_divide(pc_nchapters.nchapters, 
         (SELECT COUNT(*) FROM `{latest_dataset}.course_axis` where category = "chapter")) >= 0.5, True, False) as explored,
     if(uic.certificate_status = "downloadable", true, false) as certified,
     if(grades.percent_grade >= (SELECT MAX(overall_cutoff_for_c) from `{latest_dataset}.grading_policy`), True, False) as completed,
-    if(uic.enrollment_mode = "verified", true, false) as verified,
+    -- if(uic.enrollment_mode = "verified", true, false) as verified,
     modal_ip.modal_ip as ip,
-    NULL as cc_by_ip,
-    NULL as countryLabel,
-    NULL as continent,
-    NULL as city,
-    NULL as region,
-    NULL as subdivision,
-    NULL as postalCode,
-    NULL as un_major_region,
-    NULL as un_economic_group,
-    NULL as un_developing_nation,
-    NULL as un_special_region,
-    NULL as latitude,
-    NULL as longitude,
+    modal_ip.cc_by_ip,
+    modal_ip.countryLabel,
+    modal_ip.continent,
+    modal_ip.city,
+    modal_ip.region,
+    modal_ip.subdivision,
+    modal_ip.postalCode,
+    modal_ip.un_major_region,
+    modal_ip.un_economic_group,
+    modal_ip.un_developing_nation,
+    modal_ip.un_special_region,
+    modal_ip.latitude,
+    modal_ip.longitude,
     uic.profile_level_of_education as LoE,
     uic.profile_year_of_birth as YoB,
     uic.profile_gender as gender,
@@ -42,9 +43,13 @@ select
     pc_forum.ncomment as nforum_comments,
     pc_forum.npinned as nforum_pinned,
     roles.roles,
+    pc_day.nprogcheck,
+    pc_day.nproblem_check,
+    pc_forum.nforum as nforum_events,
+    uic.enrollment_mode as mode,
     uic.enrollment_is_active as is_active,
     uic.certificate_created_date as cert_created_date,
-    uic.certificate_modified_date as certificate_modified_date,
+    uic.certificate_modified_date as cert_modified_date,
     uic.certificate_status as cert_status,
     enroll_verified.verified_enroll_time,
     enroll_verified.verified_unenroll_time,
@@ -80,7 +85,13 @@ select
     roles.forumRoles_isModerator,
     roles.forumRoles_isStudent
 from `{latest_dataset}.user_info_combo` uic
-left join `{latest_dataset}.course_modal_ip` modal_ip using(username)
+left join (
+    select m_ip.*, geo.* except (ip)
+    from `{latest_dataset}.course_modal_ip` m_ip
+    left join `{geo_table}` geo
+    on m_ip.modal_ip = geo.ip
+
+) modal_ip using(username)
 left join `{latest_dataset}.grades_persistent` grades using(user_id)
 left join `{latest_dataset}.pc_day_totals` pc_day using(username)
 left join `{latest_dataset}.pc_forum` pc_forum using(user_id)
