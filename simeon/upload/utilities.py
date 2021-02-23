@@ -183,6 +183,12 @@ def get_bq_schema(table: str, schema_dir: str=SCHEMA_DIR):
         schema = json.load(jf)
         for field in schema.get(bname, []):
             out.append(dict_to_schema_field(field))
+    if not out:
+        msg = (
+            'The schema file {f!r} does not contain an object '
+            'with a name matching the given table {t}'
+        )
+        raise MissingSchemaException(msg.format(f=schema_file, t=table))
     return out
 
 
@@ -265,7 +271,12 @@ def sqlify_bq_field(field, named=True):
     column definition
     """
     nullability = '' if field.is_nullable else 'NOT NULL'
-    type_ = 'INT64' if 'INTEGER' in field.field_type else field.field_type
+    if 'INTEGER' in field.field_type:
+        type_ = 'INT64'
+    elif 'FLOAT' in field.field_type:
+        type_ = 'FLOAT64'
+    else:
+        type_ = field.field_type
     if type_ != 'RECORD':
         if field.mode != 'REPEATED':
             return '{n} {t} {m} OPTIONS(description="{d}")'.format(

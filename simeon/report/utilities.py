@@ -888,6 +888,7 @@ def make_sql_tables(dirname, verbose=False, logger=None):
 def make_table_from_sql(
     table, course_id, client, project, append=False,
     query_dir=QUERY_DIR, wait=False,
+    geo_table='geocode_latest.geoip'
 ):
     """
     Generate a BigQuery table using the given table name,
@@ -937,6 +938,7 @@ def make_table_from_sql(
         query.format(
             latest_dataset=latest_dataset,
             log_dataset=log_dataset,
+            geo_table=geo_table,
             course_id=course_id
         ),
         job_id='{t}_{dt}'.format(
