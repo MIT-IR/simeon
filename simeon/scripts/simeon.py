@@ -406,6 +406,16 @@ def make_secondary_tables(parsed_args):
     if not parsed_args.course_ids:
         parsed_args.logger.info('No items to process')
         sys.exit(0)
+    cond = all((
+        'person_course' in parsed_args.tables,
+        parsed_args.geo_table is None,
+    ))
+    if cond:
+        parsed_args.logger.error(
+            'person_course cannot be generated without a valid --geo-table'
+            ' value provided.'
+        )
+        sys.exit(1)
     parsed_args.logger.info('Connecting to BigQuery')
     try:
         if parsed_args.service_account_file is not None:
@@ -428,6 +438,7 @@ def make_secondary_tables(parsed_args):
                 table=table_name,
                 course_id=course_id, client=client,
                 project=parsed_args.project, append=parsed_args.append,
+                geo_table=parsed_args.geo_table,
             ))
     if parsed_args.wait_for_loads:
         wait_for_bq_jobs(all_jobs)
@@ -821,6 +832,15 @@ def main():
             'course_modal_language', 'course_modal_ip',
             'forum_posts', 'forum_person',
         ]
+    )
+    reporter.add_argument(
+        '--geo-table', '-g',
+        help=(
+            'The fully qualified name of the geolocation table '
+            'to join to modal_ip to extract geolocation information '
+            'for IP addresses.'
+        ),
+        default='geocode_latest.geoip',
     )
     reporter.add_argument(
         '--fail-fast', '-F',
