@@ -1,5 +1,5 @@
 {
-    "extra_geoip": [
+    "geoip": [
         {
             "field_type": "STRING",
             "name": "ip",
@@ -39,6 +39,31 @@
             "field_type": "STRING",
             "name": "region",
             "description": "iso_code name of region, e.g. state two-letter code in the US"
+        },
+        {
+            "field_type": "STRING",
+            "name": "cc_by_ip",
+            "description": "Two-letter country code corresponding to the modal IP address"
+        },
+        {
+            "field_type": "STRING",
+            "name": "un_major_region",
+            "description": "UN defined sub-continent major geographic regions corresponding to modal IP address"
+        },
+        {
+            "field_type": "STRING",
+            "name": "un_economic_group",
+            "description": "UN defined major geographical economic groups (developing and developed nations) corresponding to modal IP address"
+        },
+        {
+            "field_type": "STRING",
+            "name": "un_developing_nation",
+            "description": "UN defined developing nation groups files corresponding to modal IP address"
+        },
+        {
+            "field_type": "STRING",
+            "name": "un_special_region",
+            "description": "Special Regions Set 1 files: Latin America and the Caribbean.csv,Sub-Saharan-Africa.csv corresponding to modal IP address"
         },
         {
             "field_type": "FLOAT",
