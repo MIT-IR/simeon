@@ -1,4 +1,3 @@
-import glob
 from setuptools import find_packages, setup
 
 
@@ -9,7 +8,7 @@ setup(
     author_email='irx@mit.edu',
     packages=find_packages(),
     url='https://github.com/MIT-IR/simeon',
-    license='LICENSE',
+    license='MIT LICENSE',
     keywords=[
         'edx research data', 'mitx', 'edx',
         'MOOC', 'education', 'online learning'

@@ -143,6 +143,7 @@ logs/
 *.csv
 *.txt
 *.dat
+*.mmdb
 !requirements.txt
 !requirements_dev.txt
 
