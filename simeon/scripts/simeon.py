@@ -834,8 +834,12 @@ def main():
             'person_course_day', 'pc_video_watched',
             'pc_day_totals', 'pc_day_trlang',
             'pc_day_ip_counts', 'language_multi_transcripts',
+            'pc_nchapters',
             'course_modal_language', 'course_modal_ip',
             'forum_posts', 'forum_person',
+            'enrollment_events', 'enrollday_all',
+            'person_enrollment_verified', ''
+            'person_course'
         ]
     )
     reporter.add_argument(
