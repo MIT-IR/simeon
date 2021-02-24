@@ -241,7 +241,9 @@ def download_files(parsed_args):
         parsed_args.downloaded_files = list(downloads)
         split_sql_files(parsed_args)
     if not parsed_args.keep_encrypted:
-        for fname in downloads:
+        for fname, tasks in downloads.items():
+            if tasks != 2:
+                continue
             try:
                 os.remove(fname)
             except OSError:
