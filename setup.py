@@ -20,6 +20,7 @@ setup(
     entry_points={
         'console_scripts': [
             'simeon=simeon.scripts.simeon:main',
+            'simeon-geoip=simeon.scripts.geoip:main',
         ],
     },
     install_requires=[
@@ -28,6 +29,9 @@ setup(
         'google-cloud-storage>=1.35.0',
         'python-dateutil>=2.8.1',
     ],
+    extras_require={
+        'geoip': ['geoip2'],
+    },
     package_data={
         'simeon.upload': ['schemas/*.json'],
         'simeon.report': ['queries/*.sql'],

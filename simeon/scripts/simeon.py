@@ -5,7 +5,7 @@ import os
 import sys
 import traceback
 from argparse import (
-    ArgumentParser, FileType
+    ArgumentParser, FileType, RawDescriptionHelpFormatter
 )
 
 from simeon.download import (
@@ -478,7 +478,10 @@ def main():
         'push': push_generated_files,
         'report': make_secondary_tables,
     }
-    parser = ArgumentParser(description=__doc__)
+    parser = ArgumentParser(
+        description=__doc__,
+        formatter_class=RawDescriptionHelpFormatter,
+    )
     parser.add_argument(
         '--quiet', '-Q',
         help='Only print error messages to standard streams.',
@@ -870,7 +873,7 @@ def main():
         ),
         action='store_true',
     )
-    args = parser.parse_args()
+    args, _ = parser.parse_args()
     args.logger = cli_utils.make_logger(
         verbose=args.verbose,
         stream=args.log_file,
