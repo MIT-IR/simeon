@@ -482,7 +482,8 @@ def main():
     parser.add_argument(
         '--quiet', '-Q',
         help='Only print error messages to standard streams.',
-        action='store_true',
+        action='store_false',
+        dest='verbose',
     )
     parser.add_argument(
         '--debug', '-B',
@@ -754,12 +755,14 @@ def main():
         default='sql',
     )
     pusher.add_argument(
-        '--create', '-c',
+        '--no-create', '-n',
         help=(
-            'Whether to create destination BigQuery tables and '
-            'datasets if they don\'t exist'
+            'Don\'t create destination tables and datasets. '
+            'They must already exist for the push operation '
+            'to work.'
         ),
-        action='store_true',
+        action='store_false',
+        dest='create',
     )
     pusher.add_argument(
         '--append', '-a',
@@ -868,7 +871,6 @@ def main():
         action='store_true',
     )
     args = parser.parse_args()
-    args.verbose = not args.quiet
     args.logger = cli_utils.make_logger(
         verbose=args.verbose,
         stream=args.log_file,
