@@ -18,6 +18,7 @@ FROM
                     ip, 
                     sum(ipcount) as ip_count
             from `{latest_dataset}.pc_day_ip_counts` 
+            where ip is not null and ip != ""
             GROUP BY username, ip
     )
     )
