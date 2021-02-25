@@ -236,9 +236,11 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
             for col in map(str.strip, rfh.readline().split('\t')):
                 if prefix:
                     uid_col = '{p}_user_id'.format(p=prefix)
+                    username_col = '{p}_username'.format(p=prefix)
                     header.append('{p}_{c}'.format(p=prefix, c=col))
                 else:
                     uid_col = 'user_id'
+                    username_col = 'username'
                     header.append(col)
             reader = csv.DictReader(
                 rfh, delimiter='\t', lineterminator='\n',
@@ -251,6 +253,8 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
                 target = users.setdefault(user_id, {})
                 target['user_id'] = user_id
                 target.update(dict((k, row.get(k)) for k in cols))
+                if target.get('username') is None and row.get(username_col):
+                    target['username'] = row[username_col]
     outcols = reduce(lambda l, r: l + r, USER_INFO_COLS.values())
     outcols += ADDED_COLS
     with gzip.open(os.path.join(dirname, outname), 'wt') as zh:
