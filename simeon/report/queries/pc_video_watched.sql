@@ -3,7 +3,7 @@ SELECT
     "{course_id}" as course_id,
     count(*) n_unique_videos_watched,
     count(*) / n_total_videos as fract_total_videos_watched,
-    certified, "" as viewed, verified
+    certified, verified
 FROM
     (
         SELECT 
