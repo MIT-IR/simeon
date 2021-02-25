@@ -873,7 +873,7 @@ def main():
         ),
         action='store_true',
     )
-    args, _ = parser.parse_args()
+    args = parser.parse_args()
     args.logger = cli_utils.make_logger(
         verbose=args.verbose,
         stream=args.log_file,
