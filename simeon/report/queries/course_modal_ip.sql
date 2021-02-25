@@ -9,8 +9,8 @@ FROM
             username, 
             ip, 
             ip_count,
-            RANK() over (partition by username order by ip_count ASC) n_different_ip,
-            RANK() over (partition by username order by ip_count DESC) rank,
+            ROW_NUMBER() over (partition by username order by ip_count ASC) n_different_ip,
+            ROW_NUMBER() over (partition by username order by ip_count DESC) rank,
         from 
             ( 
                 select 
