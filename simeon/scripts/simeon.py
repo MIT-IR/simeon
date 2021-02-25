@@ -243,7 +243,7 @@ def download_files(parsed_args):
     elif parsed_args.file_type == 'sql' and parsed_args.split:
         parsed_args.downloaded_files = list(downloads)
         split_sql_files(parsed_args)
-    if not parsed_args.keep_encrypted:
+    if not parsed_args.keep_encrypted and parsed_args.file_type != 'sql':
         for fname, tasks in downloads.items():
             if tasks != 2:
                 continue
@@ -560,7 +560,7 @@ def main():
     )
     downloader.add_argument(
         '--split', '-S',
-        help='Split downloaded log files',
+        help='Split downloaded SQL bundles or tracking logs',
         action='store_true',
     )
     downloader.add_argument(
