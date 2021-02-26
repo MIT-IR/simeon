@@ -1,6 +1,8 @@
 """
-Integration tests for the simeon CLI tool
+Integration tests for the simeon CLI tool.
+These can be quite expensive since they read from and write to files.
 """
+import os
 import subprocess as sb
 import unittest
 
@@ -19,6 +21,13 @@ class SimeonCLIIntegration(unittest.TestCase):
     Test the simeon CLI command
     """
     def setUp(self):
+        self.this_dir = os.path.dirname(os.path.abspath(__file__))
+        self.log_file = os.path.join(
+            self.this_dir, 'fixtures', 'file.log'
+        )
+        self.config_file = os.path.join(
+            self.this_dir, 'fixture', 'config.ini'
+        )
         self.good_subcommands = [
             'download', 'list', 'push', 'split'
         ]
@@ -27,8 +36,8 @@ class SimeonCLIIntegration(unittest.TestCase):
             'psh', 'splt', 'lst', 'upoad', 'uload'
         ]
         self.global_options = [
-            '--log-file file.log',
-            '--config-file config.ini',
+            '--log-file {f}'.format(f=self.log_file),
+            '--config-file {f}'.format(f=self.config_file),
             '--quiet', '--debug'
         ]
         self.proc = None
@@ -39,6 +48,11 @@ class SimeonCLIIntegration(unittest.TestCase):
                 self.proc.stdout.close()
             if self.proc.stderr:
                 self.proc.stderr.close()
+        for file_ in (self.log_file, self.config_file):
+            try:
+                os.remove(file_)
+            except OSError:
+                continue
 
     def test_good_subcommands(self):
         """
@@ -68,6 +82,54 @@ class SimeonCLIIntegration(unittest.TestCase):
         """
         for option in self.global_options:
             cmd = 'simeon {o} --help'.format(o=option)
+            msg = 'Checking that global option {o} exists'.format(o=option)
+            with self.subTest(msg):
+                self.proc = _run_command(cmd)
+                self.assertEqual(self.proc.returncode, 0)
+                self.tearDown()
+
+
+class SimeonGeoIPCLIIntegration(unittest.TestCase):
+    """
+    Test the simeon-geoip CLI tool
+    """
+    def setUp(self):
+        self.this_dir = os.path.dirname(os.path.abspath(__file__))
+        self.log_file = os.path.join(
+            self.this_dir, 'fixtures', 'file.log'
+        )
+        self.un_file = os.path.join(
+            self.this_dir, 'fixtures', 'un_data.csv'
+        )
+        self.output_file = os.path.join(
+            self.this_dir, 'fixtures', 'geoip.json.gz'
+        )
+        self.good_options = [
+            '--log-file {f}'.format(f=self.log_file),
+            '--un-data {f}'.format(f=self.un_file),
+            '--output {f}'.format(f=self.output_file),
+            '--quiet', '--tracking-logs',
+        ]
+        self.proc = None
+
+    def tearDown(self):
+        if self.proc:
+            if self.proc.stdout:
+                self.proc.stdout.close()
+            if self.proc.stderr:
+                self.proc.stderr.close()
+        for file_ in (self.log_file, self.un_file, self.output_file):
+            try:
+                os.remove(file_)
+            except OSError:
+                continue
+
+    def test_geoip_good_options(self):
+        """
+        Test that global options for simeon-geoip have not changed.
+        """
+        for option in self.good_options:
+            cmd = 'simeon-geoip {o} --help'.format(o=option)
             msg = 'Checking that global option {o} exists'.format(o=option)
             with self.subTest(msg):
                 self.proc = _run_command(cmd)
