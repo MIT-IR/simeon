@@ -467,15 +467,19 @@ class TestDownloadUtilities(unittest.TestCase):
         test that get_sql_course_id returns what we would expect
         without issues
         """
-        for input in self.good_sql_course_ids:
-            self.assertIsNotNone(downutils.get_sql_course_id(input))
+        for course_str in self.good_sql_course_ids:
+            msg = 'Testing get_sql_course_id with {c}'.format(c=course_str)
+            with self.subTest(msg):
+                self.assertIsNotNone(downutils.get_sql_course_id(course_str))
 
     def test_sql_filename_directory(self):
         """
         should just return a tuple of Nones if the given name is a directory
         """
-        self.assertEqual(downutils.format_sql_filename(self.sql_file_name_directory),
-                         (None, None))
+        self.assertEqual(
+            downutils.format_sql_filename(self.sql_file_name_directory),
+            (None, None)
+        )
 
     def test_unexpected_extension(self):
         """
@@ -489,15 +493,23 @@ class TestDownloadUtilities(unittest.TestCase):
         test a variety of filename conversions
         """
         for input_dict in self.sql_file_names:
-            self.assertEqual(downutils.format_sql_filename(input_dict['input']),
-                             (input_dict['input'], input_dict['good-output']))
+            msg = 'Testing format_sql_filename with {f}'.format(
+                f=input_dict['input']
+            )
+            with self.subTest(msg):
+                self.assertEqual(
+                    downutils.format_sql_filename(input_dict['input']),
+                    (input_dict['input'], input_dict['good-output'])
+                )
 
     def test_course_ids(self):
         """
         test a variety of JSON-like records for course_id extraction
         """
         for record in self.course_id_records:
-            self.assertIsNotNone(downutils.get_course_id(record))
+            msg = 'Testing get_course_id with {r}'.format(r=record)
+            with self.subTest(msg):
+                self.assertIsNotNone(downutils.get_course_id(record))
 
 if __name__ == '__main__':
     unittest.main()
