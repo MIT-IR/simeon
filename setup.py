@@ -6,7 +6,7 @@ setup(
     version='0.0.1',
     author='MIT Institutional Research',
     author_email='irx@mit.edu',
-    packages=find_packages(),
+    packages=find_packages(exclude=('docs',)),
     url='https://github.com/MIT-IR/simeon',
     license='MIT LICENSE',
     keywords=[
@@ -14,7 +14,7 @@ setup(
         'MOOC', 'education', 'online learning'
     ],
     python_requires='>=3.6',
-    description='Process research data from edX',
+    description='A CLI tool to help process research data from edX',
     long_description=open('README.rst').read(),
     include_package_data=True,
     entry_points={
