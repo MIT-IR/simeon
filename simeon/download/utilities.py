@@ -68,7 +68,7 @@ def decrypt_files(fnames, verbose=True, logger=None, timeout=60):
     :type timeout: Union[int, None]
     :param timeout: Number of seconds to wait for the decryption to finish
     :rtype: bool
-    :return: Returns True if the decryption fails
+    :return: Returns True if the decryption does not fail
     :raises: DecryptionError
     """
     if isinstance(fnames, str):
@@ -78,7 +78,7 @@ def decrypt_files(fnames, verbose=True, logger=None, timeout=60):
         f=' '.join(fnames), v=verbosity
     )
     if verbose and logger is not None:
-        logger.info(cmd[:200])
+        logger.info('{m}...'.format(m=cmd[:200]))
     proc =  sb.Popen(cmd.split(), stdout=sb.PIPE, stderr=sb.PIPE)
     if proc.wait(timeout=timeout) != 0:
         err = proc.stderr.read().decode('utf8', 'ignore').strip()
