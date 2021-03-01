@@ -144,7 +144,12 @@ def local_to_bq_table(fname: str, file_type: str, project: str) -> str:
 
 def dict_to_schema_field(schema_dict: dict):
     """
-    Make a SchemaField
+    Make a SchemaField from a schema directory
+
+    :type schema_dict: dict
+    :param schema_dict: One of the objects in the schema JSON file
+    :rtype: bigquery.SchemaField
+    :returns: A SchemaField matching the given dictionary's name, type, etc.
     """
     if schema_dict.get('field_type') != 'RECORD':
         return bigquery.SchemaField(**schema_dict)
@@ -242,14 +247,15 @@ def make_bq_load_config(
 
 def make_bq_query_config(append: bool=False, plain=True):
     """
-    Make a bigquery.QueryJobConfig object
+    Make a bigquery.QueryJobConfig object to tie to a query to be sent
+    to BigQuery for secondary table generation
 
     :type append: bool
     :param append: Whether to append the loaded to the table
     :type plain: bool
     :param plain: Make an empty QueryJobConfig object
-    :rtype bigquery.QueryJobConfig
-    :return: Make a bigquery.QueryJobConfig object
+    :rtype: bigquery.QueryJobConfig
+    :returns: Make a bigquery.QueryJobConfig object
     """
     if plain:
         return bigquery.job.QueryJobConfig()
@@ -268,7 +274,14 @@ def make_bq_query_config(append: bool=False, plain=True):
 def sqlify_bq_field(field, named=True):
     """
     Convert a bigquery.SchemaField object into a DDL
-    column definition
+    column definition.
+
+    :type field: bigquery.SchemaField
+    :param field: A SchemaField object to convert to a DDL statement
+    :type named: bool
+    :param named: Whether the returned statement start with the field name
+    :rtype: str
+    :returns: A SQL column's DDL statement
     """
     nullability = '' if field.is_nullable else 'NOT NULL'
     if 'INTEGER' in field.field_type:

@@ -124,7 +124,8 @@ def check_record_schema(record, schema, coerce=True):
     :type coerce: bool
     :param coerce: Whether or not to coerce values
     :rtype: None
-    :return: Modifies the record if needed
+    :returns: Modifies the record if needed
+    :raises: MissingSchemaException
     """
     for field in schema:
         if field.get('field_type') != 'RECORD':
@@ -170,7 +171,7 @@ def drop_extra_keys(record, schema):
             drop_extra_keys(subrecord, subfields)
 
 
-def _extract_table_query(table, query_dir):
+def extract_table_query(table, query_dir):
     """
     Given a table name and a query directory,
     extract both the query string and the table description.
@@ -182,7 +183,8 @@ def _extract_table_query(table, query_dir):
     :type query_dir: str
     :param query_dir: The directory where the query file is expected to be
     :rtype: Tuple[str, str]
-    :return: A tuple of strings (query string, table description)
+    :returns: A tuple of strings (query string, table description)
+    :raises: MissingQueryFileException
     """
     table = table.split('.')[-1]
     qfile = os.path.join(query_dir, '{t}.sql'.format(t=table))
@@ -208,7 +210,7 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
     :type outname: str
     :param outname: The filename to give it to the generated report
     :rtype: None
-    :return: Nothing
+    :return: Nothing, but writes the generated data to the outname argument
     """
     schema_file = os.path.join(
         SCHEMA_DIR, 'schema_user_info_combo.json'
@@ -284,6 +286,11 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
 def course_from_block(block):
     """
     Extract a course ID from the given block ID
+
+    :type block: str
+    :param block: A module item's block string
+    :rtype: str
+    :returns: Extracts the course ID in a module's block string
     """
     if block.startswith('i4x://'):
         return block.split('//')[-1].replace('course/', '')
@@ -293,6 +300,11 @@ def course_from_block(block):
 def module_from_block(block):
     """
     Extract a module ID from the given block
+
+    :type block: str
+    :param block: A module item's block string
+    :rtype: str
+    :returns: Extracts the module ID in a module's block string
     """
     if block.startswith('i4x://'):
         return block.lstrip('i4x://')
@@ -304,6 +316,11 @@ def get_youtube_id(record):
     """
     Given a course structure record, extract the YouTube ID
     associated with the video element.
+
+    :type record: dict
+    :param record: A course_axis record
+    :rtype: Union[str, None]
+    :returns: The YouTube video ID associated with the record
     """
     for k, v in record.get('metadata', {}).items():
         if 'youtube_id' in k and v:
@@ -335,6 +352,11 @@ def get_has_solution(record):
     Extract whether the given record is a problem that has showanswer.
     If it's present and its associated value is not "never", then return True.
     Otherwise, return False.
+
+    :type record: dict
+    :param record: A course_axis record
+    :rtype: bool
+    :returns: Wether the course_axis record has a solution in the data
     """
     meta = record.get('metadata') or dict()
     if 'showanswer' not in meta:
@@ -345,6 +367,11 @@ def get_has_solution(record):
 def get_problem_nitems(record):
     """
     Get a value for data.num_items in course_axis
+
+    :type record: dict
+    :param record: A course_axis record
+    :rtype: Union[int, None]
+    :returns: The number of subitems of a problem item
     """
     if 'problem' in record.get('category', ''):
         return len(record.get('children', [])) + 1
@@ -470,7 +497,7 @@ def make_course_axis(dirname, outname='course_axis.json.gz'):
     :type outname: str
     :param outname: The filename to give it to the generated report
     :rtype: None
-    :return: Nothing
+    :return: Nothing, but writes the generated data to the outname argument
     """
     fname = os.path.join(dirname, 'course_structure-analytics.json')
     bundle = os.path.join(dirname, 'course-analytics.xml.tar.gz')
@@ -536,7 +563,7 @@ def make_grades_persistent(
     :type outname: str
     :param outname: The filename to give it to the generated report
     :rtype: None
-    :return: Nothing
+    :return: Nothing, but writes the generated data to the target files
     """
     infiles = dict([
         (
@@ -576,7 +603,7 @@ def make_grading_policy(dirname, outname='grading_policy.json.gz'):
     :type outname: str
     :param outname: The filename to give it to the generated report
     :rtype: None
-    :return: Nothing
+    :return: Nothing, but writes the generated data to the target file
     """
     file_ = os.path.join(dirname, 'course-analytics.xml.tar.gz')
     with tarfile.open(file_) as tar:
@@ -638,7 +665,7 @@ def make_forum_table(dirname, outname='forum.json.gz'):
     :type outname: str
     :param outname: The filename to give it to the generated report
     :rtype: None
-    :return: Nothing
+    :return: Nothing, but writes the generated data to the target file
     """
     outname = os.path.join(dirname, outname)
     file_ = os.path.join(dirname, 'forum.mongo')
@@ -745,7 +772,7 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
     :type outname: str
     :param outname: The filename to give it to the generated report
     :rtype: None
-    :return: Nothing
+    :return: Nothing, but writes the generated data to the target files
     """
     outname = os.path.join(dirname, outname)
     second = os.path.join(dirname, 'problem_analysis.json.gz')
@@ -808,6 +835,13 @@ def _default_roles():
 def make_roles_table(dirname, outname='roles.json.gz'):
     """
     Generate a file to be loaded into the roles table of a dataset
+
+    :type dirname: str
+    :param dirname: Name of a course's directory of SQL files
+    :type outname: str
+    :param outname: The filename to give it to the generated report
+    :rtype: None
+    :return: Nothing, but writes the generated data to the target files
     """
     files = {
         'student_courseaccessrole-analytics.sql',
@@ -864,6 +898,8 @@ def make_sql_tables(dirname, verbose=False, logger=None):
     """
     Given a SQL directory, make the SQL tables
     defined in this module.
+    This convenience function calls all the report generating functions
+    for the given directory name
 
     :type dirname: str
     :param dirname: Name of a course's SQL directory
@@ -872,7 +908,7 @@ def make_sql_tables(dirname, verbose=False, logger=None):
     :type logger: logging.Logger
     :param logger: A logging.Logger object to print messages with
     :rtype: None
-    :return: Nothing
+    :return: Nothing, but writes the generated data to the target files
     """
     reports = (
         make_course_axis, make_forum_table, make_grades_persistent,
@@ -926,7 +962,7 @@ def make_table_from_sql(
         )
     except MissingSchemaException:
         cols = ''
-    query, description = _extract_table_query(table, query_dir)
+    query, description = extract_table_query(table, query_dir)
     table = '{d}.{t}'.format(d=latest_dataset, t=table)
     if append:
         config = uputils.make_bq_query_config(append=append)

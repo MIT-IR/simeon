@@ -118,6 +118,7 @@ class S3Blob():
         """
         Fetch a list of S3Blob objects from AWS whose names
         have the given prefix.
+
         :type bucket: s3.Bucket
         :param bucket: The boto3.s3.Bucket object to tie to this blob
         :type prefix: str

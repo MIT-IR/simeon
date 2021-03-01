@@ -44,8 +44,7 @@ class BigqueryClient(bigquery.Client):
         :param use_storage: Whether or not to load the data from GCS
         :rtype: List[bigquery.LoadJob]
         :return: List of load jobs
-        :raises: Propagates exceptions from self.load_table_from_file and
-        self.load_table_from_uri
+        :raises: Propagates everything from the underlying package
         """
         formats = FILE_FORMATS.get(file_type, [])
         patts = (
@@ -72,6 +71,8 @@ class BigqueryClient(bigquery.Client):
         bucket: str=None,
     ):
         """
+        Load the given file to a target BigQuery table
+
         :type fname: str
         :param fname: The specific file to load
         :type file_type: str
@@ -88,8 +89,7 @@ class BigqueryClient(bigquery.Client):
         :param bucket: GCS bucket name to use
         :rtype: bigquery.LoadJob
         :return: The LoadJob object associated with the work being done
-        :raises: Propagates exceptions from self.load_table_from_file and
-        self.load_table_from_uri
+        :raises: Propagates everything from the underlying package
         """
         if use_storage:
             if bucket is None:
