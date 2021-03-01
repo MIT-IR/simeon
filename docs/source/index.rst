@@ -7,18 +7,21 @@ Documentation for the simeon CLI tool
 ======================================
 
 CLI Guide
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~
+Documentation for users of the ``simeon`` CLI tool.
 
 .. toctree::
    :maxdepth: 2
 
-   README
+   cli_intro
+
+Python API Guide
+~~~~~~~~~~~~~~~~~~~
+Documentation for contributing to the package, and for those wishing to add ``simeon`` to their python dependencies.
+
+.. toctree::
+   :maxdepth: 3
+
+   api_intro
 
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

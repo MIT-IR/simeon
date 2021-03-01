@@ -46,8 +46,8 @@ Developing
    tox
    # Write code and tests and submit PR's
 
-Setups
-~~~~~~
+Setups and configurations
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``simeon`` is a glorified downloader and uploader set of scripts. Much
 of the downloading and uploading that it does makes the assumptions that
@@ -84,6 +84,40 @@ to use ``simeon`` without any issues.
 
 However, if you’ve taken care of the above steps but are still unable to
 get ``simeon`` to work, please open an issue.
+
+Further, ``simeon`` can parse INI formatted configuration files. It, by
+default, looks for files in the user’s home directory, or in the current
+working directory of the running process. The base names that are
+targeted when config files are looked up are: ``simeon.cfg`` or
+``.simeon.cfg`` or ``simeon.ini`` or ``.simeon.ini``. The following is a
+sample file content:
+
+.. code:: sh
+
+   # Default section for things like the organization whose data package is processed
+   # You can also set a default site as one of the following: edx, edge, patches
+   [DEFAULT]
+   site = edx
+   org = yourorganizationx
+
+   # Section related to Google Cloud (project, bucket, service account)
+   [GCP]
+   project = your-gcp-project-id
+   bucket = target-gcs-bucket
+   service_account_file = /path/to/a/service_account_file.json
+
+   # Section related to the AWS credentials needed to download data from S3
+   [AWS]
+   credential_file = /path/to/aws/credential_file.ini
+   profile_name = profile_name_in_credential_file_whose_credentials_are_used
+
+The options in the config file(s) should match the optional arguments of
+the CLI tool. For instance, the ``--service-account-file``,
+``--project`` and ``--bucket`` options can be provided under the ``GCP``
+section of the config file as ``service_account_file``, ``project`` and
+``bucket``, respectively. Similarly, the ``--site`` and ``--org``
+options can be provided under the ``DEFAULT`` section as ``site`` and
+``org``, respectively.
 
 List files
 ~~~~~~~~~~
@@ -163,8 +197,8 @@ belonging to specific courses.
 -  If you already have downloaded SQL bundles or tracking log files, you
    can use ``simeon split`` them up.
 
-Make secondary/aggregated tables like person_course, forum_person, etc.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Make secondary/aggregated tables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``simeon`` can generate secondary tables based on already loaded data.
 Call ``simeon report --help`` for the expected positional and optional
