@@ -295,6 +295,9 @@ def push_to_bq(parsed_args):
     except Exception as excp:
         errmsg = 'Failed to connect to BigQuery: {e}'
         parsed_args.logger.error(errmsg.format(e=excp))
+        parsed_args.logger.error(
+            'The error may be from an invalid service account file'
+        )
         sys.exit(1)
     all_jobs = []
     for item in parsed_args.items:
@@ -383,6 +386,9 @@ def push_to_gcs(parsed_args):
     except Exception as excp:
         errmsg = 'Failed to connect to Google Cloud Storage: {e}'
         parsed_args.logger.error(errmsg.format(e=excp))
+        parsed_args.logger.error(
+            'The error may be from an invalid service account file'
+        )
         sys.exit(1)
     failed = False
     for item in parsed_args.items:
@@ -411,6 +417,9 @@ def push_to_gcs(parsed_args):
         except Exception as excp:
             errmsg = 'Failed to load {f} to GCS: {e}'
             parsed_args.logger.error(errmsg.format(f=item, e=excp))
+            parsed_args.logger.error(
+                'The error may be from an invalid service account file'
+            )
             if parsed_args.fail_fast:
                 parsed_args.logger.error('Exiting...')
                 sys.exit(1)
@@ -468,6 +477,9 @@ def make_secondary_tables(parsed_args):
     except Exception as excp:
         errmsg = 'Failed to connect to BigQuery: {e}'
         parsed_args.logger.error(errmsg.format(e=excp))
+        parsed_args.logger.error(
+            'The error may be from an invalid service account file'
+        )
         sys.exit(1)
     all_jobs = []
     for course_id in parsed_args.course_ids:
