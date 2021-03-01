@@ -271,6 +271,13 @@ def push_to_bq(parsed_args):
     """
     Push to BigQuery
     """
+    if not parsed_args.project:
+        parsed_args.logger.error(
+            'No GCP project given in the command line. '
+            'None was found in config file(s) either. '
+            'Aborting...'
+        )
+        sys.exit(1)
     if not parsed_args.items:
         parsed_args.logger.info('No items to process')
         sys.exit(0)
@@ -350,6 +357,13 @@ def push_to_gcs(parsed_args):
     """
     Push to Storage
     """
+    if not parsed_args.bucket:
+        parsed_args.logger.error(
+            'No valid GCP bucket given in the command line. '
+            'None was found in config file(s) either. '
+            'Aborting...'
+        )
+        sys.exit(1)
     if not parsed_args.items:
         parsed_args.logger.info('No items to process')
         sys.exit(0)
@@ -420,6 +434,13 @@ def make_secondary_tables(parsed_args):
     Generate secondary datasets that rely on existing datasets
     and tables.
     """
+    if not parsed_args.project:
+        parsed_args.logger.error(
+            'No GCP project given in the command line. '
+            'None was found in config file(s) either. '
+            'Aborting...'
+        )
+        sys.exit(1)
     if not parsed_args.course_ids:
         parsed_args.logger.info('No items to process')
         sys.exit(0)
@@ -757,12 +778,10 @@ def main():
     pusher.add_argument(
         '--project', '-p',
         help='GCP project associated with the target sink',
-        required=True
     )
     pusher.add_argument(
         '--bucket', '-b',
         help='GCS bucket name associated with the target sink',
-        required=True,
         type=cli_utils.gcs_bucket,
     )
     pusher.add_argument(
@@ -831,7 +850,6 @@ def main():
     reporter.add_argument(
         '--project', '-p',
         help='GCP project associated with the tables to query',
-        required=True
     )
     reporter.add_argument(
         '--service-account-file', '-S',
@@ -898,6 +916,13 @@ def main():
         stream=args.log_file,
         user='SIMEON:{cmd}'.format(cmd=args.command.upper()),
     )
+    configs = cli_utils.find_config(args.config_file)
+    for k, v in cli_utils.CONFIGS.items():
+        for attr in v:
+            cli_arg = getattr(args, attr, None)
+            config_arg = configs.get(k, attr, fallback=None)
+            if not cli_arg and config_arg:
+                setattr(args, attr, config_arg)
     try:
         COMMANDS.get(args.command)(args)
     except:

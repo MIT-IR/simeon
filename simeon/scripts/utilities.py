@@ -9,6 +9,12 @@ from argparse import ArgumentTypeError
 
 from dateutil.parser import parse as dateparse
 
+CONFIGS = {
+    'DEFAULT': ('site', 'org',),
+    'GCP': ('project', 'bucket', 'service_account_file'),
+    'AWS': ('credential_file', 'profile_name'),
+}
+
 
 def parsed_date(datestr: str) -> str:
     """
@@ -74,6 +80,8 @@ def make_logger(user='SIMEON', verbose=True, stream=None):
     """
     if stream is None:
         stream = sys.stdout
+    if not hasattr(stream, 'write'):
+        stream = open(stream, 'w')
     level = logging.INFO if verbose else logging.WARN
     formatter = logging.Formatter(
         '%(asctime)s:%(levelname)s:%(name)s:%(message)s'
@@ -87,57 +95,75 @@ def make_logger(user='SIMEON', verbose=True, stream=None):
     return logger
 
 
-def make_config_file(dest_path=None):
+def make_config_file(output=None):
     """
-    Create a config file named 'simeon.ini' that will have the expected
+    Create a config file named 'simeon.cfg' that will have the expected
     configuration values
-    :type dest_path: str
-    :param dest_path: path to save the config file to, if blank uses cwd
+
+    :type output: Union[None, str, pathlib.Path]
+    :param output: Path to the config file where sections and options are put
+    :rtype: None
+    :returns: Write the config info to the given output file
     """
-    if dest_path is None:
-        dest_fname = "simeon.ini"
-    else:
-        dest_fname = os.path.join(dest_path, "simeon.ini")
+    if output is None:
+        output = os.path.join(os.path.expanduser('~'), 'simeon.cfg')
     config = configparser.ConfigParser()
-    config['GoogleCloud'] = {'Project': 'default-project',
-                             'Bucket': 'default-bucket',
-                             'ServiceAccountFile': '/path/to/credentials.json'}
-    config['AmazonWebServices'] = {}
-    config['AmazonWebServices']['Credentials'] = "/path/to/credentials.json"
-    with open(dest_fname, 'w') as configfile:
+    config['DEFAULT'] = {
+        'site': '',
+        'org': '',
+    }
+    config['GCP'] = {
+        'project': '',
+        'bucket': '',
+        'service_account_file': '',
+    }
+    config['AWS'] = {
+        'credential_file': '',
+        'profile_name': '',
+    }
+    with open(output, 'w') as configfile:
         config.write(configfile)
 
 
-def load_config(fname="simeon.ini"):
+def find_config(fname=None):
     """
-    Load the config file and return the configparser object.
-    :type fname: str
-    :param fname: filename of config file, default "simeon.ini"
-    :return: Returns a ConfigParser object that is dictionary-like
+    Searches for config files in default locations.
+    If no file name is provided, it tries to load files
+    in the home and current directories of the running process.
+
+    :type fname: Union[None, str, pathlib.Path]
+    :param fname: Path to an INI config file, default "simeon.cfg"
+    :rtype: configparser.ConfigParser
+    :return: Returns a ConfigParser with configs from the file(s)
     """
+    if fname is None:
+        files = [
+            os.path.join(os.path.expanduser('~'), 'simeon.cfg'),
+            os.path.join(os.path.expanduser('~'), '.simeon.cfg'),
+            os.path.join(os.path.expanduser('~'), 'simeon.ini'),
+            os.path.join(os.path.expanduser('~'), '.simeon.ini'),
+            os.path.join(os.path.join(os.getcwd(), 'simeon.cfg')),
+            os.path.join(os.path.join(os.getcwd(), '.simeon.cfg')),
+            os.path.join(os.path.join(os.getcwd(), 'simeon.ini')),
+            os.path.join(os.path.join(os.getcwd(), '.simeon.ini')),
+        ]
+    else:
+        files = [fname]
     config = configparser.ConfigParser()
-    config.read(fname)
+    for config_file in files:
+        config.read(config_file)
     return config
-
-
-def find_config(fname="simeon.ini"):
-    """
-    searches common locations for a config file
-    :param fname: filename of config file, default "simeon.ini"
-    :return: Returns a ConfigParser object that is dictionary-like
-    """
-    cwd = os.path.join(os.getcwd(), fname)
-    home = os.path.expanduser("~/{f}".format(f=fname))
-    if os.path.exists(cwd):
-        return load_config(cwd)
-    elif os.path.exists(home):
-        return load_config(home)
 
 
 def course_listings(courses_str):
     """
     Given a list of white space separated course IDs,
     split it into a list.
+
+    :type courses_str: str
+    :param courses_str: A string comprising space delimited course IDs
+    :rtype: set
+    :return: A set object of course IDs
     """
     if courses_str is None:
         return None
