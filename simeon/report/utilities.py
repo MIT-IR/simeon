@@ -223,7 +223,8 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
     with open(os.path.join(dirname, user_file)) as ufh:
         incols = [c.strip() for c in ufh.readline().split('\t')]
         reader = csv.DictReader(
-            ufh, delimiter='\t', lineterminator='\n', quotechar='\'',
+            ufh, delimiter='\t', lineterminator='\n',
+            # quotechar='\'',
             fieldnames=incols
         )
         for row in reader:
@@ -246,7 +247,8 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
                     header.append(col)
             reader = csv.DictReader(
                 rfh, delimiter='\t', lineterminator='\n',
-                quotechar='\'', fieldnames=header
+                # quotechar='\'',
+                fieldnames=header
             )
             for row in reader:
                 if uid_col not in row:

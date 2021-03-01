@@ -148,3 +148,8 @@ logs/
 !requirements.txt
 !requirements_dev.txt
 
+# Simeon configs
+simeon.cfg
+.simeon.cfg
+simeon.ini
+.simeon.ini
