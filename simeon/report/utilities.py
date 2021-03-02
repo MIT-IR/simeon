@@ -105,7 +105,12 @@ def wait_for_bq_jobs(job_list):
     done = 0
     while done < len(job_list):
         for job in job_list:
-            state = job.done()
+            try:
+                state = job.done()
+            except:
+                done += 1
+                job.reload()
+                continue
             if not state:
                 job.reload()
             done += state
