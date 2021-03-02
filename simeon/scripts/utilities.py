@@ -10,9 +10,22 @@ from argparse import ArgumentTypeError
 from dateutil.parser import parse as dateparse
 
 CONFIGS = {
-    'DEFAULT': ('site', 'org',),
-    'GCP': ('project', 'bucket', 'service_account_file'),
-    'AWS': ('credential_file', 'profile_name'),
+    'DEFAULT': (
+        ('site', configparser.ConfigParser.get),
+        ('org', configparser.ConfigParser.get),
+    ),
+    'GCP': (
+        ('project', configparser.ConfigParser.get),
+        ('bucket', configparser.ConfigParser.get),
+        ('service_account_file', configparser.ConfigParser.get),
+        ('wait_for_loads', configparser.ConfigParser.getboolean),
+        ('use_storage', configparser.ConfigParser.getboolean),
+        ('geo_table', configparser.ConfigParser.get),
+    ),
+    'AWS': (
+        ('credential_file', configparser.ConfigParser.get),
+        ('profile_name', configparser.ConfigParser.get),
+    ),
 }
 
 

@@ -481,23 +481,30 @@ def make_secondary_tables(parsed_args):
             'The error may be from an invalid service account file'
         )
         sys.exit(1)
+    parsed_args.logger.info('Connection established')
     all_jobs = []
     for course_id in parsed_args.course_ids:
+        parsed_args.logger.info(
+            'Making secondary tables for course ID {c}'.format(c=course_id)
+        )
         for table_name in parsed_args.tables:
             all_jobs.append(make_table_from_sql(
-                table=table_name,
-                course_id=course_id, client=client,
+                table=table_name, course_id=course_id, client=client,
                 project=parsed_args.project, append=parsed_args.append,
                 geo_table=parsed_args.geo_table,
+                wait=parsed_args.wait_for_loads,
             ))
-    if parsed_args.wait_for_loads:
-        wait_for_bq_jobs(all_jobs)
+        parsed_args.logger.info(
+            'Submitted query jobs for course ID {c}'.format(c=course_id)
+        )
     errors = []
+    parsed_args.logger.info('Checking for errors...')
     for job in all_jobs:
         if job.errors:
-            parsed_args.logger.error(
-                'Error encountered: {e}'.format(e=job.errors)
-            )
+            msg = 'Error {e} from query text:\n{q}\n'
+            parsed_args.logger.error(msg.format(
+                q=job.query, e=job.errors
+            ))
             errors.extend(job.errors)
     if errors:
         sys.exit(1)
@@ -889,7 +896,7 @@ def main():
             'person_course_day', 'pc_video_watched',
             'pc_day_totals', 'pc_day_trlang',
             'pc_day_ip_counts', 'language_multi_transcripts',
-            'pc_nchapters',
+            'pc_nchapters', 'pc_forum',
             'course_modal_language', 'course_modal_ip',
             'forum_posts', 'forum_person',
             'enrollment_events', 'enrollday_all',
@@ -930,9 +937,9 @@ def main():
     )
     configs = cli_utils.find_config(args.config_file)
     for k, v in cli_utils.CONFIGS.items():
-        for attr in v:
+        for (attr, cgetter) in v:
             cli_arg = getattr(args, attr, None)
-            config_arg = configs.get(k, attr, fallback=None)
+            config_arg = cgetter(configs, k, attr, fallback=None)
             if not cli_arg and config_arg:
                 setattr(args, attr, config_arg)
     try:
