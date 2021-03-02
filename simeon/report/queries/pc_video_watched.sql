@@ -2,7 +2,7 @@ SELECT
     user_id, 
     "{course_id}" as course_id,
     count(*) n_unique_videos_watched,
-    count(*) / n_total_videos as fract_total_videos_watched,
+    safe_divide(count(*), n_total_videos) as fract_total_videos_watched,
     certified, verified
 FROM
     (
@@ -34,5 +34,5 @@ FROM
         ) NV
         WHERE ((ROL.roles = 'Student') OR (ROL.roles is NULL))
     )
-GROUP BY user_id, certified, viewed, verified, n_total_videos
+GROUP BY user_id, certified, verified, n_total_videos
 order by user_id
