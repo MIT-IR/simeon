@@ -106,7 +106,8 @@ def split_tracking_log(
     )
     with open(schema_file) as sfh:
         schema = json.load(sfh).get('tracking_log')
-    courses = set(courses) if courses else set()
+    if not isinstance(courses, set):
+        courses = set(c for c in (courses or []))
     fhandles = dict()
     if not dynamic_date:
         date = utils.get_file_date(filename)

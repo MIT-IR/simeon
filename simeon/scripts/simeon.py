@@ -646,7 +646,7 @@ def main():
             'A list of white space separated course IDs whose data files '
             'are unpacked and decrypted.'
         ),
-        type=cli_utils.course_listings,
+        nargs='*',
     )
     downloader.add_argument(
         '--no-decryption', '-N',
@@ -766,7 +766,7 @@ def main():
             'A list of white space separated course IDs whose data files '
             'are unpacked and decrypted.'
         ),
-        type=cli_utils.course_listings,
+        nargs='*',
     )
     splitter.add_argument(
         '--dynamic-date', '-m',

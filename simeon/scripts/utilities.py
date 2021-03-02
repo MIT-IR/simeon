@@ -168,16 +168,16 @@ def find_config(fname=None):
     return config
 
 
-def course_listings(courses_str):
+def course_listings(courses):
     """
     Given a list of white space separated course IDs,
     split it into a list.
 
-    :type courses_str: str
-    :param courses_str: A string comprising space delimited course IDs
+    :type courses: Union[Iterable, None]
+    :param courses: An iterable of course ID's
     :rtype: set
     :return: A set object of course IDs
     """
-    if courses_str is None:
+    if courses is None:
         return None
-    return set(c.strip() for c in courses_str.split(' '))
+    return set(c.strip() for c in courses)
