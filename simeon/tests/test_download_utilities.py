@@ -1,5 +1,5 @@
 """
-Test the download module in the download package
+Test the download package
 """
 import unittest
 import warnings

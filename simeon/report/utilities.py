@@ -16,6 +16,7 @@ from simeon.download import utilities as downutils
 from simeon.exceptions import (
     BadSQLFileException, MissingFileException,
     MissingQueryFileException, MissingSchemaException,
+    SchemaMismatchException,
 )
 from simeon.upload import utilities as uputils
 
@@ -130,13 +131,13 @@ def check_record_schema(record, schema, coerce=True):
     :param coerce: Whether or not to coerce values
     :rtype: None
     :returns: Modifies the record if needed
-    :raises: MissingSchemaException
+    :raises: SchemaMismatchException
     """
     for field in schema:
         if field.get('field_type') != 'RECORD':
             if field.get('name') not in record:
                 if not coerce:
-                    raise MissingSchemaException(
+                    raise SchemaMismatchException(
                         '{f} is missing from the record'.format(
                             f=field.get('name')
                         )
@@ -926,7 +927,17 @@ def make_sql_tables(dirname, verbose=False, logger=None):
         if verbose and logger is not None:
             msg = 'Calling routine {f} on {d}'
             logger.info(msg.format(f=maker.__name__, d=dirname))
-        maker(dirname)
+        try:
+            maker(dirname)
+        except OSError:
+            msg = (
+                'The necessary files needed to make the {n} table(s) '
+                'are missing from the given directory {d}'
+            )
+            excp = MissingFileException(msg.format(
+                d=dirname, n=maker.__name__.replace('make_', '')
+            ))
+            raise excp from None
         if verbose and logger is not None:
             msg = '{f} made a report from files in {d}'
             logger.info(msg.format(f=maker.__name__, d=dirname))

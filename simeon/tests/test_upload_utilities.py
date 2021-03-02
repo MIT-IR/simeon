@@ -1,5 +1,5 @@
 """
-Unit tests for upload utilities
+Unit tests for the upload package
 """
 import unittest
 
