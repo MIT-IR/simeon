@@ -229,6 +229,16 @@ def download_files(parsed_args):
                 downloads[fullname] += 1
             except Exception as excp:
                 parsed_args.logger.error(excp)
+            cond = all((
+                not parsed_args.keep_encrypted,
+                parsed_args.file_type != 'sql'
+            ))
+            if cond:
+                if downloads[fullname] == 2:
+                    try:
+                        os.remove(fullname)
+                    except:
+                        pass
     if not downloads:
         parsed_args.logger.warn(
             'No files found matching the given criteria'
@@ -255,14 +265,6 @@ def download_files(parsed_args):
         else:
             parsed_args.destination = parsed_args.split_destination
         split_sql_files(parsed_args)
-    if not parsed_args.keep_encrypted and parsed_args.file_type != 'sql':
-        for fname, tasks in downloads.items():
-            if tasks != 2:
-                continue
-            try:
-                os.remove(fname)
-            except OSError:
-                continue
     rc = 0 if all(v == 2 for v in downloads.values()) else 1
     sys.exit(rc)
 
