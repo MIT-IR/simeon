@@ -107,7 +107,14 @@ def split_tracking_log(
     courses: List[str]=None,
 ):
     """
-    Split the records in the given GZIP tracking log file
+    Split the records in the given GZIP tracking log file.
+    This function is very resource hungry because it keeps around
+    a lot of open file handles and writes to them whenever it processes
+    a good record. Some attempts are made to keep records around whenever
+    the process is no longer allowed to open new files. But that will likely
+    lead to the running process' alotted memory to be exhausted.
+
+    :NOTE: If you've got a better way, please update me.
 
     :type filename: str
     :param filename: The GZIP file to split
@@ -134,6 +141,7 @@ def split_tracking_log(
     else:
         date = None
     with gzip.open(filename) as zfh:
+        stragglers = []
         for i, line in enumerate(zfh):
             line_info = process_line(line, i + 1, date=date, courses=courses)
             if not line_info:
@@ -149,7 +157,11 @@ def split_tracking_log(
             fname = line_info.get('filename')
             fname = os.path.join(ddir, fname)
             if fname not in fhandles:
-                fhandles[fname] = utils.make_file_handle(fname, is_gzip=True)
+                try:
+                    fhandles[fname] = utils.make_file_handle(fname, is_gzip=True)
+                except OSError:
+                    stragglers.append(line_info)
+                    continue
             fhandle = fhandles[fname]
             if not isinstance(data, str):
                 drop_extra_keys(data, schema)
@@ -158,6 +170,43 @@ def split_tracking_log(
                 fhandle.write(data.encode('utf8', 'ignore') + b'\n')
             else:
                 fhandle.write(data + '\n')
+        # Working around EMFILE errors
+        for fhandle in fhandles:
+            try:
+                fhandle.close()
+            except:
+                continue
+        # Sort the stragglers by file name and use a file tracker
+        stragglers = sorted(stragglers, key=lambda s: s.get('filename'))
+        pfname = None
+        while stragglers:
+            try:
+                rec = stragglers.pop()
+                fname = rec.get('filename')
+                fname = os.path.join(ddir, fname)
+                if pfname and pfname != fname:
+                    try:
+                        fhandles[pfname].close()
+                    except:
+                        pass
+                data = line_info['data']
+                if fname not in fhandles:
+                    try:
+                        fhandle = utils.make_file_handle(fname, is_gzip=True)
+                        fhandles[fname] = fhandle
+                    except OSError:
+                        stragglers.append(rec)
+                        continue
+                if not isinstance(data, str):
+                    drop_extra_keys(data, schema)
+                    data = json.dumps(data)
+                if isinstance(fhandle, gzip.GzipFile):
+                    fhandle.write(data.encode('utf8', 'ignore') + b'\n')
+                else:
+                    fhandle.write(data + '\n')
+                pfname = fname
+            except IndexError:
+                break
     return bool(fhandles)
 
 
@@ -190,7 +239,9 @@ def batch_split_tracking_logs(
                 if done:
                     continue
                 try:
-                    rc = result.get(timeout=1)
+                    # Do the rounds every minute and check if a worker
+                    # is done with its job
+                    rc = result.get(timeout=60)
                     splits += rc
                     results[fname] = (result, True)
                     processed += 1
