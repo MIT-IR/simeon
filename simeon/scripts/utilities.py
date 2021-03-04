@@ -13,6 +13,7 @@ CONFIGS = {
     'DEFAULT': (
         ('site', configparser.ConfigParser.get),
         ('org', configparser.ConfigParser.get),
+        ('clistings_file', configparser.ConfigParser.get),
     ),
     'GCP': (
         ('project', configparser.ConfigParser.get),
@@ -181,3 +182,23 @@ def course_listings(courses):
     if courses is None:
         return None
     return set(c.strip() for c in courses)
+
+
+def course_from_file(fname):
+    """
+    Given the path to a file, extract the course IDs in it.
+    One course ID per line.
+
+    :type fname: str
+    :param fname: Path to a file with course listings. 1 course ID per line
+    :rtype: Union[None, set]
+    :returns: A set of course IDs
+    """
+    if not fname:
+        return None
+    fname = os.path.expanduser(fname)
+    if not os.path.isfile(fname):
+        msg = 'The given course listings file, {f!r}, is not a valid file'
+        raise ArgumentTypeError(msg.format(f=fname))
+    with open(fname) as fh:
+        return set(line.strip() for line in fh)

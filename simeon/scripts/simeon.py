@@ -32,8 +32,6 @@ def bail_out(sig, frame):
     """
     Exit somewhat cleanly from a signal
     """
-    global logger
-    needs_cleaning_msg = False
     if logger:
         logger.warn('The process is being interrupted by a signal.')
     if logger:
@@ -683,13 +681,22 @@ def main():
         help='Number of seconds to wait for the decryption of files.',
         type=int,
     )
-    downloader.add_argument(
+    cdgroup = downloader.add_mutually_exclusive_group(required=False)
+    cdgroup.add_argument(
         '--courses', '-c',
         help=(
             'A list of white space separated course IDs whose data files '
             'are unpacked and decrypted.'
         ),
         nargs='*',
+    )
+    cdgroup.add_argument(
+        '--clistings-file', '-l',
+        help=(
+            'Path to a file with one course ID per line. The file is expected'
+            ' to have no header row.'
+        ),
+        type=cli_utils.course_from_file,
     )
     downloader.add_argument(
         '--no-decryption', '-N',
@@ -803,13 +810,22 @@ def main():
         ),
         default=os.getcwd(),
     )
-    splitter.add_argument(
+    csgroup = splitter.add_mutually_exclusive_group(required=False)
+    csgroup.add_argument(
         '--courses', '-c',
         help=(
             'A list of white space separated course IDs whose data files '
             'are unpacked and decrypted.'
         ),
         nargs='*',
+    )
+    csgroup.add_argument(
+        '--clistings-file', '-l',
+        help=(
+            'Path to a file with one course ID per line. The file is expected'
+            ' to have no header row.'
+        ),
+        type=cli_utils.course_from_file,
     )
     splitter.add_argument(
         '--dynamic-date', '-m',
@@ -978,20 +994,30 @@ def main():
         stream=args.log_file,
         user='SIMEON:{cmd}'.format(cmd=args.command.upper()),
     )
+    # Get simeon configurations and plug them in wherever
+    # a CLI option is not given
     configs = cli_utils.find_config(args.config_file)
     for k, v in cli_utils.CONFIGS.items():
         for (attr, cgetter) in v:
             cli_arg = getattr(args, attr, None)
             config_arg = cgetter(configs, k, attr, fallback=None)
+            if attr.replace('-', '_') == 'clistings_file':
+                config_arg = cli_utils.course_from_file(config_arg)
             if not cli_arg and config_arg:
                 setattr(args, attr, config_arg)
+    # Combine --courses with --clistings-file
+    if hasattr(args, 'courses') and hasattr(args, 'clistings_file'):
+        if not getattr(args, 'courses', None):
+            args.courses = args.clistings_file
     # Signal handling for the usual interrupters
-    # List shortened because Windows is too dumb
-    # to know of many of the Unix interrupting signals
+    # List shortened because Windows is too annoying
+    # to know of many of the Unix interrupting signals.
+    # Also, set the global logger variable, so the signal handler can use it.
     sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
     logger = args.logger
     for sig in sigs:
         signal.signal(sig, bail_out)
+    # Call the function matching the given command
     try:
         COMMANDS.get(args.command)(args)
     except:
