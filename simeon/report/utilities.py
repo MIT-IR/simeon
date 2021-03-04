@@ -314,10 +314,12 @@ def module_from_block(block):
     :rtype: str
     :returns: Extracts the module ID in a module's block string
     """
+    block = block.replace('/courses/course-v1:', '')
     if block.startswith('i4x://'):
         return block.lstrip('i4x://')
     segments = block.split(':', 1)[-1].split('+')
-    return '/'.join(map(lambda s: s.split('@')[-1], segments))
+    segments = '/'.join(map(lambda s: s.split('@')[-1], segments))
+    return '/'.join(segments.split('/')[:5])
 
 
 def get_youtube_id(record):
@@ -523,7 +525,7 @@ def make_course_axis(dirname, outname='course_axis.json.gz'):
     if not root_block:
         msg = (
             'The given course structure file {f!r} does not have a root'
-            'course block. Please reach out to edX to have them fix it.'
+            ' course block. Please reach out to edX to have them fix it.'
         )
         raise BadSQLFileException(msg.format(f=fname))
     course_id = course_from_block(root_block)
