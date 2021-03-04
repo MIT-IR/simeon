@@ -4,6 +4,7 @@ Module to process tracking log files from edX
 import gzip
 import json
 import os
+import signal
 import sys
 import traceback
 from datetime import datetime
@@ -16,13 +17,28 @@ from typing import Dict, List, Union
 from dateutil.parser import parse as parse_date
 
 import simeon.download.utilities as utils
+from simeon.exceptions import EarlyExitError
 from simeon.report.utilities import SCHEMA_DIR, drop_extra_keys
+
+
+def _process_initializer():
+    """
+    Process initializer for multiprocessing pools
+    """
+    def sighandler(sig, frame):
+        raise EarlyExitError(
+            'Tracking log splitting interrupted prematurely'
+        )
+    sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
+    for sig in sigs:
+        signal.signal(sig, sighandler)
 
 
 # pylint:disable=unsubscriptable-object
 def process_line(
     line: Union[str, bytes], lcount: int,
-    date: Union[None, datetime]=None, is_gzip=True
+    date: Union[None, datetime]=None, is_gzip=True,
+    courses: List[str]=None
 ) -> dict:
     """
     Process the line from a tracking log file and return the reformatted
@@ -36,6 +52,8 @@ def process_line(
     :param date: The date of the file where this line comes from.
     :type is_gzip: bool
     :param is_gzip: Whether or not this line came from a GZIP file
+    :type courses: Union[Iterable[str], None]
+    :param courses: A list of course IDs whose records are exported
     :rtype: Dict[str, Union[Dict[str, str], str]]
     :return: Dictionary with both the data and its destination file name
     """
@@ -55,6 +73,8 @@ def process_line(
         except (JSONDecodeError, TypeError):
             record['event'] = {'event': record['event']}
     course_id = utils.get_course_id(record)
+    if courses and course_id not in courses:
+        return {}
     record['course_id'] = course_id
     try:
         utils.rephrase_record(record)
@@ -115,7 +135,9 @@ def split_tracking_log(
         date = None
     with gzip.open(filename) as zfh:
         for i, line in enumerate(zfh):
-            line_info = process_line(line, i + 1, date=date)
+            line_info = process_line(line, i + 1, date=date, courses=courses)
+            if not line_info:
+                continue
             data = line_info['data']
             user_id = (data.get('context') or {}).get('user_id')
             username = data.get('username')
@@ -146,10 +168,10 @@ def batch_split_tracking_logs(
     """
     Call split_tracking_log on each file inside a process or thread pool
     """
-    size = 5 if len(filenames) >= 10 else 2
+    size = 10 if len(filenames) >= 10 else 5
     splits = 0
     processed = 0
-    with Pool(size) as pool:
+    with Pool(size, initializer=None) as pool:
         results = dict()
         for fname in filenames:
             if verbose and logger:
@@ -186,6 +208,9 @@ def batch_split_tracking_logs(
                 except TimeoutError:
                     continue
                 except:
+                    _, excp, tb = sys.exc_info()
+                    if isinstance(excp, (SystemExit, EarlyExitError)):
+                        return False
                     results[fname] = (result, True)
                     processed += 1
                     _, excp, tb = sys.exc_info()
@@ -193,8 +218,6 @@ def batch_split_tracking_logs(
                     if verbose:
                         traces = ['{e}'.format(e=excp)]
                         traces += map(str.strip, traceback.format_tb(tb))
-                        msg = msg.format(f=fname, e='\n'.join(traces))
-                    else:
-                        msg = msg.format(f=fname, e=excp)
-                    logger.error(msg)
+                        excp = '\n'.join(traces)
+                    logger.error(msg.format(f=fname, e=excp))
     return splits == len(filenames)
