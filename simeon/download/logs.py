@@ -31,7 +31,7 @@ def _process_initializer():
         )
     sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
     for sig in sigs:
-        signal.signal(sig, sighandler)
+        signal.signal(sig, signal.SIG_DFL)
 
 
 # pylint:disable=unsubscriptable-object
@@ -171,7 +171,7 @@ def batch_split_tracking_logs(
     size = 10 if len(filenames) >= 10 else 5
     splits = 0
     processed = 0
-    with Pool(size, initializer=None) as pool:
+    with Pool(size, initializer=_process_initializer) as pool:
         results = dict()
         for fname in filenames:
             if verbose and logger:

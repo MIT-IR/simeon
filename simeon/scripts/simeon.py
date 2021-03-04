@@ -4,6 +4,7 @@ simeon is a command line tool that helps with processing edx data
 import functools
 import multiprocessing as mp
 import os
+import platform
 import signal
 import sys
 import traceback
@@ -32,8 +33,9 @@ def bail_out(sig, frame):
     Exit somewhat cleanly from a signal
     """
     global logger
+    needs_cleaning_msg = False
     if logger:
-        logger.warn('Interrupted by a signal. Cleaning up...')
+        logger.warn('The process is being interrupted by a signal.')
     if logger:
         logger.warn('Waiting for child processes...')
     children = mp.active_children()
@@ -45,6 +47,14 @@ def bail_out(sig, frame):
         except:
             continue
     if logger:
+        logger.warn(
+            'Incomplete splitting will leave generated files in an incomplete'
+            ' state. Please make sure to clean up manually.'
+        )
+        logger.warn(
+            'You may also have to hit CTRL+C again to fully exit, '
+            'if the first one does not fully terminate the program.'
+        )
         logger.warn('Exiting...')
     sys.exit(1)
 
