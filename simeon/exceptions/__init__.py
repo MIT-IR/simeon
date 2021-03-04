@@ -57,3 +57,9 @@ class MissingQueryFileException(Exception):
     """
     pass
 
+
+class EarlyExitError(Exception):
+    """
+    Raised when an early exit is requested by the end user of
+    the CLI tool
+    """

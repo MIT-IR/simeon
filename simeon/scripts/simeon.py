@@ -1,7 +1,10 @@
 """
 simeon is a command line tool that helps with processing edx data
 """
+import functools
+import multiprocessing as mp
 import os
+import signal
 import sys
 import traceback
 from argparse import (
@@ -11,12 +14,39 @@ from argparse import (
 from simeon.download import (
     aws, emails, logs, sqls, utilities as downutils
 )
-from simeon.exceptions import AWSException
+from simeon.exceptions import (
+    AWSException, EarlyExitError
+)
 from simeon.report import (
     make_sql_tables, make_table_from_sql, wait_for_bq_jobs
 )
 from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
+
+
+logger = None
+
+
+def bail_out(sig, frame):
+    """
+    Exit somewhat cleanly from a signal
+    """
+    global logger
+    if logger:
+        logger.warn('Interrupted by a signal. Cleaning up...')
+    if logger:
+        logger.warn('Waiting for child processes...')
+    children = mp.active_children()
+    for child in children:
+        try:
+            # os.kill(child.pid, sig)
+            # os.waitpid(child.pid, 0)
+            child.terminate()
+        except:
+            continue
+    if logger:
+        logger.warn('Exiting...')
+    sys.exit(1)
 
 
 def list_files(parsed_args):
@@ -525,6 +555,7 @@ def main():
     """
     Entry point
     """
+    global logger
     COMMANDS = {
         'list': list_files,
         'download': download_files,
@@ -944,11 +975,18 @@ def main():
             config_arg = cgetter(configs, k, attr, fallback=None)
             if not cli_arg and config_arg:
                 setattr(args, attr, config_arg)
+    # Signal handling for the usual interrupters
+    # List shortened because Windows is too dumb
+    # to know of many of the Unix interrupting signals
+    sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
+    logger = args.logger
+    for sig in sigs:
+        signal.signal(sig, bail_out)
     try:
         COMMANDS.get(args.command)(args)
     except:
         _, excp, tb = sys.exc_info()
-        if isinstance(excp, SystemExit):
+        if isinstance(excp, (EarlyExitError, SystemExit)):
             raise excp
         msg = 'The command {c} failed: {e}'
         if args.debug:
