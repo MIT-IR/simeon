@@ -6,6 +6,7 @@ import json
 import os
 import signal
 import sys
+import time
 import traceback
 from datetime import datetime
 from json.decoder import JSONDecodeError
@@ -32,6 +33,21 @@ def _process_initializer():
     sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
     for sig in sigs:
         signal.signal(sig, signal.SIG_DFL)
+
+
+def _cleanup_handles(fhandles, sleep=1):
+    """
+    Flush and close the given file handles.
+    Sleep sleep number of seconds if necessary,
+    so the OS can reclaim the file descriptors
+    associated with the given handles.
+    """
+    for fhandle in fhandles:
+        fhandle.flush()
+        os.fsync(fhandle.fileno())
+        os.close(fhandle.fileno())
+    if sleep:
+        time.sleep(sleep)
 
 
 # pylint:disable=unsubscriptable-object
@@ -170,12 +186,10 @@ def split_tracking_log(
                 fhandle.write(data.encode('utf8', 'ignore') + b'\n')
             else:
                 fhandle.write(data + '\n')
+        if not stragglers:
+            return bool(fhandles)
         # Working around EMFILE errors
-        for fhandle in fhandles:
-            try:
-                fhandle.close()
-            except:
-                continue
+        _cleanup_handles(fhandles.values())
         # Sort the stragglers by file name and use a file tracker
         stragglers = sorted(stragglers, key=lambda s: s.get('filename'))
         pfname = None
@@ -186,7 +200,7 @@ def split_tracking_log(
                 fname = os.path.join(ddir, fname)
                 if pfname and pfname != fname:
                     try:
-                        fhandles[pfname].close()
+                        _cleanup_handles([fhandles[pfname]], None)
                     except:
                         pass
                 data = line_info['data']
