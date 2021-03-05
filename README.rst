@@ -89,8 +89,12 @@ Further, ``simeon`` can parse INI formatted configuration files. It, by
 default, looks for files in the user’s home directory, or in the current
 working directory of the running process. The base names that are
 targeted when config files are looked up are: ``simeon.cfg`` or
-``.simeon.cfg`` or ``simeon.ini`` or ``.simeon.ini``. The following is a
-sample file content:
+``.simeon.cfg`` or ``simeon.ini`` or ``.simeon.ini``. You can also
+provide ``simeon`` with a config file by using the global option
+``--config-file`` or ``-C`` and giving it a path to the file with the
+corresponding configurations.
+
+The following is a sample file content:
 
 .. code:: sh
 
@@ -99,6 +103,7 @@ sample file content:
    [DEFAULT]
    site = edx
    org = yourorganizationx
+   clistings_file = /path/to/file/with/course_ids
 
    # Section related to Google Cloud (project, bucket, service account)
    [GCP]
@@ -240,3 +245,24 @@ Notes:
    both information and errors encountered while processing your files.
    You can capture those logs in a file by using the global option
    ``--log-file`` and providing a destination file for the logs.
+
+4. When using multi argument options like ``--tables`` or ``--courses``,
+   you should try not to place them right before the expected positional
+   arguments. This will help the CLI parser not confuse your positional
+   arguments with table names (in the case of ``--tables``) or course
+   IDs (when ``--courses`` is used).
+
+5. Splitting tracking logs is a resource intensive process. The routine
+   that splits the logs generates a file for each course ID encountered.
+   If you happen to have more course IDs in your logs than the running
+   process can open operation system file descriptors, then ``simeon``
+   will put away records it can’t save to disk for a second pass.
+   Putting away the records involves using more memory than normally
+   required. The second pass will only require one file descriptor at a
+   time, so it should be safe in terms of file descriptor limits. To
+   help ``simeon`` not have to do a second pass, you may increase the
+   file descriptor limits of processes from your shell by running
+   something like ``ulimit -n 2000`` before calling ``simeon split`` on
+   Unix machines. For Windows users, you may have to dig into the
+   Windows Registries for a corresponding setting. This should tell your
+   OS kernel to allow OS processes to open up to 2000 file handles.

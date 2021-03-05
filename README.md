@@ -60,7 +60,9 @@ If the above steps are carried out successfully, then you should be able to use 
 
 However, if you've taken care of the above steps but are still unable to get `simeon` to work, please open an issue.
 
-Further, `simeon` can parse INI formatted configuration files. It, by default, looks for files in the user's home directory, or in the current working directory of the running process. The base names that are targeted when config files are looked up are: `simeon.cfg` or `.simeon.cfg` or `simeon.ini` or `.simeon.ini`. The following is a sample file content:
+Further, `simeon` can parse INI formatted configuration files. It, by default, looks for files in the user's home directory, or in the current working directory of the running process. The base names that are targeted when config files are looked up are: `simeon.cfg` or `.simeon.cfg` or `simeon.ini` or `.simeon.ini`. You can also provide `simeon` with a config file by using the global option `--config-file` or `-C` and giving it a path to the file with the corresponding configurations.
+
+The following is a sample file content:
 
 ```sh
 # Default section for things like the organization whose data package is processed
@@ -68,6 +70,7 @@ Further, `simeon` can parse INI formatted configuration files. It, by default, l
 [DEFAULT]
 site = edx
 org = yourorganizationx
+clistings_file = /path/to/file/with/course_ids
 
 # Section related to Google Cloud (project, bucket, service account)
 [GCP]
@@ -178,3 +181,7 @@ Otherwise, `simeon` may end up failing to complete the split operation due to ex
 SQL bundles are only downloaded (not decrypted). Their decryption is done during a split operation.
 
 3. Unless there is an unhandled exception (which should be reported as a bug), `simeon` should, by default, print to the standard output both information and errors encountered while processing your files. You can capture those logs in a file by using the global option `--log-file` and providing a destination file for the logs.
+
+4. When using multi argument options like `--tables` or `--courses`, you should try not to place them right before the expected positional arguments. This will help the CLI parser not confuse your positional arguments with table names (in the case of `--tables`) or course IDs (when `--courses` is used).
+
+5. Splitting tracking logs is a resource intensive process. The routine that splits the logs generates a file for each course ID encountered. If you happen to have more course IDs in your logs than the running process can open operation system file descriptors, then `simeon` will put away records it can't save to disk for a second pass. Putting away the records involves using more memory than normally required. The second pass will only require one file descriptor at a time, so it should be safe in terms of file descriptor limits. To help `simeon` not have to do a second pass, you may increase the file descriptor limits of processes from your shell by running something like `ulimit -n 2000` before calling `simeon split` on Unix machines. For Windows users, you may have to dig into the Windows Registries for a corresponding setting. This should tell your OS kernel to allow OS processes to open up to 2000 file handles.
