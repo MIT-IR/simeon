@@ -231,7 +231,7 @@ def get_module_id(record: dict, paths=MODULE_PATHS):
         block = block.split('course-v1:')[-1]
         segments = block.split(':', 1)[-1].split('+')
         segments = '/'.join(map(lambda s: s.split('@')[-1], segments))
-        return '/'.join(segments.split('/', 5)[:-1])
+        return '/'.join(segments.split('/')[:5])
     return None
 
 
