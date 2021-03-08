@@ -38,7 +38,7 @@ def parsed_date(datestr: str) -> str:
     :type datestr: str
     :param datestr: A stringified date
     :rtype: str
-    :return: A properly formatted date string
+    :returns: A properly formatted date string
     :raises: ArgumentTypeError
     """
     try:
@@ -55,11 +55,26 @@ def gcs_bucket(bucket: str) -> str:
     :type bucket: str
     :param bucket: Google Cloud Storage bucket name
     :rtype: str
-    :return: A properly formatted GCS bucket name
+    :returns: A properly formatted GCS bucket name
     """
     if not bucket.startswith('gs://'):
         return 'gs://{b}'.format(b=bucket)
     return bucket
+
+
+def bq_table(name):
+    """
+    Check that the given BigQuery table name
+    is a fully qualified one: dataset.table or project.dataset.table
+    """
+    chunks = name.split('.')
+    if len(chunks) not in (2, 3):
+        raise ArgumentTypeError(
+            '{n} is not a valid BigQuery table name.\nValid table names '
+            'should be in the form project.dataset.table '
+            'or dataset.table.'.format(n=name)
+        )
+    return name
 
 
 def optional_file(fname: str) -> str:
@@ -70,7 +85,7 @@ def optional_file(fname: str) -> str:
     :type fname: str
     :param fname: File name from the command line
     :rtype: str
-    :return: A properly formatted file name
+    :returns: A properly formatted file name
     :raises: ArgumentTypeError
     """
     if fname is not None:
@@ -90,7 +105,7 @@ def make_logger(user='SIMEON', verbose=True, stream=None):
     :type stream: Union[TextIOWrapper,None]
     :param stream: A file object opened for writing
     :rtype: logging.Logger
-    :return: Returns a Logger object used to print messages
+    :returns: Returns a Logger object used to print messages
     """
     if stream is None:
         stream = sys.stdout
@@ -148,7 +163,7 @@ def find_config(fname=None):
     :type fname: Union[None, str, pathlib.Path]
     :param fname: Path to an INI config file, default "simeon.cfg"
     :rtype: configparser.ConfigParser
-    :return: Returns a ConfigParser with configs from the file(s)
+    :returns: Returns a ConfigParser with configs from the file(s)
     """
     if fname is None:
         files = [
@@ -177,7 +192,7 @@ def course_listings(courses):
     :type courses: Union[Iterable, None]
     :param courses: An iterable of course ID's
     :rtype: set
-    :return: A set object of course IDs
+    :returns: A set object of course IDs
     """
     if courses is None:
         return None
