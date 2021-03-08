@@ -177,11 +177,15 @@ The options in the config file(s) should match the optional arguments of the CLI
 1. Please note that SQL bundles are quite large when split up, so consider using the `-c` or `--courses` option when invoking `simeon download -S` or `simeon split` to make sure that you limit the splitting to a set of course IDs.
 Otherwise, `simeon` may end up failing to complete the split operation due to exhausted system resources (storage to be specific).
 
+
 2. `simeon download` with file types `log` and `email` will both download and decrypt the files matching the given criteria. If the latter operations are successful, then the encrypted files are deleted by default. This is to make sure that you don't exhaust storage resources. If you wish to keep those files, you can always use the `--keep-encrypted` option that comes with `simeon download` and `simeon split`.
 SQL bundles are only downloaded (not decrypted). Their decryption is done during a split operation.
 
+
 3. Unless there is an unhandled exception (which should be reported as a bug), `simeon` should, by default, print to the standard output both information and errors encountered while processing your files. You can capture those logs in a file by using the global option `--log-file` and providing a destination file for the logs.
 
+
 4. When using multi argument options like `--tables` or `--courses`, you should try not to place them right before the expected positional arguments. This will help the CLI parser not confuse your positional arguments with table names (in the case of `--tables`) or course IDs (when `--courses` is used).
+
 
 5. Splitting tracking logs is a resource intensive process. The routine that splits the logs generates a file for each course ID encountered. If you happen to have more course IDs in your logs than the running process can open operation system file descriptors, then `simeon` will put away records it can't save to disk for a second pass. Putting away the records involves using more memory than normally required. The second pass will only require one file descriptor at a time, so it should be safe in terms of file descriptor limits. To help `simeon` not have to do a second pass, you may increase the file descriptor limits of processes from your shell by running something like `ulimit -n 2000` before calling `simeon split` on Unix machines. For Windows users, you may have to dig into the Windows Registries for a corresponding setting. This should tell your OS kernel to allow OS processes to open up to 2000 file handles.

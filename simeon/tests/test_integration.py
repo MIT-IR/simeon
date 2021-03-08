@@ -98,39 +98,82 @@ class SimeonGeoIPCLIIntegration(unittest.TestCase):
         self.log_file = os.path.join(
             self.this_dir, 'fixtures', 'file.log'
         )
+        self.config_file = os.path.join(
+            self.this_dir, 'fixtures', 'config.ini'
+        )
         self.un_file = os.path.join(
             self.this_dir, 'fixtures', 'un_data.csv'
         )
         self.output_file = os.path.join(
             self.this_dir, 'fixtures', 'geoip.json.gz'
         )
-        self.good_options = [
+        self.global_options = [
             '--log-file {f}'.format(f=self.log_file),
+            '--config-file {f}'.format(f=self.config_file),
+            '--quiet',
+        ]
+        self.extract_good_options = [
             '--un-data {f}'.format(f=self.un_file),
             '--output {f}'.format(f=self.output_file),
             '--quiet', '--tracking-logs',
+        ]
+        self.merge_good_options = [
+            '--geo-table dataset.table',
+            '--project gcp-project-id',
+            '--service-account-file saccount_file.json',
+            '--column ip',
         ]
         self.proc = None
 
     def tearDown(self):
         if self.proc:
-            if self.proc.stdout:
-                self.proc.stdout.close()
-            if self.proc.stderr:
-                self.proc.stderr.close()
+            streams = (self.proc.stdout, self.proc.stderr)
+            for stream in streams:
+                if stream:
+                    stream.close()
         for file_ in (self.log_file, self.un_file, self.output_file):
             try:
                 os.remove(file_)
             except OSError:
                 continue
 
-    def test_geoip_good_options(self):
+    def test_geoip_global_options(self):
         """
         Test that global options for simeon-geoip have not changed.
         """
-        for option in self.good_options:
+        for option in self.global_options:
             cmd = 'simeon-geoip {o} --help'.format(o=option)
-            msg = 'Checking that global option {o} exists'.format(o=option)
+            msg = 'Checking that option {o} for simeon-geoip exists'.format(
+                o=option
+            )
+            with self.subTest(msg):
+                self.proc = _run_command(cmd)
+                self.assertEqual(self.proc.returncode, 0)
+                self.tearDown()
+
+    def test_geoip_extract_options(self):
+        """
+        Test that options for simeon-geoip extract have not changed.
+        """
+        for option in self.global_options:
+            cmd = 'simeon-geoip extract {o} --help'.format(o=option)
+            msg = 'Checking that option {o} for extract exists'.format(
+                o=option
+            )
+            with self.subTest(msg):
+                self.proc = _run_command(cmd)
+                self.assertEqual(self.proc.returncode, 0)
+                self.tearDown()
+
+    def test_geoip_merge_options(self):
+        """
+        Test that options for simeon-geoip merge have not changed.
+        """
+        for option in self.global_options:
+            cmd = 'simeon-geoip merge {o} --help'.format(o=option)
+            msg = 'Checking that option {o} for merge exists'.format(
+                o=option
+            )
             with self.subTest(msg):
                 self.proc = _run_command(cmd)
                 self.assertEqual(self.proc.returncode, 0)
