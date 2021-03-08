@@ -970,7 +970,8 @@ def main():
             'to join to modal_ip to extract geolocation information '
             'for IP addresses.'
         ),
-        default='geocode_latest.geoip',
+        default='geocode.geoip',
+        type=cli_utils.bq_table,
     )
     reporter.add_argument(
         '--fail-fast', '-F',
