@@ -63,3 +63,10 @@ class EarlyExitError(Exception):
     Raised when an early exit is requested by the end user of
     the CLI tool
     """
+
+
+class LoadJobException(Exception):
+    """
+    Raised from a BigQuery data load job
+    """
+    pass

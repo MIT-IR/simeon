@@ -11,11 +11,19 @@ from google.cloud import bigquery
 from google.cloud import storage
 
 from simeon.upload import utilities as uputils
+from simeon.report import utilities as rutils
+from simeon.exceptions import LoadJobException
+
 
 FILE_FORMATS = {
     'log': ['json'],
     'sql': ['csv', 'txt', 'sql', 'json']
 }
+MERGE_DDL = """MERGE {first} f USING {second} s
+ON f.{column} = s.{column}
+WHEN NOT MATCHED THEN
+INSERT ROW
+"""
 
 
 class BigqueryClient(bigquery.Client):
@@ -43,7 +51,7 @@ class BigqueryClient(bigquery.Client):
         :type use_storage: bool
         :param use_storage: Whether or not to load the data from GCS
         :rtype: List[bigquery.LoadJob]
-        :return: List of load jobs
+        :returns: List of load jobs
         :raises: Propagates everything from the underlying package
         """
         formats = FILE_FORMATS.get(file_type, [])
@@ -88,7 +96,7 @@ class BigqueryClient(bigquery.Client):
         :type bucket: str
         :param bucket: GCS bucket name to use
         :rtype: bigquery.LoadJob
-        :return: The LoadJob object associated with the work being done
+        :returns: The LoadJob object associated with the work being done
         :raises: Propagates everything from the underlying package
         """
         if use_storage:
@@ -104,7 +112,7 @@ class BigqueryClient(bigquery.Client):
             t=file_type, dt=datetime.now().strftime('%Y%m%d%H%M%S%f')
         )
         dest = uputils.local_to_bq_table(fname, file_type, project)
-        dataset, _ = dest.rsplit('.', 1)
+        dataset = dest.rsplit('.', 1)[0]
         self.create_dataset(dataset, exists_ok=True)
         if use_storage:
             fname = uputils.local_to_gcs_path(fname, file_type, bucket)
@@ -114,6 +122,65 @@ class BigqueryClient(bigquery.Client):
         return loader(
             fname, dest, job_config=config, job_id_prefix=job_prefix
         )
+
+    def merge_to_table(self, fname, table, col, use_storage=False):
+        """
+        Merge the given file to the target table name.
+        If the latter does not exist, create it first.
+        This process waits for all the jobs needed
+
+        :type fname: str
+        :param fname: A local file name or a GCS URI
+        :type table: str
+        :param table: Fully qualified BigQuery table name
+        :type col: str
+        :param col: Column by which to merge
+        :type use_storage: bool
+        :param use_storage: Whether or not the given path is a GCS URI
+        :rtype: bigquery.QueryJob
+        :returns: The QueryJob object associated with the merge carried out
+        :raises: Propagates everything from the underlying package
+        """
+        if len(table.split('.')) < 3:
+            table = '{p}.{t}'.format(p=self.project, t=table)
+        dataset = table.rsplit('.', 1)[0]
+        bqtable = bigquery.Table.from_string(table)
+        temp_table = bigquery.Table.from_string(table + '_temp')
+        schema = uputils.get_bq_schema(table)
+        bqtable.schema = schema
+        temp_table.schema = schema
+        job_prefix = '{t}_data_load_{dt}-'.format(
+            t=bqtable.table_id,
+            dt=datetime.now().strftime('%Y%m%d%H%M%S%f')
+        )
+        config = config = uputils.make_bq_load_config(
+            table, False, True, 'json'
+        )
+        self.create_dataset(dataset, exists_ok=True)
+        for tbl in (bqtable, temp_table):
+            self.create_table(tbl, exists_ok=True)
+        if use_storage:
+            loader = self.load_table_from_uri
+        else:
+            loader = self.load_table_from_file
+            fname = gzip.open(fname, 'rb')
+        job = loader(
+            fname, temp_table, job_config=config, job_id_prefix=job_prefix
+        )
+        rutils.wait_for_bq_jobs([job])
+        if job.errors:
+            raise LoadJobException(
+                'Merge job failed with: {e}'.format(e=job.errors)
+            )
+        query = MERGE_DDL.format(
+            first=table, second=table + '_temp', column=col,
+        )
+        qjob = self.query(query)
+        rutils.wait_for_bq_jobs([qjob])
+        if qjob.errors:
+            raise LoadJobException(
+                'Merge job failed with: {e}'.format(e=qjob.errors)
+            )
 
 
 class GCSClient(storage.Client):
@@ -135,7 +202,7 @@ class GCSClient(storage.Client):
         :type overwrite: bool
         :param overwrite: Overwrite the target blob if it exists
         :rtype: None
-        :return: Nothing
+        :returns: Nothing
         :raises: Propagates everything from the underlying package
         """
         dest = storage.Blob.from_string(
@@ -160,7 +227,7 @@ class GCSClient(storage.Client):
         :type bucket: str
         :param bucket: GCS bucket name
         :rtype: None
-        :return: Nothing
+        :returns: Nothing
         :raises: Propagates everything from the underlying package
         """
         formats = FILE_FORMATS.get(file_type, [])
