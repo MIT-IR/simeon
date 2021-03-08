@@ -10,7 +10,7 @@ chapters.name as chapter_name,
 FROM (
     SELECT index, category, course_id, name, chapter_mid,
     REGEXP_EXTRACT(REGEXP_REPLACE(module_id, '[.]', '_'), r'(?:.*\/)(.*)') as vid_id,
-    REGEXP_EXTRACT(data.ytid, r'\:(.*)') as yt_id,
+    ARRAY_REVERSE(SPLIT(data.ytid, ':'))[SAFE_ORDINAL(1)] as yt_id,
     FROM `{latest_dataset}.course_axis`
     WHERE category = "video"
 ) as videos
