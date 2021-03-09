@@ -1,5 +1,5 @@
 """
-simeon-geoip is a companion CLI tool to the simeon tool that helps with
+simeon-geoip is a companion script to the simeon tool that helps with
 extracting geolocation information from a MaxMind database, and merging
 the generated data file to a target table in BigQuery.
 
@@ -257,7 +257,10 @@ def main():
     )
     merger.add_argument(
         '--column', '-c',
-        help='The column on which to to merge the file and table',
+        help=(
+            'The column on which to to merge the file and table. '
+            'Default: %(default)s'
+        ),
         default='ip',
     )
     args = parser.parse_args()
@@ -301,14 +304,13 @@ def main():
             for (attr, cgetter) in v:
                 cli_arg = getattr(args, attr, None)
                 config_arg = cgetter(configs, k, attr, fallback=None)
-                if attr.replace('-', '_') == 'clistings_file':
-                    config_arg = cli_utils.course_from_file(config_arg)
                 if not cli_arg and config_arg:
                     setattr(args, attr, config_arg)
-        keys = ('geo-table', 'column')
+        keys = ('geo-table', 'column', 'project')
         if not all(getattr(args, k.replace('-', '_'), None) for k in keys):
             msg = 'The following options expected valid values: {o}'
-            args.logger.info(msg.format(o=', '.join(keys)))
+            args.logger.error(msg.format(o=', '.join(keys)))
+            sys.exit(1)
         args.logger.info(
             'Merging {f} to {t}'.format(f=args.geofile, t=args.geo_table)
         )
