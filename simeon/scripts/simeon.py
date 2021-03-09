@@ -974,6 +974,16 @@ def main():
         type=cli_utils.bq_table,
     )
     reporter.add_argument(
+        '--youtube-table', '-y',
+        help=(
+            'The fully qualified name of the geolocation table '
+            'to join to modal_ip to extract geolocation information '
+            'for IP addresses.'
+        ),
+        default='videos.youtube',
+        type=cli_utils.bq_table,
+    )
+    reporter.add_argument(
         '--fail-fast', '-F',
         help=(
             'Force simeon to quit as soon as an error is encountered'
