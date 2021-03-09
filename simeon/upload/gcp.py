@@ -181,6 +181,7 @@ class BigqueryClient(bigquery.Client):
             raise LoadJobException(
                 'Merge job failed with: {e}'.format(e=qjob.errors)
             )
+        self.delete_table(temp_table)
 
 
 class GCSClient(storage.Client):
