@@ -1,0 +1,39 @@
+{
+    "youtube": [
+        {
+            "field_type": "STRING",
+            "name": "id",
+            "description": "The ID that YouTube uses to uniquely identify the video"
+        },
+        {
+            "field_type": "STRING",
+            "name": "title",
+            "description": "Title of the YouTube video"
+        },
+        {
+            "field_type": "STRING",
+            "name": "description",
+            "description": "The description of the YouTube video"
+        },
+        {
+            "field_type": "INTEGER",
+            "name": "duration",
+            "description": "Duration of the YouTube video in seconds"
+        },
+        {
+            "field_type": "STRING",
+            "name": "channel_id",
+            "description": "The ID that YouTube uses to uniquely identify the channel that the video was uploaded to"
+        },
+        {
+            "field_type": "STRING",
+            "name": "channel_title",
+            "description": "Channel title for the channel that the video belongs to"
+        },
+        {
+            "field_type": "TIMESTAMP",
+            "name": "published_at",
+            "description": "The date and time that the video was published"
+        }
+    ]
+}
