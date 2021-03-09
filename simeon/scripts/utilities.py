@@ -14,6 +14,7 @@ CONFIGS = {
         ('site', configparser.ConfigParser.get),
         ('org', configparser.ConfigParser.get),
         ('clistings_file', configparser.ConfigParser.get),
+        ('youtube_token', configparser.ConfigParser.get),
     ),
     'GCP': (
         ('project', configparser.ConfigParser.get),
@@ -22,6 +23,8 @@ CONFIGS = {
         ('wait_for_loads', configparser.ConfigParser.getboolean),
         ('use_storage', configparser.ConfigParser.getboolean),
         ('geo_table', configparser.ConfigParser.get),
+        ('youtube_table', configparser.ConfigParser.get),
+        ('youtube_token', configparser.ConfigParser.get),
     ),
     'AWS': (
         ('credential_file', configparser.ConfigParser.get),
