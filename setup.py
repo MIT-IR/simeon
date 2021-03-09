@@ -21,12 +21,14 @@ setup(
         'console_scripts': [
             'simeon=simeon.scripts.simeon:main',
             'simeon-geoip=simeon.scripts.geoip:main',
+            'simeon-youtube=simeon.scripts.youtube:main',
         ],
     },
     install_requires=[
         'boto3>=1.16.57',
         'google-cloud-bigquery>=2.6.2',
         'google-cloud-storage>=1.35.0',
+        'jinja2',
         'python-dateutil>=2.8.1',
     ],
     extras_require={

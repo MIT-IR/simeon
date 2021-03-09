@@ -12,6 +12,8 @@ from datetime import datetime
 from functools import reduce
 from xml.etree import ElementTree
 
+from jinja2 import Template
+
 from simeon.download import utilities as downutils
 from simeon.exceptions import (
     BadSQLFileException, MissingFileException,
@@ -948,7 +950,8 @@ def make_sql_tables(dirname, verbose=False, logger=None):
 def make_table_from_sql(
     table, course_id, client, project, append=False,
     query_dir=QUERY_DIR, wait=False,
-    geo_table='geocode_latest.geoip'
+    geo_table='geocode.geoip',
+    youtube_table='videos.youtube',
 ):
     """
     Generate a BigQuery table using the given table name,
@@ -966,6 +969,10 @@ def make_table_from_sql(
     :param project: GCP project id where the video_axis table is loaded.
     :type query_dir: str
     :param query_dir: Directory where query files are saved.
+    :type geo_table: str
+    :param geo_table: Table name in BigQuery with geolocation data for IPs
+    :type youtube_table: str
+    :param youtube_table: Table name in BigQuery with YouTube video details
     :type wait: bool
     :param wait: Whether to wait for the query job to finish running
     :rtype: bigquery.QueryJob
@@ -994,11 +1001,15 @@ def make_table_from_sql(
             query=query,
             cols='({c})'.format(c=cols) if cols else ''
         )
+    query = Template(query).render(
+        geo_table=geo_table, youtube_table=youtube_table
+    )
     job = client.query(
         query.format(
             latest_dataset=latest_dataset,
             log_dataset=log_dataset,
             geo_table=geo_table,
+            youtube_table=youtube_table,
             course_id=course_id
         ),
         job_id='{t}_{dt}'.format(
