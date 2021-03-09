@@ -11,6 +11,7 @@ select
     if(grades.percent_grade >= (SELECT MAX(overall_cutoff_for_c) from `{latest_dataset}.grading_policy`), True, False) as completed,
     -- if(uic.enrollment_mode = "verified", true, false) as verified,
     modal_ip.modal_ip as ip,
+    {% if geo_table is defined and geo_table %}
     modal_ip.cc_by_ip,
     modal_ip.countryLabel,
     modal_ip.continent,
@@ -24,6 +25,21 @@ select
     modal_ip.un_special_region,
     modal_ip.latitude,
     modal_ip.longitude,
+    {% else %}
+    null cc_by_ip,
+    null countryLabel,
+    null continent,
+    null city,
+    null region,
+    null subdivision,
+    null postalCode,
+    null un_major_region,
+    null un_economic_group,
+    null un_developing_nation,
+    null un_special_region,
+    null latitude,
+    null longitude,
+    {% endif %}
     uic.profile_level_of_education as LoE,
     uic.profile_year_of_birth as YoB,
     uic.profile_gender as gender,
@@ -85,6 +101,7 @@ select
     roles.forumRoles_isModerator,
     roles.forumRoles_isStudent
 from `{latest_dataset}.user_info_combo` uic
+{% if geo_table is defined and geo_table %}
 left join (
     select m_ip.*, geo.* except (ip)
     from `{latest_dataset}.course_modal_ip` m_ip
@@ -92,6 +109,9 @@ left join (
     on m_ip.modal_ip = geo.ip
 
 ) modal_ip using(username)
+{% else %}
+left join `{latest_dataset}.course_modal_ip` modal_ip
+{% endif %}
 left join `{latest_dataset}.grades_persistent` grades using(user_id)
 left join `{latest_dataset}.pc_day_totals` pc_day using(username)
 left join `{latest_dataset}.pc_forum` pc_forum using(user_id)
