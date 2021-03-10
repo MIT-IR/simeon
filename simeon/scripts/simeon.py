@@ -4,7 +4,6 @@ simeon is a command line tool that helps with processing edx data
 import functools
 import multiprocessing as mp
 import os
-import platform
 import signal
 import sys
 import traceback
@@ -329,7 +328,7 @@ def push_to_bq(parsed_args):
                 project=parsed_args.project
             )
         else:
-            client = client = gcp.BigqueryClient(
+            client = gcp.BigqueryClient(
                 project=parsed_args.project
             )
     except Exception as excp:
@@ -375,13 +374,12 @@ def push_to_bq(parsed_args):
         sys.exit(1)
     if parsed_args.wait_for_loads:
         wait_for_bq_jobs(all_jobs)
-    errors = []
+    errors = 0
     for job in all_jobs:
         if job.errors:
-            parsed_args.logger.error(
-                'Error encountered: {e}'.format(e=job.errors)
-            )
-            errors.extend(job.errors)
+            for err in client.extract_error_messages(job.errors):
+                parsed_args.logger.error(err)
+            errors += 1
     if errors:
         sys.exit(1)
     if parsed_args.wait_for_loads:
@@ -420,7 +418,7 @@ def push_to_gcs(parsed_args):
                 project=parsed_args.project
             )
         else:
-            client = client = gcp.GCSClient(
+            client = gcp.GCSClient(
                 project=parsed_args.project
             )
     except Exception as excp:
@@ -511,7 +509,7 @@ def make_secondary_tables(parsed_args):
                 project=parsed_args.project
             )
         else:
-            client = client = gcp.BigqueryClient(
+            client = gcp.BigqueryClient(
                 project=parsed_args.project
             )
     except Exception as excp:
@@ -522,30 +520,32 @@ def make_secondary_tables(parsed_args):
         )
         sys.exit(1)
     parsed_args.logger.info('Connection established')
-    all_jobs = []
+    all_jobs = dict()
     for course_id in parsed_args.course_ids:
         parsed_args.logger.info(
             'Making secondary tables for course ID {c}'.format(c=course_id)
         )
         for table_name in parsed_args.tables:
-            all_jobs.append(make_table_from_sql(
+            job = make_table_from_sql(
                 table=table_name, course_id=course_id, client=client,
                 project=parsed_args.project, append=parsed_args.append,
                 geo_table=parsed_args.geo_table,
                 wait=parsed_args.wait_for_loads,
-            ))
+            )
+            all_jobs[(course_id, table_name)] = job
         parsed_args.logger.info(
             'Submitted query jobs for course ID {c}'.format(c=course_id)
         )
-    errors = []
+    errors = 0
     parsed_args.logger.info('Checking for errors...')
-    for job in all_jobs:
+    for (course_id, table), job in all_jobs.items():
         if job.errors:
-            msg = 'Error {e} from query text:\n{q}\n'
+            msg = 'Making {t} for {c} failed with the following: {e}'
             parsed_args.logger.error(msg.format(
-                q=job.query, e=job.errors
+                t=table, c=course_id,
+                e='\n'.join(client.extract_error_messages(job.errors))
             ))
-            errors.extend(job.errors)
+            errors += 1
     if errors:
         sys.exit(1)
     if parsed_args.wait_for_loads:
@@ -595,7 +595,7 @@ def main():
     parser.add_argument(
         '--log-file', '-L',
         help='Log file to use when simeon prints messages. Default: stdout',
-        type=FileType('w'),
+        type=FileType('a'),
         default=sys.stdout,
     )
     subparsers = parser.add_subparsers(

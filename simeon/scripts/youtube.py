@@ -236,7 +236,7 @@ def main():
     parser.add_argument(
         '--log-file', '-L',
         help='Log file to use when simeon prints messages. Default: stdout',
-        type=FileType('w'),
+        type=FileType('a'),
         default=sys.stdout,
     )
     parser.add_argument(
