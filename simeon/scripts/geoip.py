@@ -118,7 +118,7 @@ def make_geo_data(
                         '\nSkipping it...'
                     ).format(i=line, f=ip_file, e=excp)
                     if logger:
-                        logger.warn(msg)
+                        logger.warning(msg)
                     else:
                         print(msg, file=sys.stderr)
                     continue
@@ -286,7 +286,7 @@ def main():
         except Exception as e:
             msg = 'Failed to get UN denominations because: {e}'
             if args.logger:
-                args.logger.warn(msg.format(e=e))
+                args.logger.warning(msg.format(e=e))
             else:
                 print(msg.format(e=e), file=sys.stderr)
             un_denoms = {}

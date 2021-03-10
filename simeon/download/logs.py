@@ -268,8 +268,8 @@ def batch_split_tracking_logs(
                             'No files were extracted while splitting the tracking '
                             'log file {f!r} with the given criteria. Moving on...'
                         )
-                        logger.warn(errmsg.format(f=fname))
-                        logger.warn('Done splitting {f}'.format(f=fname))
+                        logger.warning(errmsg.format(f=fname))
+                        logger.warning('Done splitting {f}'.format(f=fname))
                 except TimeoutError:
                     continue
                 except:

@@ -116,7 +116,8 @@ def make_logger(user='SIMEON', verbose=True, stream=None):
         stream = open(stream, 'w')
     level = logging.INFO if verbose else logging.WARN
     formatter = logging.Formatter(
-        '%(asctime)s:%(levelname)s:%(name)s:%(message)s'
+        '%(asctime)s:%(levelname)s:%(name)s:%(message)s',
+        '%Y-%m-%d %H:%M:%S%z'
     )
     handler = logging.StreamHandler(stream=stream)
     handler.setLevel(level)

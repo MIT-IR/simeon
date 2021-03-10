@@ -32,9 +32,9 @@ def bail_out(sig, frame):
     Exit somewhat cleanly from a signal
     """
     if logger:
-        logger.warn('The process is being interrupted by a signal.')
+        logger.warning('The process is being interrupted by a signal.')
     if logger:
-        logger.warn('Waiting for child processes...')
+        logger.warning('Waiting for child processes...')
     children = mp.active_children()
     for child in children:
         try:
@@ -44,15 +44,15 @@ def bail_out(sig, frame):
         except:
             continue
     if logger:
-        logger.warn(
+        logger.warning(
             'Incomplete splitting will leave generated files in an incomplete'
             ' state. Please make sure to clean up manually.'
         )
-        logger.warn(
+        logger.warning(
             'You may also have to hit CTRL+C again to fully exit, '
             'if the first one does not fully terminate the program.'
         )
-        logger.warn('Exiting...')
+        logger.warning('Exiting...')
     sys.exit(1)
 
 
@@ -106,7 +106,7 @@ def split_log_files(parsed_args):
                     'No files were extracted while splitting the tracking '
                     'log file {f!r} with the given criteria.'
                 )
-                parsed_args.logger.warn(errmsg.format(f=fname))
+                parsed_args.logger.warning(errmsg.format(f=fname))
             parsed_args.logger.info('Done splitting {f}'.format(f=fname))
             success += rc
     else:
@@ -143,8 +143,8 @@ def split_sql_files(parsed_args):
                     'contents of {f!r} with the given criteria. '
                     'Moving on'
                 )
-                parsed_args.logger.warn(errmsg.format(f=fname))
-                parsed_args.logger.warn(msg.format(
+                parsed_args.logger.warning(errmsg.format(f=fname))
+                parsed_args.logger.warning(msg.format(
                     f=fname, w='Done splitting'
                 ))
                 continue
@@ -277,7 +277,7 @@ def download_files(parsed_args):
                     except:
                         pass
     if not downloads:
-        parsed_args.logger.warn(
+        parsed_args.logger.warning(
             'No files found matching the given criteria'
         )
     if parsed_args.file_type == 'log' and parsed_args.split:
