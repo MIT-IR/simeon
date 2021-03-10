@@ -123,6 +123,19 @@ class BigqueryClient(bigquery.Client):
             fname, dest, job_config=config, job_id_prefix=job_prefix
         )
 
+    @staticmethod
+    def extract_error_messages(errors):
+        messages = []
+        for err in errors:
+            msg = err.get('message', '')
+            if not msg:
+                continue
+            loc = err.get('location', '')
+            if loc:
+                msg = '{m} - File: {f}'.format(m=msg, f=loc)
+            messages.append(msg)
+        return messages
+
     def merge_to_table(self, fname, table, col, use_storage=False):
         """
         Merge the given file to the target table name.
@@ -169,18 +182,20 @@ class BigqueryClient(bigquery.Client):
         )
         rutils.wait_for_bq_jobs([job])
         if job.errors:
-            raise LoadJobException(
-                'Merge job failed with: {e}'.format(e=job.errors)
-            )
+            msg = 'Merge job failed with: {e}'
+            raise LoadJobException(msg.format(
+                e='\n'.join(self.extract_error_messages(job.errors))
+            ))
         query = MERGE_DDL.format(
             first=table, second=table + '_temp', column=col,
         )
         qjob = self.query(query)
         rutils.wait_for_bq_jobs([qjob])
         if qjob.errors:
-            raise LoadJobException(
-                'Merge job failed with: {e}'.format(e=qjob.errors)
-            )
+            msg = 'Merge job failed with: {e}'
+            raise LoadJobException(msg.format(
+                e='\n'.join(self.extract_error_messages(job.errors))
+            ))
         self.delete_table(temp_table)
 
 
