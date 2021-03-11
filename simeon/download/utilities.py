@@ -203,7 +203,10 @@ def get_course_id(record: dict, paths=COURSE_PATHS) -> str:
             if course_id:
                 break
     course_id = (course_id or '').split('courses/')[-1]
-    segments = '/'.join(course_id.split(':', 1)[-1].split('+')[:3])
+    if course_id.count('i4x:'):
+        segments = '/'.join(course_id.split(':', 1)[0].split('+')[:3])
+    else:
+        segments = '/'.join(course_id.split(':', 1)[-1].split('+')[:3])
     return '/'.join(segments.split('/')[:3])
 
 
