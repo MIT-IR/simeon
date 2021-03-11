@@ -78,11 +78,17 @@ def process_line(
         line = line.decode('utf8', 'ignore')
     if not line.startswith('{'):
         if 'localhost {' in line[:27]:
-            line = line[26:]
+            line = line.split('localhost ')[-1]
     try:
         record = json.loads(line)
     except (JSONDecodeError, TypeError):
-        return {'data': line, 'filename': 'dead_letter_queue.json.gz'}
+        return {
+            'data': line,
+            'filename': os.path.join(
+                'dead_letters',
+                'dead_letter_queue_{p}.json.gz'.format(p=os.getpid())
+            )
+        }
     if not isinstance(record.get('event'), dict):
         try:
             record['event'] = json.loads(record.get('event', '{}'))
@@ -95,9 +101,21 @@ def process_line(
     try:
         utils.rephrase_record(record)
     except KeyError:
-        return {'data': line, 'filename': 'dead_letter_queue.json.gz'}
+        return {
+            'data': line,
+            'filename': os.path.join(
+                'dead_letters',
+                'dead_letter_queue_{p}.json.gz'.format(p=os.getpid())
+            )
+        }
     if any(k not in record for k in ('event', 'event_type')):
-        return {'data': line, 'filename': 'dead_letter_queue.json.gz'}
+        return {
+            'data': line,
+            'filename': os.path.join(
+                'dead_letters',
+                'dead_letter_queue_{p}.json.gz'.format(p=os.getpid())
+            )
+        }
     if not date:
         try:
             date = parse_date(record.get('time', ''))
