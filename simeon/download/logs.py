@@ -183,7 +183,7 @@ def split_tracking_log(
             data = line_info['data']
             user_id = (data.get('context') or {}).get('user_id')
             username = data.get('username')
-            if not all([user_id, username]):
+            if not any([user_id, username]):
                 continue
             if isinstance(data, dict):
                 if courses and data.get('course_id') not in courses:
