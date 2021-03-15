@@ -40,7 +40,6 @@ def _extract_values(record, paths):
     Given a list of JSON paths (tuples), extract
     all the values associated with the given paths
     """
-    values = []
     for path in paths:
         subrec = record or {}
         start = path[:-1]
@@ -49,8 +48,7 @@ def _extract_values(record, paths):
             subrec = record.get(k, {}) or {}
         if not isinstance(subrec, dict):
             continue
-        values.append(subrec.get(end, ''))
-    return values
+        yield subrec.get(end, '')
 
 
 def decrypt_files(fnames, verbose=True, logger=None, timeout=60):
@@ -199,15 +197,18 @@ def get_course_id(record: dict, paths=COURSE_PATHS) -> str:
         course_id = record.get('context', {}).get('course_id') or ''
     if not course_id:
         for course_id in _extract_values(record, paths):
-            course_id = urlparser.urlparse(course_id or '').path
+            course_id = (course_id or '')
+            if not (course_id.count('/') or course_id.count('+')):
+                continue
+            course_id = urlparser.urlparse(course_id).path
             if course_id:
                 break
     course_id = (course_id or '').split('courses/')[-1]
-    if course_id.count('i4x:'):
+    if course_id.count('i4x:') or course_id.count('data:image'):
         segments = '/'.join(course_id.split(':', 1)[0].split('+')[:3])
     else:
         segments = '/'.join(course_id.split(':', 1)[-1].split('+')[:3])
-    return '/'.join(segments.split('/')[:3])
+    return '/'.join([s for s in segments.rstrip('/').split('/') if s][:3])
 
 
 def get_module_id(record: dict, paths=MODULE_PATHS):
@@ -233,9 +234,10 @@ def get_module_id(record: dict, paths=MODULE_PATHS):
             continue
         block = urlparser.urlparse(value).path
         block = block.split('course-v1:')[-1]
+        block = block.split('courses/')[-1]
         segments = block.split(':', 1)[-1].split('+')
         segments = '/'.join(map(lambda s: s.split('@')[-1], segments))
-        return '/'.join(segments.split('/')[:5])
+        return '/'.join([s for s in segments.split('/') if s][:5])
     return None
 
 
@@ -255,7 +257,7 @@ def make_tracklog_path(course_id: str, datestr: str, is_gzip=True) -> str:
     """
     ext = '.gz' if is_gzip else ''
     return os.path.join(
-        course_id.replace('.', '_').replace('/', '__'),
+        course_id.strip().replace('.', '_').replace('/', '__') or 'UNKNOWN',
         'tracklog-{ds}.json{x}'.format(ds=datestr, x=ext)
     )
 

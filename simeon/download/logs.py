@@ -125,7 +125,7 @@ def process_line(
         except Exception:
             ext = '.gz' if is_gzip else ''
             outfile = os.path.join(
-                course_id.replace('.', '_').replace('/', '__'),
+                course_id.replace('.', '_').replace('/', '__') or 'UNKNOWN',
                 'tracklog-unknown.json{x}'.format(x=ext)
             )
     else:
@@ -146,7 +146,7 @@ def split_tracking_log(
     a lot of open file handles and writes to them whenever it processes
     a good record. Some attempts are made to keep records around whenever
     the process is no longer allowed to open new files. But that will likely
-    lead to the running process' alotted memory to be exhausted.
+    lead to the exhaustion of the running process's alotted memory.
 
     :NOTE: If you've got a better way, please update me.
 

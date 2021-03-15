@@ -1,6 +1,7 @@
 """
 Test the download package
 """
+import os
 import unittest
 import warnings
 
@@ -15,6 +16,9 @@ class TestDownloadUtilities(unittest.TestCase):
     Test the utility functions and classes in the aws module
     """
     def setUp(self):
+        self.dead_letter_text = os.path.join(
+            'dead_letters', 'dead_letter_queue'
+        )
         self.bad_json_log_lines = [
             """{'time': '2020-01-01 23:45:13'}""",
             """{'time': '2020-01-01 23:45:13', 'course_id': 'science'}""",
@@ -428,8 +432,9 @@ class TestDownloadUtilities(unittest.TestCase):
             msg = 'Testing process_line with record {r}'
             with self.subTest(msg.format(r=line)):
                 out = logs.process_line(line, i)
-                self.assertEqual(
-                    out.get('filename', ''), 'dead_letter_queue.json.gz'
+                self.assertIn(
+                    self.dead_letter_text,
+                    out.get('filename', '')
                 )
                 self.assertEqual(line, out.get('data'))
 
@@ -443,8 +448,9 @@ class TestDownloadUtilities(unittest.TestCase):
             msg = 'Testing process_line with record {r}'
             with self.subTest(msg.format(r=line)):
                 out = logs.process_line(line, i)
-                self.assertEqual(
-                    out.get('filename', ''), 'dead_letter_queue.json.gz'
+                self.assertIn(
+                    self.dead_letter_text,
+                    out.get('filename', '')
                 )
                 self.assertEqual(line, out.get('data'))
 
@@ -458,7 +464,8 @@ class TestDownloadUtilities(unittest.TestCase):
             with self.subTest(msg.format(r=line)):
                 out = logs.process_line(line, i)
                 self.assertNotIn(
-                    'dead_letter_queue.json.gz', out.get('filename', '')
+                    self.dead_letter_text,
+                    out.get('filename', '')
                 )
                 self.assertIsInstance(out.get('data'), dict)
 
