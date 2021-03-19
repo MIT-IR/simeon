@@ -2,12 +2,14 @@
 Module to process SQL files from edX
 """
 import os
+import sys
 import zipfile
 from multiprocessing.pool import ThreadPool
 
 from simeon.download.utilities import (
     decrypt_files, format_sql_filename
 )
+from simeon.exceptions import SplitException
 
 
 def _batch_them(items, size):
@@ -119,13 +121,20 @@ def process_sql_archive(archive, ddir=None, include_edge=False, courses=None):
             if any(c in name for c in courses):
                 names.append(name)
         with ThreadPool(10) as pool:
-            results = []
+            results = dict()
             for name in names:
-                results.append(
-                    pool.apply_async(unpacker, args=(zf, name, ddir))
+                results[name] = pool.apply_async(
+                    unpacker, args=(zf, name, ddir)
                 )
-            for result in results:
-                result = result.get()
+            for fname, result in results.items():
+                try:
+                    result = result.get()
+                except:
+                    _, excp, _ = sys.exc_info()
+                    msg = 'Unable to unpack {f} from archive {a}: {e}'
+                    raise SplitException(
+                        msg.format(a=archive, f=fname, e=excp)
+                    )
                 if not result:
                     continue
                 out.append(result)

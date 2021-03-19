@@ -242,7 +242,10 @@ def download_files(parsed_args):
                 'Done downloading {n}'.format(n=blob.name)
             )
             try:
-                parsed_args.logger.info('Decrypting {f}'.format(f=fullname))
+                if parsed_args.file_type != 'sql':
+                    parsed_args.logger.info(
+                        'Decrypting {f}'.format(f=fullname)
+                    )
                 if parsed_args.file_type == 'email':
                     emails.process_email_file(
                         fname=fullname, verbose=parsed_args.verbose,

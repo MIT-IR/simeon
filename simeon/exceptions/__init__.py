@@ -70,3 +70,10 @@ class LoadJobException(Exception):
     Raised from a BigQuery data load job
     """
     pass
+
+
+class SplitException(Exception):
+    """
+    Raised when an issue happens during a split operation
+    """
+    pass
