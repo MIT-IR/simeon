@@ -305,7 +305,8 @@ def check_for_funny_keys(record, name='toplevel'):
     :rtype: None
     :return: Modifies the record in place
     """
-    for key, val in record.items():
+    for key in list(record):
+        val = record[key]
         if key.startswith('i4x-') or key.startswith('xblock.'):
             return True
         if key[0] in '0123456789':
