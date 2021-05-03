@@ -477,11 +477,13 @@ def push_generated_files(parsed_args):
     if parsed_args.courses:
         items = []
         for item in parsed_args.items:
-            real_item = os.path.realpath(item)
+            real_item = os.path.basename(
+                os.path.dirname(os.path.realpath(item))
+            )
             for c in parsed_args.courses:
                 c = c.replace('/', '__').replace('+', '__').replace('.', '_')
                 c = c.replace('-', '_')
-                if c in real_item:
+                if c.lower() == real_item.lower():
                     items.append(item)
                     break
         parsed_args.items = items

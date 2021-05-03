@@ -200,7 +200,7 @@ def course_listings(courses):
     """
     if courses is None:
         return None
-    return set(c.strip() for c in courses)
+    return set(c.strip() for c in courses if c.strip())
 
 
 def course_from_file(fname):
@@ -220,4 +220,4 @@ def course_from_file(fname):
         msg = 'The given course listings file, {f!r}, is not a valid file'
         raise ArgumentTypeError(msg.format(f=fname))
     with open(fname) as fh:
-        return set(line.strip() for line in fh)
+        return set(line.strip() for line in fh if line.strip())
