@@ -117,6 +117,7 @@ def split_log_files(parsed_args):
             courses=parsed_args.courses,
             verbose=parsed_args.verbose,
             logger=parsed_args.logger,
+            size=parsed_args.jobs,
         )
     sys.exit(0 if success else 1)
 
@@ -791,6 +792,15 @@ def main():
         action='store_true',
     )
     splitter.add_argument(
+        '--jobs', '-j',
+        help=(
+            'Number of processes/threads to use when processing multiple '
+            'files using multi threading or processing. Default: %(default)s'
+        ),
+        default=mp.cpu_count(),
+        type=int,
+    )
+    splitter.add_argument(
         '--include-edge', '-E',
         help='Include the edge site files when splitting SQL data packages.',
         action='store_true',
@@ -1029,8 +1039,10 @@ def main():
     # Also, set the global logger variable, so the signal handler can use it.
     sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
     logger = args.logger
-    for sig in sigs:
-        signal.signal(sig, bail_out)
+    if args.command == 'split':
+        if len(args.downloaded_files) > 1 and not args.dynamic_date:
+            for sig in sigs:
+                signal.signal(sig, bail_out)
     # Call the function matching the given command
     try:
         COMMANDS.get(args.command)(args)

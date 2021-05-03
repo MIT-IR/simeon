@@ -1,6 +1,7 @@
 """
 Module to process tracking log files from edX
 """
+import errno
 import gzip
 import json
 import os
@@ -192,8 +193,12 @@ def split_tracking_log(
             fname = os.path.join(ddir, fname)
             if fname not in fhandles:
                 try:
-                    fhandles[fname] = utils.make_file_handle(fname, is_gzip=True)
-                except OSError:
+                    fhandles[fname] = utils.make_file_handle(
+                        fname, is_gzip=True
+                    )
+                except OSError as excp:
+                    if not excp.errno == errno.EMFILE:
+                        raise excp
                     stragglers.append(line_info)
                     continue
             fhandle = fhandles[fname]
@@ -219,14 +224,16 @@ def split_tracking_log(
                 if pfname and pfname != fname:
                     try:
                         _cleanup_handles([fhandles[pfname]], None)
-                    except:
+                    except OSError:
                         pass
                 data = line_info['data']
                 if fname not in fhandles:
                     try:
                         fhandle = utils.make_file_handle(fname, is_gzip=True)
                         fhandles[fname] = fhandle
-                    except OSError:
+                    except OSError as excp:
+                        if not excp.errno == errno.EMFILE:
+                            raise excp
                         stragglers.append(rec)
                         continue
                 if not isinstance(data, str):
@@ -245,11 +252,13 @@ def split_tracking_log(
 def batch_split_tracking_logs(
     filenames, ddir, dynamic_date=False,
     courses=None, verbose=True, logger=None,
+    size=10
 ):
     """
     Call split_tracking_log on each file inside a process or thread pool
     """
-    size = 10 if len(filenames) >= 10 else 5
+    if not size or size > len(filenames):
+        size = len(filenames)
     splits = 0
     processed = 0
     with Pool(size, initializer=_process_initializer) as pool:
@@ -296,7 +305,6 @@ def batch_split_tracking_logs(
                         return False
                     results[fname] = (result, True)
                     processed += 1
-                    _, excp, tb = sys.exc_info()
                     msg = 'Failed to split {f}: {e}'
                     if verbose:
                         traces = ['{e}'.format(e=excp)]
