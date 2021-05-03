@@ -72,7 +72,7 @@ def local_to_gcs_path(fname: str, file_type: str, bucket: str) -> str:
         gcs_file = bname
     else:
         gcs_file = '{d}/{f}'.format(
-            d=os.path.basename(dname).replace('.', '_'),
+            d=os.path.basename(dname).replace('.', '_').replace('-', '_'),
             f=bname
         )
     return '{b}/{s}/{f}'.format(b=bucket, s=segment, f=gcs_file)
@@ -98,7 +98,7 @@ def course_to_bq_dataset(course_id: str, file_type: str, project: str) -> str:
     if file_type in ('sql', 'email'):
         suffix = 'latest'
     dataset = '{d}_{s}'.format(
-        d=course_id.replace('/', '__').replace('.', '_'),
+        d=course_id.replace('/', '__').replace('.', '_').replace('-', '_'),
         s=suffix
     )
     return '{p}.{d}'.format(p=project, d=dataset)
