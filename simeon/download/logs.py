@@ -197,10 +197,12 @@ def split_tracking_log(
                         fname, is_gzip=True
                     )
                 except OSError as excp:
-                    if not excp.errno == errno.EMFILE:
-                        raise excp
-                    stragglers.append(line_info)
-                    continue
+                    if excp.errno == errno.EMFILE:
+                       stragglers.append(line_info)
+                       continue
+                    if excp.errno == errno.ENAMETOOLONG:
+                        continue
+                    raise excp
             fhandle = fhandles[fname]
             if not isinstance(data, str):
                 drop_extra_keys(data, schema)
@@ -232,10 +234,12 @@ def split_tracking_log(
                         fhandle = utils.make_file_handle(fname, is_gzip=True)
                         fhandles[fname] = fhandle
                     except OSError as excp:
-                        if not excp.errno == errno.EMFILE:
-                            raise excp
-                        stragglers.append(rec)
-                        continue
+                        if excp.errno == errno.EMFILE:
+                            stragglers.append(rec)
+                            continue
+                        if excp.errno == errno.ENAMETOOLONG:
+                            continue
+                        raise excp
                 if not isinstance(data, str):
                     drop_extra_keys(data, schema)
                     data = json.dumps(data)

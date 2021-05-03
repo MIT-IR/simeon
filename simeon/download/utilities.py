@@ -256,8 +256,13 @@ def make_tracklog_path(course_id: str, datestr: str, is_gzip=True) -> str:
     :return: A local FS file path
     """
     ext = '.gz' if is_gzip else ''
+    segments = course_id.strip().split('/')[:3]
+    if len(segments) < 3:
+        return os.path.join(
+            'UNKNOWN', 'tracklog-{ds}.json{x}'.format(ds=datestr, x=ext)
+        )
     return os.path.join(
-        course_id.strip().replace('.', '_').replace('/', '__') or 'UNKNOWN',
+        '__'.join(segments).replace('.', '_'),
         'tracklog-{ds}.json{x}'.format(ds=datestr, x=ext)
     )
 
