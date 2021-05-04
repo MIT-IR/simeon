@@ -12,6 +12,7 @@ from datetime import datetime
 from functools import reduce
 from xml.etree import ElementTree
 
+from dateutil.parser import parse as parse_date
 from jinja2 import Template
 
 from simeon.download import utilities as downutils
@@ -21,6 +22,10 @@ from simeon.exceptions import (
     SchemaMismatchException,
 )
 from simeon.upload import utilities as uputils
+
+
+def format_str_date(d):
+    return parse_date(d).isoformat()
 
 
 csv.field_size_limit(13107200)
@@ -93,6 +98,14 @@ PROBLEM_TYPES = {
     'optionresponse', 'stringresponse', 'schematicresponse',
 }
 
+BQ2PY_TYPES = {
+    'TIMESTAMP': format_str_date,
+    'STRING': str,
+    'INTEGER': int,
+    'FLOAT': float,
+    'BOOLEAN': bool,
+}
+
 
 def wait_for_bq_jobs(job_list):
     """
@@ -119,7 +132,7 @@ def wait_for_bq_jobs(job_list):
             done += state
 
 
-def check_record_schema(record, schema, coerce=True):
+def check_record_schema(record, schema, coerce=True, nullify=False):
     """
     Check that the given record matches the same keys found in the given
     schema list of fields. The latter is one of the schemas in
@@ -130,14 +143,16 @@ def check_record_schema(record, schema, coerce=True):
     :type schema: Iterable[Dict[str, Union[str, Dict]]]
     :param schema: A list of dicts with info on BigQuery table fields
     :type coerce: bool
-    :param coerce: Whether or not to coerce values
+    :param coerce: Whether or not to coerce values into BigQuery types
+    :type nullify: bool
+    :param nullify: Whether to set values mapping missing keys to None
     :rtype: None
     :returns: Modifies the record if needed
     :raises: SchemaMismatchException
     """
     for field in schema:
         if field.get('field_type') != 'RECORD':
-            if field.get('name') not in record:
+            if field.get('name') not in record and nullify:
                 if not coerce:
                     raise SchemaMismatchException(
                         '{f} is missing from the record'.format(
@@ -145,6 +160,13 @@ def check_record_schema(record, schema, coerce=True):
                         )
                     )
                 record[field.get('name')] = None
+            elif field.get('name') in record and coerce:
+                func = BQ2PY_TYPES.get(field.get('field_type'))
+                if func:
+                    try:
+                        record[field.get('name')] = func(record[field.get('name')])
+                    except (ValueError, TypeError):
+                        record[field.get('name')] = None
         else:
             subfields = field.get('fields')
             subrecord = record.get(field.get('name'), {})
