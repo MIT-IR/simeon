@@ -20,7 +20,9 @@ from dateutil.parser import parse as parse_date
 
 import simeon.download.utilities as utils
 from simeon.exceptions import EarlyExitError
-from simeon.report.utilities import SCHEMA_DIR, drop_extra_keys
+from simeon.report.utilities import (
+    SCHEMA_DIR, check_record_schema, drop_extra_keys
+)
 
 
 def _process_initializer():
@@ -205,6 +207,7 @@ def split_tracking_log(
                     raise excp
             fhandle = fhandles[fname]
             if not isinstance(data, str):
+                check_record_schema(data, schema)
                 drop_extra_keys(data, schema)
                 data = json.dumps(data)
             if isinstance(fhandle, gzip.GzipFile):
@@ -241,6 +244,7 @@ def split_tracking_log(
                             continue
                         raise excp
                 if not isinstance(data, str):
+                    check_record_schema(data, schema)
                     drop_extra_keys(data, schema)
                     data = json.dumps(data)
                 if isinstance(fhandle, gzip.GzipFile):
