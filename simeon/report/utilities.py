@@ -25,7 +25,7 @@ from simeon.upload import utilities as uputils
 
 
 def format_str_date(d):
-    return parse_date(d).isoformat()
+    return parse_date(d).strftime('%Y-%m-%d %H:%M:%S.%f%z')
 
 
 csv.field_size_limit(13107200)
@@ -161,10 +161,11 @@ def check_record_schema(record, schema, coerce=True, nullify=False):
                     )
                 record[field.get('name')] = None
             elif field.get('name') in record and coerce:
+                val = record[field.get('name')]
                 func = BQ2PY_TYPES.get(field.get('field_type'))
-                if func:
+                if func and val is not None:
                     try:
-                        record[field.get('name')] = func(record[field.get('name')])
+                        record[field.get('name')] = func(val)
                     except (ValueError, TypeError):
                         record[field.get('name')] = None
         else:
