@@ -266,3 +266,13 @@ Notes:
    Unix machines. For Windows users, you may have to dig into the
    Windows Registries for a corresponding setting. This should tell your
    OS kernel to allow OS processes to open up to 2000 file handles.
+
+6. Care must be taken when using ``simeon split`` and ``simeon push`` to
+   make sure that the number of positional arguments passed does not
+   lead to the invoked command exceeding the maximum command-line length
+   allowed for arguments in a command. To avoid errors along those
+   lines, please consider passing the positional arguments as UNIX glob
+   patterns. For instance,
+   ``simeon split --file-type log 'data/TRACKING-LOGS/*/*.log.gz'``
+   tells ``simeon`` to expand the given glob pattern, instead of relying
+   on the shell to do it.
