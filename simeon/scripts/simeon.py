@@ -393,6 +393,13 @@ def push_to_bq(parsed_args):
                 parsed_args.logger.error(err)
             errors += 1
     if errors:
+        msg = (
+            'Out of {j} load job(s) submitted, {f} failed to '
+            'complete successfully'
+        )
+        parsed_args.logger.error(msg.format(
+            j=len(all_jobs), f=errors
+        ))
         sys.exit(1)
     if parsed_args.wait_for_loads:
         parsed_args.logger.info(

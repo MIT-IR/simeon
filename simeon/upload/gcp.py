@@ -125,6 +125,9 @@ class BigqueryClient(bigquery.Client):
 
     @staticmethod
     def extract_error_messages(errors):
+        """
+        Return the error messages from given list of error objects (dict)
+        """
         messages = []
         for err in errors:
             msg = err.get('message', '')
