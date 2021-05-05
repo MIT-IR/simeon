@@ -4,6 +4,7 @@ Utility functions and classes to help with making course reports like user_info_
 import csv
 import gzip
 import json
+import math
 import os
 import re
 import tarfile
@@ -26,6 +27,13 @@ from simeon.upload import utilities as uputils
 
 def format_str_date(d):
     return parse_date(d).strftime('%Y-%m-%d %H:%M:%S.%f%z')
+
+
+def to_float(v):
+    v = float(v)
+    if math.isnan(v):
+        return None
+    return v
 
 
 csv.field_size_limit(13107200)
@@ -102,7 +110,7 @@ BQ2PY_TYPES = {
     'TIMESTAMP': format_str_date,
     'STRING': str,
     'INTEGER': int,
-    'FLOAT': float,
+    'FLOAT': to_float,
     'BOOLEAN': bool,
 }
 
