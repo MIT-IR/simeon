@@ -26,7 +26,7 @@ from simeon.upload import utilities as uputils
 
 
 def format_str_date(d):
-    return parse_date(d).strftime('%Y-%m-%d %H:%M:%S.%f%z')
+    return parse_date(d).strftime('%Y-%m-%d %H:%M:%S.%f')
 
 
 def to_float(v):
