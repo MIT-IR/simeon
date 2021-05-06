@@ -31,7 +31,7 @@ def format_str_date(d):
 
 def to_float(v):
     v = float(v)
-    if math.isnan(v):
+    if math.isnan(v) or math.isinf(v):
         return None
     return v
 
