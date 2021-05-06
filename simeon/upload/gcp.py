@@ -33,7 +33,7 @@ class BigqueryClient(bigquery.Client):
     def load_tables_from_dir(
         self, dirname: str, file_type: str, project: str,
         create: bool, append: bool, use_storage: bool=False,
-        bucket: str=None
+        bucket: str=None, max_bad_rows=0,
     ) -> List[bigquery.LoadJob]:
         """
         Load all the files in the given directory.
@@ -50,6 +50,10 @@ class BigqueryClient(bigquery.Client):
         :param append: Whether or not to append the records to the table
         :type use_storage: bool
         :param use_storage: Whether or not to load the data from GCS
+        :type bucket: str
+        :param bucket: GCS bucket name to use
+        :type max_bad_rows: int
+        :param max_bad_rows: Max number of bad rows allowed during loading
         :rtype: List[bigquery.LoadJob]
         :returns: List of load jobs
         :raises: Propagates everything from the underlying package
@@ -67,8 +71,8 @@ class BigqueryClient(bigquery.Client):
         for file_ in files:
             jobs.append(
                 self.load_one_file_to_table(
-                    file_, file_type, project,
-                    create, append, use_storage, bucket,
+                    file_, file_type, project, create, append,
+                    use_storage, bucket, max_bad_rows
                 )
             )
         return jobs
@@ -76,7 +80,7 @@ class BigqueryClient(bigquery.Client):
     def load_one_file_to_table(
         self, fname: str, file_type: str, project: str,
         create: bool, append: bool, use_storage: bool=False,
-        bucket: str=None,
+        bucket: str=None, max_bad_rows=0,
     ):
         """
         Load the given file to a target BigQuery table
@@ -95,6 +99,8 @@ class BigqueryClient(bigquery.Client):
         :param use_storage: Whether or not to load the data from GCS
         :type bucket: str
         :param bucket: GCS bucket name to use
+        :type max_bad_rows: int
+        :param max_bad_rows: Max number of bad rows allowed during loading
         :rtype: bigquery.LoadJob
         :returns: The LoadJob object associated with the work being done
         :raises: Propagates everything from the underlying package
@@ -115,10 +121,13 @@ class BigqueryClient(bigquery.Client):
         dataset = dest.rsplit('.', 1)[0]
         self.create_dataset(dataset, exists_ok=True)
         if use_storage:
-            fname = uputils.local_to_gcs_path(fname, file_type, bucket)
+            if not fname.startswith('gs://'):
+                fname = uputils.local_to_gcs_path(fname, file_type, bucket)
         else:
             fname = gzip.open(fname, 'rb')
-        config = uputils.make_bq_load_config(dest, append, create, format_)
+        config = uputils.make_bq_load_config(
+            dest, append, create, format_, max_bad_rows=max_bad_rows
+        )
         return loader(
             fname, dest, job_config=config, job_id_prefix=job_prefix
         )

@@ -352,7 +352,7 @@ def push_to_bq(parsed_args):
         sys.exit(1)
     all_jobs = []
     for item in parsed_args.items:
-        if not os.path.exists(item):
+        if not item.startswith('gs://') and not os.path.exists(item):
             errmsg = 'Skipping {f!r}. It does not exist.'
             parsed_args.logger.error(errmsg.format(f=item))
             if parsed_args.fail_fast:
@@ -897,6 +897,15 @@ def main():
         '--service-account-file', '-S',
         help='The service account to carry out the data load',
         type=cli_utils.optional_file
+    )
+    pusher.add_argument(
+        '--max-bad-rows', '-m',
+        help=(
+            'Max number of bad rows to allow when loading data to BigQuery. '
+            'Default: %(default)s'
+        ),
+        type=int,
+        default=0,
     )
     pusher.add_argument(
         '--file-type', '-f',

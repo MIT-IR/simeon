@@ -199,7 +199,8 @@ def get_bq_schema(table: str, schema_dir: str=SCHEMA_DIR):
 
 def make_bq_load_config(
     table: str, append: bool=False,
-    create: bool=True, file_format: str='json', delim=','
+    create: bool=True, file_format: str='json',
+    delim=',', max_bad_rows=0,
 ):
     """
     Make a bigquery.LoadJobConfig object
@@ -237,11 +238,13 @@ def make_bq_load_config(
         return bigquery.LoadJobConfig(
             schema=schema, source_format=format_,
             create_disposition=create, write_disposition=append,
+            max_bad_records=max_bad_rows,
         )
     return bigquery.LoadJobConfig(
         schema=schema, source_format=format_,
         create_disposition=create, write_disposition=append,
         field_delimiter=delim, skip_leading_rows=skips,
+        max_bad_records=max_bad_rows,
     )
 
 
