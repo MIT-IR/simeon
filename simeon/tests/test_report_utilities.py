@@ -92,7 +92,7 @@ class TestReportUtilities(unittest.TestCase):
                 for schema in self.schemas:
                     copied = record.copy()
                     rutils.check_record_schema(
-                        copied, schema, True
+                        copied, schema, True, True
                     )
                     self.assertTrue(len(copied) > len(record))
             msg = (
@@ -103,7 +103,7 @@ class TestReportUtilities(unittest.TestCase):
                 with self.assertRaises(rutils.SchemaMismatchException):
                     for schema in self.schemas:
                         updated = rutils.check_record_schema(
-                            record.copy(), schema, False
+                            record.copy(), schema, False, True
                         )
     
     def test_drop_extra_keys(self):
