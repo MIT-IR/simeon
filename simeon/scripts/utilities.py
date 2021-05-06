@@ -278,3 +278,14 @@ def filter_generated_items(items, cdirs):
         else:
             out.update(filter_generated_items(glob.glob(item), cdirs))
     return out
+
+
+def items_from_files(files):
+    """
+    Given a list of text files, extract file paths
+    """
+    out = set()
+    for file_ in files:
+        with open(file_) as fh:
+            out.update(map(str.strip, fh))
+    return out

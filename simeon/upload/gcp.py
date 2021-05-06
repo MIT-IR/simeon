@@ -105,6 +105,7 @@ class BigqueryClient(bigquery.Client):
         :returns: The LoadJob object associated with the work being done
         :raises: Propagates everything from the underlying package
         """
+        use_storage = use_storage or fname.startswith('gs://')
         if use_storage:
             if bucket is None:
                 raise ValueError('use_storage=True requires a bucket name')
