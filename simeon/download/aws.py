@@ -43,12 +43,16 @@ O2B_MAP = dict(
 )
 
 
-def make_s3_bucket(bucket):
+def make_s3_bucket(bucket, client_id=None, client_secret=None):
     """
     Make a simple boto3 Bucket object pointing to S3
     """
     try:
-        return boto.resource('s3').Bucket(bucket)
+        resource = boto.resource(
+            's3', aws_access_key_id=client_id,
+            aws_secret_access_key=client_secret
+        )
+        return resource.Bucket(bucket)
     except Exception as excp:
         raise AWSException(excp)
 
