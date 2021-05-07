@@ -351,8 +351,10 @@ def push_to_bq(parsed_args):
         )
         sys.exit(1)
     all_jobs = []
+    storage = parsed_args.use_storage
     for item in parsed_args.items:
-        if not item.startswith('gs://') and not os.path.exists(item):
+        parsed_args.use_storage = storage or item.startswith('gs://')
+        if not parsed_args.use_storage and not os.path.exists(item):
             errmsg = 'Skipping {f!r}. It does not exist.'
             parsed_args.logger.error(errmsg.format(f=item))
             if parsed_args.fail_fast:
