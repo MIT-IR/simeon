@@ -185,7 +185,10 @@ def find_config(fname=None):
         files = [fname]
     config = configparser.ConfigParser()
     for config_file in files:
-        config.read(config_file)
+        try:
+            config.read(config_file)
+        except Exception as excp:
+            raise ArgumentTypeError(excp) from None
     return config
 
 

@@ -299,7 +299,11 @@ def main():
         )
         args.logger.info('Done processing the given IP files')
     else:
-        configs = cli_utils.find_config(args.config_file)
+        try:
+            configs = cli_utils.find_config(args.config_file)
+        except Exception as excp:
+            args.logger.error(str(excp).replace('\n', ' '))
+            sys.exit(1)
         for k, v in cli_utils.CONFIGS.items():
             for (attr, cgetter) in v:
                 cli_arg = getattr(args, attr, None)
