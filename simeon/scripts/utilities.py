@@ -28,7 +28,7 @@ CONFIGS = {
         ('youtube_token', configparser.ConfigParser.get),
     ),
     'AWS': (
-        ('credential_file', configparser.ConfigParser.get),
+        ('aws_cred_file', configparser.ConfigParser.get),
         ('profile_name', configparser.ConfigParser.get),
     ),
 }
@@ -159,7 +159,7 @@ def make_config_file(output=None):
         config.write(configfile)
 
 
-def find_config(fname=None):
+def find_config(fname=None, no_raise=False):
     """
     Searches for config files in default locations.
     If no file name is provided, it tries to load files
@@ -188,6 +188,8 @@ def find_config(fname=None):
         try:
             config.read(config_file)
         except Exception as excp:
+            if not no_raise:
+                continue
             raise ArgumentTypeError(excp) from None
     return config
 
