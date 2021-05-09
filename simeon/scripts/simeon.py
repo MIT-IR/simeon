@@ -64,7 +64,7 @@ def list_files(parsed_args):
     """
     if parsed_args.credentials is None:
         parsed_args.credentials = cli_utils.find_config(
-            os.path.expanduser('~/.aws/credentials'), no_raise=True
+            '~/.aws/credentials', no_raise=True
         )
     client_id = parsed_args.credentials.get(
         parsed_args.profile_name, 'aws_access_key_id',
@@ -233,7 +233,7 @@ def download_files(parsed_args):
     """
     if parsed_args.credentials is None:
         parsed_args.credentials = cli_utils.find_config(
-            os.path.expanduser('~/.aws/credentials'), no_raise=True
+            '~/.aws/credentials', no_raise=True
         )
     client_id = parsed_args.credentials.get(
         parsed_args.profile_name, 'aws_access_key_id',

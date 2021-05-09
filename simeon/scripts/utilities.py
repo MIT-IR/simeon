@@ -182,7 +182,7 @@ def find_config(fname=None, no_raise=False):
             os.path.join(os.path.join(os.getcwd(), '.simeon.ini')),
         ]
     else:
-        files = [fname]
+        files = [os.path.expanduser(fname)]
     config = configparser.ConfigParser()
     for config_file in files:
         try:
