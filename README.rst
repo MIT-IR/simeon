@@ -108,13 +108,17 @@ The following is a sample file content:
    # Section related to Google Cloud (project, bucket, service account)
    [GCP]
    project = your-gcp-project-id
-   bucket = target-gcs-bucket
+   bucket = your-gcs-bucket
    service_account_file = /path/to/a/service_account_file.json
+   wait_for_loads = True
+   geo_table = your-gcp-project.geocode_latest.geoip
+   youtube_table = your-gcp-project.videos.youtube
+   youtube_token = your-YouTube-API-token
 
    # Section related to the AWS credentials needed to download data from S3
    [AWS]
-   credential_file = /path/to/aws/credential_file.ini
-   profile_name = profile_name_in_credential_file_whose_credentials_are_used
+   aws_cred_file = ~/.aws/credentials
+   profile_name = default
 
 The options in the config file(s) should match the optional arguments of
 the CLI tool. For instance, the ``--service-account-file``,
