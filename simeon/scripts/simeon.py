@@ -19,7 +19,7 @@ from simeon.exceptions import (
     AWSException, EarlyExitError
 )
 from simeon.report import (
-    make_sql_tables, make_table_from_sql, wait_for_bq_jobs
+    make_sql_tables, make_table_from_sql, wait_for_bq_job_ids
 )
 from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
@@ -394,49 +394,54 @@ def push_to_bq(parsed_args):
         parsed_args.logger.info(
             'Loading item(s) in {f!r} to BigQuery'.format(f=item)
         )
-        appender(
-            loader(
-                item, parsed_args.file_type, parsed_args.project,
-                parsed_args.create, parsed_args.append,
-                parsed_args.use_storage, parsed_args.bucket
-            )
+        # Use .job_id here, so we don't lug LoadJob objects in memory.
+        # We would still need to make network calls
+        # to check on their statuses when wait_for_loads is True.
+        job = loader(
+            item, parsed_args.file_type, parsed_args.project,
+            parsed_args.create, parsed_args.append,
+            parsed_args.use_storage, parsed_args.bucket
         )
+        if parsed_args.wait_for_loads:
+            if isinstance(job, (list, tuple)):
+                appender(map(lambda j: j.job_id, job))
+            else:
+                appender(job.job_id)
         parsed_args.logger.info(
             'Created BigQuery load job(s) for item(s) in {f!r}'.format(f=item)
         )
-    if not all_jobs:
+    if not all_jobs and parsed_args.wait_for_loads:
         errmsg = (
             'No items processed. Perhaps, the given directory is empty?'
         )
         parsed_args.logger.error(errmsg)
         sys.exit(1)
-    if parsed_args.wait_for_loads:
-        wait_for_bq_jobs(all_jobs)
-    errors = 0
-    for job in all_jobs:
-        if job.errors:
-            for err in client.extract_error_messages(job.errors):
+    if not parsed_args.wait_for_loads:
+        msg = (
+            '{c} BigQuery data load job(s) started. Please consult your '
+            'BigQuery console for more details about the status of said jobs.'
+        )
+        parsed_args.logger.info(msg.format(c=len(parsed_args.items)))
+        sys.exit(0)
+    all_jobs = wait_for_bq_job_ids(all_jobs, client)
+    err_count = 0
+    for job, errors in all_jobs.items():
+        if errors:
+            for err in client.extract_error_messages(errors):
                 parsed_args.logger.error(err)
-            errors += 1
-    if errors:
+            err_count += 1
+    if err_count:
         msg = (
             'Out of {j} load job(s) submitted, {f} failed to '
             'complete successfully'
         )
         parsed_args.logger.error(msg.format(
-            j=len(all_jobs), f=errors
+            j=len(all_jobs), f=err_count
         ))
         sys.exit(1)
-    if parsed_args.wait_for_loads:
-        parsed_args.logger.info(
-            '{c} item(s) loaded to BigQuery'.format(c=len(all_jobs))
-        )
-        sys.exit(0)
-    msg = (
-        '{c} BigQuery data load jobs started. Please consult your '
-        'BigQuery console for more details about the status of said jobs.'
+    parsed_args.logger.info(
+        '{c} item(s) loaded to BigQuery'.format(c=len(all_jobs))
     )
-    parsed_args.logger.info(msg.format(c=len(all_jobs)))
 
 
 def push_to_gcs(parsed_args):
@@ -526,6 +531,12 @@ def push_generated_files(parsed_args):
     parsed_args.items = cli_utils.filter_generated_items(
         parsed_args.items, parsed_args.courses
     )
+    try:
+        # Not sure if this is going to give memory back to the OS,
+        # but worth the try
+        delattr(parsed_args, 'courses')
+    except AttributeError:
+        pass
     if parsed_args.destination == 'bq':
         push_to_bq(parsed_args)
     else:

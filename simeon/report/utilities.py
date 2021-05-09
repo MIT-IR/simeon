@@ -15,10 +15,11 @@ from xml.etree import ElementTree
 
 from dateutil.parser import parse as parse_date
 from jinja2 import Template
+from google.cloud.exceptions import NotFound
 
 from simeon.download import utilities as downutils
 from simeon.exceptions import (
-    BadSQLFileException, MissingFileException,
+    BadSQLFileException, LoadJobException, MissingFileException,
     MissingQueryFileException, MissingSchemaException,
     SchemaMismatchException,
 )
@@ -138,6 +139,31 @@ def wait_for_bq_jobs(job_list):
             if not state:
                 job.reload()
             done += state
+
+
+def wait_for_bq_job_ids(job_list, client):
+    """
+    Given a list of BigQuery load or query job IDs,
+    wait for them all to finish.
+
+    :type job_list: Iterable[str]
+    :param job_list: An Iterable of job IDs
+    :rtype: Dict[str, Dict[str, str]]
+    :return: Returns a dict of job IDs to job errors
+    :TODO: Improve this function to behave a little less like a tight loop
+    """
+    done = 0
+    out = dict()
+    while done < len(job_list):
+        for job in job_list:
+            try:
+                rjob = client.get_job(job)
+                done += rjob.state == 'DONE'
+                out[job] = (rjob.errors or {})
+            except NotFound:
+                msg = '{id} is not a valid BigQuery job ID'.format(id=job)
+                raise LoadJobException(msg) from None
+    return out
 
 
 def check_record_schema(record, schema, coerce=True, nullify=False):
