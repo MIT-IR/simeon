@@ -171,16 +171,13 @@ def find_config(fname=None, no_raise=False):
     :returns: Returns a ConfigParser with configs from the file(s)
     """
     if fname is None:
-        files = [
-            os.path.join(os.path.expanduser('~'), 'simeon.cfg'),
-            os.path.join(os.path.expanduser('~'), '.simeon.cfg'),
-            os.path.join(os.path.expanduser('~'), 'simeon.ini'),
-            os.path.join(os.path.expanduser('~'), '.simeon.ini'),
-            os.path.join(os.path.join(os.getcwd(), 'simeon.cfg')),
-            os.path.join(os.path.join(os.getcwd(), '.simeon.cfg')),
-            os.path.join(os.path.join(os.getcwd(), 'simeon.ini')),
-            os.path.join(os.path.join(os.getcwd(), '.simeon.ini')),
-        ]
+        names = ('simeon.cfg', 'simeon.ini', '.simeon.cfg', '.simeon.ini')
+        files = []
+        for name in names:
+            files.extend([
+                os.path.join(os.path.expanduser('~'), name),
+                os.path.join(os.getcwd(), name)
+            ])
     else:
         files = [os.path.expanduser(fname)]
     config = configparser.ConfigParser()

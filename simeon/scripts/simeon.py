@@ -64,7 +64,8 @@ def list_files(parsed_args):
     """
     if parsed_args.credentials is None:
         parsed_args.credentials = cli_utils.find_config(
-            '~/.aws/credentials', no_raise=True
+            os.path.join('~', '.aws', 'credentials'),
+            no_raise=True
         )
     client_id = parsed_args.credentials.get(
         parsed_args.profile_name, 'aws_access_key_id',
@@ -85,16 +86,13 @@ def list_files(parsed_args):
             date=parsed_args.begin_date, org=parsed_args.org,
             request=parsed_args.request_id or '',
         )
-        blobs += aws.S3Blob.from_prefix(
-            bucket=bucket, prefix=prefix
-        )
-    for blob in blobs:
-        fdate = aws.get_file_date(blob.name)
-        if parsed_args.begin_date <= fdate <= parsed_args.end_date:
-            if parsed_args.json:
-                print(blob.to_json())
-            else:
-                print(blob)
+        for blob in aws.S3Blob.from_prefix(bucket=bucket, prefix=prefix):
+            fdate = aws.get_file_date(blob.name)
+            if parsed_args.begin_date <= fdate <= parsed_args.end_date:
+                if parsed_args.json:
+                    print(blob.to_json())
+                else:
+                    print(blob)
 
 
 def split_log_files(parsed_args):
@@ -233,7 +231,8 @@ def download_files(parsed_args):
     """
     if parsed_args.credentials is None:
         parsed_args.credentials = cli_utils.find_config(
-            '~/.aws/credentials', no_raise=True
+            os.path.join('~', '.aws', 'credentials'),
+            no_raise=True
         )
     client_id = parsed_args.credentials.get(
         parsed_args.profile_name, 'aws_access_key_id',
