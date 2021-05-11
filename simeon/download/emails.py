@@ -7,7 +7,9 @@ import zipfile
 from simeon.download.utilities import decrypt_files
 
 
-def process_email_file(fname, verbose=True, logger=None, timeout=60):
+def process_email_file(
+    fname, verbose=True, logger=None, timeout=60, keepfiles=False
+):
     """
     Email opt-in files are kind of different in that
     they are zip archives inside of which reside GPG encrypted files.
@@ -20,6 +22,8 @@ def process_email_file(fname, verbose=True, logger=None, timeout=60):
     :param logger: A Logger object to print messages with
     :type timeout: int
     :param timeout: Number of seconds to wait for the decryption to finish
+    :type keepfiles: bool
+    :param keepfiles: Whether to keep the .gpg files after decrypting them
     :rtype: None
     :return: Nothing
     """
@@ -40,3 +44,8 @@ def process_email_file(fname, verbose=True, logger=None, timeout=60):
                 fnames=out, verbose=verbose,
                 logger=logger, timeout=timeout
             )
+    if not keepfiles:
+        try:
+            os.remove(out)
+        except OSError:
+            pass

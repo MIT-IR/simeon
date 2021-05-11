@@ -283,11 +283,11 @@ def download_files(parsed_args):
                         fname=fullname, verbose=parsed_args.verbose,
                         logger=parsed_args.logger,
                         timeout=parsed_args.decryption_timeout,
+                        keepfiles=parsed_args.keep_encrypted
                     )
                     if parsed_args.verbose:
-                        parsed_args.logger.info(
-                            'Downloaded and decrypted {f}'.format(f=fullname)
-                        )
+                        msg = 'Downloaded and decrypted the contents of {f}'
+                        parsed_args.logger.info(msg.format(f=fullname))
                 elif parsed_args.file_type == 'log':
                     downutils.decrypt_files(
                         fnames=fullname, verbose=parsed_args.verbose,
@@ -295,9 +295,8 @@ def download_files(parsed_args):
                         timeout=parsed_args.decryption_timeout,
                     )
                     if parsed_args.verbose:
-                        parsed_args.logger.info(
-                            'Downloaded and decrypted {f}'.format(f=fullname)
-                        )
+                        msg = 'Downloaded and decrypted the contents of {f}'
+                        parsed_args.logger.info(msg.format(f=fullname))
                 downloads[fullname] += 1
             except Exception as excp:
                 parsed_args.logger.error(excp)
