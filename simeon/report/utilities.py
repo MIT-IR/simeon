@@ -156,13 +156,14 @@ def wait_for_bq_job_ids(job_list, client):
     out = dict()
     while done < len(job_list):
         for job in job_list:
-            try:
-                rjob = client.get_job(job)
-                done += rjob.state == 'DONE'
-                out[job] = (rjob.errors or {})
-            except NotFound:
-                msg = '{id} is not a valid BigQuery job ID'.format(id=job)
-                raise LoadJobException(msg) from None
+            if job not in out:
+                try:
+                    rjob = client.get_job(job)
+                    done += rjob.state == 'DONE'
+                    out[job] = (rjob.errors or {})
+                except NotFound:
+                    msg = '{id} is not a valid BigQuery job ID'.format(id=job)
+                    raise LoadJobException(msg) from None
     return out
 
 

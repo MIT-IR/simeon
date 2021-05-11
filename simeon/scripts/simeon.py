@@ -421,6 +421,9 @@ def push_to_bq(parsed_args):
         )
         parsed_args.logger.info(msg.format(c=len(parsed_args.items)))
         sys.exit(0)
+    parsed_args.logger.info(
+        'Checking on the status of the submitted load job(s)...'
+    )
     all_jobs = wait_for_bq_job_ids(all_jobs, client)
     err_count = 0
     for job, errors in all_jobs.items():
