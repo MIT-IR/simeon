@@ -75,7 +75,7 @@ def batch_decrypt_files(
                 _delete_all(results[result])
 
 
-def unpacker(zfile, name, ddir):
+def unpacker(fname, name, ddir):
     """
     A worker callable to pass a Thread or Process pool
     """
@@ -85,9 +85,10 @@ def unpacker(zfile, name, ddir):
     target_name = os.path.join(ddir, target_name)
     target_dir = os.path.dirname(target_name)
     os.makedirs(target_dir, exist_ok=True)
-    with zfile.open(name) as zh, open(target_name, 'wb') as fh:
-        for line in zh:
-            fh.write(line)
+    with zipfile.ZipFile(fname) as zfile:
+        with zfile.open(name) as zh, open(target_name, 'wb') as fh:
+            for line in zh:
+                fh.write(line)
     return target_name
 
 
@@ -124,7 +125,7 @@ def process_sql_archive(archive, ddir=None, include_edge=False, courses=None):
             results = dict()
             for name in names:
                 results[name] = pool.apply_async(
-                    unpacker, args=(zf, name, ddir)
+                    unpacker, args=(archive, name, ddir)
                 )
             for fname, result in results.items():
                 try:
