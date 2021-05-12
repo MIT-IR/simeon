@@ -27,7 +27,8 @@ from simeon.upload import utilities as uputils
 
 
 def format_str_date(d):
-    return parse_date(d).strftime('%Y-%m-%d %H:%M:%S.%f')
+    # return parse_date(d).strftime('%Y-%m-%d %H:%M:%S.%f')
+    return parse_date(d).isoformat()
 
 
 def to_float(v):
@@ -130,14 +131,15 @@ def wait_for_bq_jobs(job_list):
     done = 0
     while done < len(job_list):
         for job in job_list:
+            if job.state == 'DONE':
+                continue
             try:
                 state = job.done()
-            except:
-                done += 1
-                job.reload()
-                continue
+            except NotFound:
+                msg = '{id} is not a valid BigQuery job ID'
+                raise LoadJobException(msg.format(id=job.job_id)) from None
             if not state:
-                job.reload()
+                state = job.reload()
             done += state
 
 
@@ -152,15 +154,14 @@ def wait_for_bq_job_ids(job_list, client):
     :return: Returns a dict of job IDs to job errors
     :TODO: Improve this function to behave a little less like a tight loop
     """
-    done = 0
     out = dict()
-    while done < len(job_list):
+    while len(out) < len(job_list):
         for job in job_list:
             if job not in out:
                 try:
                     rjob = client.get_job(job)
-                    done += rjob.state == 'DONE'
-                    out[job] = (rjob.errors or {})
+                    if rjob.state == 'DONE':
+                        out[job] = (rjob.errors or {})
                 except NotFound:
                     msg = '{id} is not a valid BigQuery job ID'.format(id=job)
                     raise LoadJobException(msg) from None
