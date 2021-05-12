@@ -20,9 +20,7 @@ from dateutil.parser import parse as parse_date
 
 from simeon.download import utilities as utils
 from simeon.exceptions import EarlyExitError
-from simeon.report.utilities import (
-    SCHEMA_DIR, check_record_schema, drop_extra_keys
-)
+from simeon.report import utilities as rutils
 
 
 def _process_initializer():
@@ -166,7 +164,7 @@ def split_tracking_log(
     :return: True if files have generated. False, otherwise
     """
     schema_file = os.path.join(
-        SCHEMA_DIR, 'schema_tracking_log.json'
+        rutils.SCHEMA_DIR, 'schema_tracking_log.json'
     )
     with open(schema_file) as sfh:
         schema = json.load(sfh).get('tracking_log')
@@ -207,8 +205,8 @@ def split_tracking_log(
                     raise excp
             fhandle = fhandles[fname]
             if not isinstance(data, str):
-                check_record_schema(data, schema)
-                drop_extra_keys(data, schema)
+                rutils.check_record_schema(data, schema)
+                rutils.drop_extra_keys(data, schema)
                 data = json.dumps(data)
             if isinstance(fhandle, gzip.GzipFile):
                 fhandle.write(data.encode('utf8', 'ignore') + b'\n')
@@ -244,8 +242,8 @@ def split_tracking_log(
                             continue
                         raise excp
                 if not isinstance(data, str):
-                    check_record_schema(data, schema)
-                    drop_extra_keys(data, schema)
+                    rutils.check_record_schema(data, schema)
+                    rutils.drop_extra_keys(data, schema)
                     data = json.dumps(data)
                 if isinstance(fhandle, gzip.GzipFile):
                     fhandle.write(data.encode('utf8', 'ignore') + b'\n')
