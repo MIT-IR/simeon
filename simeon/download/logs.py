@@ -18,7 +18,7 @@ from typing import Dict, List, Union
 
 from dateutil.parser import parse as parse_date
 
-import simeon.download.utilities as utils
+from simeon.download import utilities as utils
 from simeon.exceptions import EarlyExitError
 from simeon.report.utilities import (
     SCHEMA_DIR, check_record_schema, drop_extra_keys
