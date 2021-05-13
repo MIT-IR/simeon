@@ -871,7 +871,7 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
                 zh.write(json.dumps(record) + '\n')
                 try:
                     state = json.loads(
-                        record.get('state', '{}').replace('\\\\', '\\')
+                        (record.get('state') or '{}').replace('\\\\', '\\')
                     )
                 except json.JSONDecodeError:
                     continue
