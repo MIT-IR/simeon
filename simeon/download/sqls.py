@@ -4,9 +4,10 @@ Module to process SQL files from edX
 import os
 import signal
 import sys
+import traceback
 import zipfile
 from multiprocessing.pool import (
-    Pool as ProcessPool, ThreadPool
+    Pool as ProcessPool, ThreadPool, TimeoutError
 )
 
 from simeon.download.utilities import (
@@ -184,7 +185,10 @@ def process_sql_archive(
                 except TimeoutError:
                     continue
                 except:
-                    _, excp, _ = sys.exc_info()
+                    _, excp, tb = sys.exc_info()
+                    traces = ['{e}'.format(e=excp)]
+                    traces += map(str.strip, traceback.format_tb(tb))
+                    excp = '\n'.join(traces)
                     msg = 'Failed to unpack items from archive {a}: {e}'
                     raise SplitException(msg.format(a=archive, e=excp))
     return out
