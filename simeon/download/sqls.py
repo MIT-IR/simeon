@@ -4,12 +4,25 @@ Module to process SQL files from edX
 import os
 import sys
 import zipfile
-from multiprocessing.pool import ThreadPool
+from multiprocessing.pool import (
+    Pool as ProcessPool, ThreadPool
+)
 
 from simeon.download.utilities import (
     decrypt_files, format_sql_filename
 )
 from simeon.exceptions import SplitException
+
+
+proc_zfile = None
+
+
+def _pool_initializer(fname):
+    """
+    Process pool initializer
+    """
+    global proc_zfile
+    proc_zfile = zipfile.ZipFile(fname)
 
 
 def _batch_them(items, size):
@@ -22,6 +35,27 @@ def _batch_them(items, size):
             yield bucket[:]
             bucket = []
         bucket.append(item)
+    if bucket:
+        yield bucket
+
+
+def _batch_archive_names(names, size, include_edge=False, courses=None):
+    """
+    Batch the file names inside the archive by size
+    """
+    bucket = []
+    for name in names:
+        if not include_edge and '-edge' in name:
+            continue
+        if not courses:
+            bucket.append(name)
+            continue
+        if any(c in name for c in courses):
+            bucket.append(name)
+        if len(bucket) == size:
+            yield bucket[:]
+            bucket = []
+        bucket.append(name)
     if bucket:
         yield bucket
 
@@ -75,24 +109,29 @@ def batch_decrypt_files(
                 _delete_all(results[result])
 
 
-def unpacker(fname, name, ddir):
+def unpacker(fname, names, ddir):
     """
     A worker callable to pass a Thread or Process pool
     """
-    name, target_name = format_sql_filename(name)
-    if name is None or target_name is None:
-        return
-    target_name = os.path.join(ddir, target_name)
-    target_dir = os.path.dirname(target_name)
-    os.makedirs(target_dir, exist_ok=True)
-    with zipfile.ZipFile(fname) as zfile:
-        with zfile.open(name) as zh, open(target_name, 'wb') as fh:
+    global proc_zfile
+    targets = []
+    for name in names:
+        name, target_name = format_sql_filename(name)
+        if name is None or target_name is None:
+            continue
+        target_name = os.path.join(ddir, target_name)
+        target_dir = os.path.dirname(target_name)
+        os.makedirs(target_dir, exist_ok=True)
+        with proc_zfile.open(name) as zh, open(target_name, 'wb') as fh:
             for line in zh:
                 fh.write(line)
-    return target_name
+        targets.append(target_name)
+    return targets
 
 
-def process_sql_archive(archive, ddir=None, include_edge=False, courses=None):
+def process_sql_archive(
+    archive, ddir=None, include_edge=False, courses=None, size=10
+):
     """
     Unpack and decrypt files inside the given archive
 
@@ -104,6 +143,8 @@ def process_sql_archive(archive, ddir=None, include_edge=False, courses=None):
     :param include_edge: Include the files from the edge site
     :type courses: Union[Iterable[str], None]
     :param courses: A list of course IDs whose data files are unpacked
+    :type size: int
+    :param size: The size of the thread or process pool doing the unpacking
     :rtype: Iterable[str]
     :return: List of file names
     """
@@ -112,31 +153,30 @@ def process_sql_archive(archive, ddir=None, include_edge=False, courses=None):
         ddir, _ = os.path.split(archive)
     out = []
     with zipfile.ZipFile(archive) as zf:
-        names = []
-        for name in zf.namelist():
-            if not include_edge and '-edge' in name:
-                continue
-            if not courses:
-                names.append(name)
-                continue
-            if any(c in name for c in courses):
-                names.append(name)
-        with ThreadPool(10) as pool:
-            results = dict()
-            for name in names:
-                results[name] = pool.apply_async(
-                    unpacker, args=(archive, name, ddir)
+        names = zf.namelist()
+        batches = _batch_archive_names(
+            names, len(names) // size,
+            include_edge, courses
+        )
+        with ProcessPool(
+            size, initializer=_pool_initializer,
+            initargs=(archive,)
+        ) as pool:
+            results = []
+            for batch in batches:
+                results.append(
+                    pool.apply_async(unpacker, args=(archive, batch, ddir))
                 )
-            for fname, result in results.items():
+            for result in results:
                 try:
                     result = result.get()
                 except:
                     _, excp, _ = sys.exc_info()
-                    msg = 'Unable to unpack {f} from archive {a}: {e}'
+                    msg = 'Failed to unpack items from archive {a}: {e}'
                     raise SplitException(
-                        msg.format(a=archive, f=fname, e=excp)
+                        msg.format(a=archive, e=excp)
                     )
                 if not result:
                     continue
-                out.append(result)
+                out.extend(result)
     return out

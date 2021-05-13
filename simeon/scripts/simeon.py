@@ -148,6 +148,7 @@ def split_sql_files(parsed_args):
                 archive=fname, ddir=parsed_args.destination,
                 include_edge=parsed_args.include_edge,
                 courses=parsed_args.courses,
+                size=parsed_args.jobs,
             )
             if not to_decrypt:
                 errmsg = (
