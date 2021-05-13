@@ -16,7 +16,6 @@ from simeon.download.utilities import (
 from simeon.exceptions import (
     EarlyExitError, SplitException
 )
-import re
 
 
 proc_zfile = None

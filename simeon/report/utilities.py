@@ -7,7 +7,9 @@ import json
 import math
 import os
 import re
+import sys
 import tarfile
+import threading
 from collections import OrderedDict, defaultdict
 from datetime import datetime
 from functools import reduce
@@ -997,7 +999,7 @@ def make_roles_table(dirname, outname='roles.json.gz'):
             zh.write(json.dumps(record) + '\n')
 
 
-def make_sql_tables(dirname, verbose=False, logger=None):
+def make_sql_tables(dirname, verbose=False, logger=None, fail_fast=False):
     """
     Given a SQL directory, make the SQL tables
     defined in this module.
@@ -1010,6 +1012,8 @@ def make_sql_tables(dirname, verbose=False, logger=None):
     :param verbose: Print a message when a report is being made
     :type logger: logging.Logger
     :param logger: A logging.Logger object to print messages with
+    :type fail_fast: bool
+    :param fail_fast: Whether or not to bail after the first error
     :rtype: None
     :return: Nothing, but writes the generated data to the target files
     """
@@ -1018,13 +1022,20 @@ def make_sql_tables(dirname, verbose=False, logger=None):
         make_grading_policy, make_roles_table,
         make_student_module, make_user_info_combo,
     )
+    threads = []
     for maker in reports:
         if verbose and logger is not None:
             msg = 'Calling routine {f} on {d}'
             logger.info(msg.format(f=maker.__name__, d=dirname))
+        thread = threading.Thread(target=maker, args=(dirname,))
+        thread.start()
+        threads.append(thread)
+    fails = []
+    for thread in threads:
         try:
-            maker(dirname)
-        except OSError as excp:
+            thread.join()
+        except:
+            _, excp, _ = sys.exc_info()
             msg = (
                 'Some of the necessary files needed to make the {n} table(s) '
                 'are missing from the given directory {d}: {e}'
@@ -1033,10 +1044,13 @@ def make_sql_tables(dirname, verbose=False, logger=None):
                 d=dirname, n=maker.__name__.replace('make_', ''),
                 e=excp
             ))
-            raise excp from None
-        if verbose and logger is not None:
-            msg = '{f} made a report from files in {d}'
-            logger.info(msg.format(f=maker.__name__, d=dirname))
+            if fail_fast:
+                raise excp from None
+            fails.append(excp)
+    if verbose and logger is not None:
+        if fails:
+            for failure in fails:
+                logger.error(failure)
 
 
 def make_table_from_sql(

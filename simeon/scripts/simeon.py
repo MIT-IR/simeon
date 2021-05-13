@@ -186,8 +186,11 @@ def split_sql_files(parsed_args):
             parsed_args.logger.info('Making reports from course SQL files')
             for folder in dirnames:
                 try:
-                    make_sql_tables(folder, parsed_args.verbose, parsed_args.logger)
-                except OSError as excp:
+                    make_sql_tables(
+                        folder, parsed_args.verbose,
+                        parsed_args.logger, parsed_args.fail_fast
+                    )
+                except Exception as excp:
                     if parsed_args.fail_fast:
                         raise excp
                     parsed_args.logger.error(excp)
