@@ -16,6 +16,7 @@ from simeon.download.utilities import (
 from simeon.exceptions import (
     EarlyExitError, SplitException
 )
+import re
 
 
 proc_zfile = None
@@ -50,17 +51,17 @@ def _batch_them(items, size):
         yield bucket
 
 
-def _batch_archive_names(names, size, include_edge=False, courses=None):
+def _batch_archive_names(names, size, include_edge=False):
     """
     Batch the file names inside the archive by size
     """
-    courses = courses or set()
     bucket = []
     for name in names:
         if not include_edge and '-edge' in name:
             continue
-        if not courses or any(c in name for c in courses):
-            bucket.append(name)
+        if name.endswith('/'):
+            continue
+        bucket.append(name)
         if len(bucket) == size:
             yield bucket[:]
             bucket = []
@@ -117,10 +118,11 @@ def batch_decrypt_files(
         _delete_all(all_files)
 
 
-def unpacker(fname, names, ddir, tables_only=False):
+def unpacker(fname, names, ddir, courses=None, tables_only=False):
     """
     A worker callable to pass a Thread or Process pool
     """
+    # cid.replace('/', '__').replace('-', '_').replace('.', '_')
     global proc_zfile
     targets = []
     for name in names:
@@ -128,10 +130,16 @@ def unpacker(fname, names, ddir, tables_only=False):
         if name is None or target_name is None:
             continue
         target_name = os.path.join(ddir, target_name)
+        target_dir = os.path.dirname(target_name)
+        if target_dir.count('ora'):
+            cfolder = os.path.basename(os.path.dirname(target_dir))
+        else:
+            cfolder = os.path.basename(target_dir)
+        if courses and cfolder not in courses:
+            continue
         if tables_only:
             targets.append(target_name)
             continue
-        target_dir = os.path.dirname(target_name)
         os.makedirs(target_dir, exist_ok=True)
         with proc_zfile.open(name) as zh, open(target_name, 'wb') as fh:
             for line in zh:
@@ -162,15 +170,15 @@ def process_sql_archive(
     :rtype: Iterable[str]
     :return: List of file names
     """
-    courses = set(c.replace('/', '-') for c in (courses or []))
+    cpaths = set()
+    for c in (courses or []):
+        cpaths.add(c.replace('/', '__').replace('-', '_').replace('.', '_'))
     if ddir is None:
         ddir, _ = os.path.split(archive)
     out = []
     with zipfile.ZipFile(archive) as zf:
         names = zf.namelist()
-    batches = _batch_archive_names(
-        names, len(names) // size, include_edge, courses
-    )
+    batches = _batch_archive_names(names, len(names) // size, include_edge)
     with ProcessPool(
         size, initializer=_pool_initializer,
         initargs=(archive,)
@@ -178,7 +186,7 @@ def process_sql_archive(
         results = []
         for batch in batches:
             results.append(pool.apply_async(
-                unpacker, args=(archive, batch, ddir, tables_only)
+                unpacker, args=(archive, batch, ddir, cpaths, tables_only)
             ))
         processed = 0
         while processed < len(results):
