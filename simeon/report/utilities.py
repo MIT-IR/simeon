@@ -9,10 +9,12 @@ import os
 import re
 import sys
 import tarfile
-import threading
 from collections import OrderedDict, defaultdict
 from datetime import datetime
 from functools import reduce
+from multiprocessing.pool import (
+    ThreadPool, TimeoutError
+)
 from xml.etree import ElementTree
 
 from dateutil.parser import parse as parse_date
@@ -1022,35 +1024,41 @@ def make_sql_tables(dirname, verbose=False, logger=None, fail_fast=False):
         make_grading_policy, make_roles_table,
         make_student_module, make_user_info_combo,
     )
-    threads = []
-    for maker in reports:
-        if verbose and logger is not None:
-            msg = 'Calling routine {f} on {d}'
-            logger.info(msg.format(f=maker.__name__, d=dirname))
-        thread = threading.Thread(target=maker, args=(dirname,))
-        thread.start()
-        threads.append(thread)
-    fails = []
-    for thread in threads:
-        try:
-            thread.join()
-        except:
-            _, excp, _ = sys.exc_info()
-            msg = (
-                'Some of the necessary files needed to make the {n} table(s) '
-                'are missing from the given directory {d}: {e}'
-            )
-            excp = MissingFileException(msg.format(
-                d=dirname, n=maker.__name__.replace('make_', ''),
-                e=excp
-            ))
-            if fail_fast:
-                raise excp from None
-            fails.append(excp)
+    results = dict()
+    with ThreadPool(len(reports)) as pool:
+        for maker in reports:
+            clean_name = maker.__name__.replace('make_', '')
+            if verbose and logger is not None:
+                msg = 'Calling routine {f} on {d}'
+                logger.info(msg.format(f=maker.__name__, d=dirname))
+            results[clean_name] = pool.apply_async(maker, args=(dirname,))
+        fails = []
+        processed = 0
+        while processed < len(results):
+            for maker, result in results.items():
+                try:
+                    result.get(timeout=30)
+                    processed += 1
+                except TimeoutError:
+                    continue
+                except:
+                    _, excp, _ = sys.exc_info()
+                    msg = (
+                        'Error encountered while making the {n} table(s) '
+                        'with the given directory {d}: {e}'
+                    )
+                    excp = MissingFileException(msg.format(
+                        d=dirname, n=maker, e=excp
+                    ))
+                    if fail_fast:
+                        raise excp from None
+                    fails.append(excp)
+                    processed += 1
     if verbose and logger is not None:
         if fails:
             for failure in fails:
                 logger.error(failure)
+        logger.info('Done processing files in {d}'.format(d=dirname))
 
 
 def make_table_from_sql(
