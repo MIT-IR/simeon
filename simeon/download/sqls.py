@@ -43,19 +43,16 @@ def _batch_archive_names(names, size, include_edge=False, courses=None):
     """
     Batch the file names inside the archive by size
     """
+    courses = courses or set()
     bucket = []
     for name in names:
         if not include_edge and '-edge' in name:
             continue
-        if not courses:
-            bucket.append(name)
-            continue
-        if any(c in name for c in courses):
+        if not courses or any(c in name for c in courses):
             bucket.append(name)
         if len(bucket) == size:
             yield bucket[:]
             bucket = []
-        bucket.append(name)
     if bucket:
         yield bucket
 
@@ -130,7 +127,8 @@ def unpacker(fname, names, ddir):
 
 
 def process_sql_archive(
-    archive, ddir=None, include_edge=False, courses=None, size=10
+    archive, ddir=None, include_edge=False,
+    courses=None, size=5
 ):
     """
     Unpack and decrypt files inside the given archive
@@ -154,29 +152,28 @@ def process_sql_archive(
     out = []
     with zipfile.ZipFile(archive) as zf:
         names = zf.namelist()
-        batches = _batch_archive_names(
-            names, len(names) // size,
-            include_edge, courses
-        )
-        with ProcessPool(
-            size, initializer=_pool_initializer,
-            initargs=(archive,)
-        ) as pool:
-            results = []
-            for batch in batches:
-                results.append(
-                    pool.apply_async(unpacker, args=(archive, batch, ddir))
+    batches = _batch_archive_names(
+        names, len(names) // size, include_edge, courses
+    )
+    with ProcessPool(
+        size, initializer=_pool_initializer,
+        initargs=(archive,)
+    ) as pool:
+        results = []
+        for batch in batches:
+            results.append(
+                pool.apply_async(unpacker, args=(archive, batch, ddir))
+            )
+        for result in results:
+            try:
+                result = result.get()
+            except:
+                _, excp, _ = sys.exc_info()
+                msg = 'Failed to unpack items from archive {a}: {e}'
+                raise SplitException(
+                    msg.format(a=archive, e=excp)
                 )
-            for result in results:
-                try:
-                    result = result.get()
-                except:
-                    _, excp, _ = sys.exc_info()
-                    msg = 'Failed to unpack items from archive {a}: {e}'
-                    raise SplitException(
-                        msg.format(a=archive, e=excp)
-                    )
-                if not result:
-                    continue
-                out.extend(result)
+            if not result:
+                continue
+            out.extend(result)
     return out

@@ -1173,7 +1173,11 @@ def main():
     sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
     logger = args.logger
     if args.command == 'split':
-        if len(args.downloaded_files) > 1 and not args.dynamic_date:
+        conds = (
+            len(args.downloaded_files) > 1 and not args.dynamic_date,
+            args.file_type == 'sql'
+        )
+        if any(conds):
             for sig in sigs:
                 signal.signal(sig, bail_out)
     # Call the function matching the given command
