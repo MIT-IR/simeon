@@ -2,6 +2,7 @@
 Module to process SQL files from edX
 """
 import os
+import signal
 import sys
 import zipfile
 from multiprocessing.pool import (
@@ -11,7 +12,9 @@ from multiprocessing.pool import (
 from simeon.download.utilities import (
     decrypt_files, format_sql_filename
 )
-from simeon.exceptions import SplitException
+from simeon.exceptions import (
+    EarlyExitError, SplitException
+)
 
 
 proc_zfile = None
@@ -23,6 +26,13 @@ def _pool_initializer(fname):
     """
     global proc_zfile
     proc_zfile = zipfile.ZipFile(fname)
+    def sighandler(sig, frame):
+        raise EarlyExitError(
+            'Tracking log splitting interrupted prematurely'
+        )
+    sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
+    for sig in sigs:
+        signal.signal(sig, signal.SIG_DFL)
 
 
 def _batch_them(items, size):
@@ -164,16 +174,17 @@ def process_sql_archive(
             results.append(
                 pool.apply_async(unpacker, args=(archive, batch, ddir))
             )
-        for result in results:
-            try:
-                result = result.get()
-            except:
-                _, excp, _ = sys.exc_info()
-                msg = 'Failed to unpack items from archive {a}: {e}'
-                raise SplitException(
-                    msg.format(a=archive, e=excp)
-                )
-            if not result:
-                continue
-            out.extend(result)
+        processed = 0
+        while processed < len(results):
+            for result in results:
+                try:
+                    targets = result.get(timeout=60)
+                    processed += 1
+                    out.extend(targets or [])
+                except TimeoutError:
+                    continue
+                except:
+                    _, excp, _ = sys.exc_info()
+                    msg = 'Failed to unpack items from archive {a}: {e}'
+                    raise SplitException(msg.format(a=archive, e=excp))
     return out
