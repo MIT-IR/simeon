@@ -279,6 +279,12 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
     :rtype: None
     :return: Nothing, but writes the generated data to the outname argument
     """
+    for file_ in USER_INFO_COLS:
+        file_ = os.path.join(dirname, file_)
+        if not os.path.exists(file_):
+            raise OSError(
+                '{f} does not exist on this machine'.format(f=file_)
+            )
     schema_file = os.path.join(
         SCHEMA_DIR, 'schema_user_info_combo.json'
     )
@@ -573,6 +579,11 @@ def make_course_axis(dirname, outname='course_axis.json.gz'):
     """
     fname = os.path.join(dirname, 'course_structure-analytics.json')
     bundle = os.path.join(dirname, 'course-analytics.xml.tar.gz')
+    for file_ in (fname, bundle):
+        if not os.path.exists(file_):
+            raise OSError(
+                '{f} could be found on this machine'.format(f=file_)
+            )
     itypes = _get_itypes(bundle)
     with open(fname) as fh:
         structure: dict = json.load(fh)
@@ -648,6 +659,10 @@ def make_grades_persistent(
         )
     ])
     for file_ in infiles:
+        if not os.path.exists(file_):
+            raise OSError(
+                '{f} does not exist on this machine'.format(f=file_)
+            )
         outname = os.path.join(dirname, infiles[file_])
         file_ = os.path.join(dirname, file_)
         with open(file_) as gh, gzip.open(outname, 'wt') as zh:
@@ -678,6 +693,10 @@ def make_grading_policy(dirname, outname='grading_policy.json.gz'):
     :return: Nothing, but writes the generated data to the target file
     """
     file_ = os.path.join(dirname, 'course-analytics.xml.tar.gz')
+    if not os.path.exists(file_):
+        raise OSError(
+            '{f} does not exist on this machine'.format(f=file_)
+        )
     with tarfile.open(file_) as tar:
         policy = next(
             (m for m in tar.getmembers() if 'grading_policy.json' in m.name),
@@ -741,6 +760,10 @@ def make_forum_table(dirname, outname='forum.json.gz'):
     """
     outname = os.path.join(dirname, outname)
     file_ = os.path.join(dirname, 'forum.mongo')
+    if not os.path.exists(file_):
+        raise OSError(
+            '{f} could not be found on this machine'.format(f=file_)
+        )
     cols = {
         '$oid': (
             '_id', 'parent_id', 'parent_ids', 'comment_thread_id',
@@ -851,6 +874,10 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
     file_ = os.path.join(
         dirname, 'courseware_studentmodule-analytics.sql'
     )
+    if not os.path.exists(file_):
+        raise OSError(
+            '{f} does not exist on this machine'.format(f=file_)
+        )
     prob_cols = ('correct_map', 'student_answers')
     with open(file_, encoding='UTF8', errors='ignore') as fh:
         header = [c.strip() for c in fh.readline().split('\t')]
@@ -936,6 +963,10 @@ def make_roles_table(dirname, outname='roles.json.gz'):
     with gzip.open(os.path.join(dirname, outname), 'wt') as zh:
         data = defaultdict(_default_roles)
         for file_ in map(lambda f: os.path.join(dirname, f), files):
+            if not os.path.exists(file_):
+                raise OSError(
+                    '{f} does not exist on this machine'.format(f=file_)
+                )
             with open(file_) as fh:
                 line = fh.readline().replace('\tname', '\trole')
                 header = []
@@ -993,13 +1024,14 @@ def make_sql_tables(dirname, verbose=False, logger=None):
             logger.info(msg.format(f=maker.__name__, d=dirname))
         try:
             maker(dirname)
-        except OSError:
+        except OSError as excp:
             msg = (
-                'The necessary files needed to make the {n} table(s) '
-                'are missing from the given directory {d}'
+                'Some of the necessary files needed to make the {n} table(s) '
+                'are missing from the given directory {d}: {e}'
             )
             excp = MissingFileException(msg.format(
-                d=dirname, n=maker.__name__.replace('make_', '')
+                d=dirname, n=maker.__name__.replace('make_', ''),
+                e=excp
             ))
             raise excp from None
         if verbose and logger is not None:
