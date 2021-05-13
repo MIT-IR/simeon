@@ -117,7 +117,7 @@ def batch_decrypt_files(
         _delete_all(all_files)
 
 
-def unpacker(fname, names, ddir):
+def unpacker(fname, names, ddir, tables_only=False):
     """
     A worker callable to pass a Thread or Process pool
     """
@@ -128,6 +128,9 @@ def unpacker(fname, names, ddir):
         if name is None or target_name is None:
             continue
         target_name = os.path.join(ddir, target_name)
+        if tables_only:
+            targets.append(target_name)
+            continue
         target_dir = os.path.dirname(target_name)
         os.makedirs(target_dir, exist_ok=True)
         with proc_zfile.open(name) as zh, open(target_name, 'wb') as fh:
@@ -139,7 +142,7 @@ def unpacker(fname, names, ddir):
 
 def process_sql_archive(
     archive, ddir=None, include_edge=False,
-    courses=None, size=5
+    courses=None, size=5, tables_only=False
 ):
     """
     Unpack and decrypt files inside the given archive
@@ -154,6 +157,8 @@ def process_sql_archive(
     :param courses: A list of course IDs whose data files are unpacked
     :type size: int
     :param size: The size of the thread or process pool doing the unpacking
+    :type tables_only: bool
+    :param tables_only: Whether to extract file names only (no unarchiving)
     :rtype: Iterable[str]
     :return: List of file names
     """
@@ -172,9 +177,9 @@ def process_sql_archive(
     ) as pool:
         results = []
         for batch in batches:
-            results.append(
-                pool.apply_async(unpacker, args=(archive, batch, ddir))
-            )
+            results.append(pool.apply_async(
+                unpacker, args=(archive, batch, ddir, tables_only)
+            ))
         processed = 0
         while processed < len(results):
             for result in results:

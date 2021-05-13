@@ -149,6 +149,7 @@ def split_sql_files(parsed_args):
                 include_edge=parsed_args.include_edge,
                 courses=parsed_args.courses,
                 size=parsed_args.jobs,
+                tables_only=parsed_args.tables_only,
             )
             if not to_decrypt:
                 errmsg = (
@@ -166,24 +167,31 @@ def split_sql_files(parsed_args):
             )
             if parsed_args.no_decryption:
                 continue
-            parsed_args.logger.info(
-                msg.format(f=fname, w='Decrypting the contents in')
-            )
-            sqls.batch_decrypt_files(
-                all_files=to_decrypt, size=100,
-                verbose=parsed_args.verbose, logger=parsed_args.logger,
-                timeout=parsed_args.decryption_timeout,
-                keepfiles=parsed_args.keep_encrypted
-            )
-            parsed_args.logger.info(
-                msg.format(f=fname, w='Done decrypting the contents in')
-            )
+            if not parsed_args.tables_only:
+                parsed_args.logger.info(
+                    msg.format(f=fname, w='Decrypting the contents in')
+                )
+                sqls.batch_decrypt_files(
+                    all_files=to_decrypt, size=100,
+                    verbose=parsed_args.verbose, logger=parsed_args.logger,
+                    timeout=parsed_args.decryption_timeout,
+                    keepfiles=parsed_args.keep_encrypted
+                )
+                parsed_args.logger.info(
+                    msg.format(f=fname, w='Done decrypting the contents in')
+                )
             dirnames = set(
                 os.path.dirname(f) for f in to_decrypt if 'ora/' not in f
             )
             parsed_args.logger.info('Making reports from course SQL files')
             for folder in dirnames:
-                make_sql_tables(folder, parsed_args.verbose, parsed_args.logger)
+                try:
+                    make_sql_tables(folder, parsed_args.verbose, parsed_args.logger)
+                except OSError as excp:
+                    if parsed_args.fail_fast:
+                        raise excp
+                    parsed_args.logger.error(excp)
+                    continue
             parsed_args.logger.info('Course reports generated')
         except:
             _, excp, tb = sys.exc_info()
@@ -936,6 +944,23 @@ def main():
         help=(
             'Use the dates from the records to make tracking log file names. '
             'Otherwise, the dates in the GZIP file names are used.'
+        ),
+        action='store_true',
+    )
+    splitter.add_argument(
+        '--tables-only', '-T',
+        help=(
+            'Don\'t do any unpacking of the SQL archive. Use the latter to '
+            'get directories that already contain SQL files to use to make '
+            'files to load to BigQuery.'
+        ),
+        action='store_true',
+    )
+    splitter.add_argument(
+        '--fail-fast', '-F',
+        help=(
+            'Force simeon to stop splitting if any error is encountered. '
+            'Otherwise, simeon reports the error and moves on to the next thing.'
         ),
         action='store_true',
     )

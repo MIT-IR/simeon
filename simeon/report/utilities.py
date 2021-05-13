@@ -279,7 +279,7 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
     :rtype: None
     :return: Nothing, but writes the generated data to the outname argument
     """
-    for file_ in USER_INFO_COLS:
+    for (file_, _) in USER_INFO_COLS:
         file_ = os.path.join(dirname, file_)
         if not os.path.exists(file_):
             raise OSError(
@@ -659,12 +659,12 @@ def make_grades_persistent(
         )
     ])
     for file_ in infiles:
+        outname = os.path.join(dirname, infiles[file_])
+        file_ = os.path.join(dirname, file_)
         if not os.path.exists(file_):
             raise OSError(
                 '{f} does not exist on this machine'.format(f=file_)
             )
-        outname = os.path.join(dirname, infiles[file_])
-        file_ = os.path.join(dirname, file_)
         with open(file_) as gh, gzip.open(outname, 'wt') as zh:
             header = [c.strip() for c in gh.readline().split('\t')]
             reader = csv.DictReader(
