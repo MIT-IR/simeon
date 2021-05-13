@@ -42,10 +42,10 @@ def _batch_them(items, size):
     """
     bucket = []
     for item in items:
+        bucket.append(item)
         if len(bucket) == size:
             yield bucket[:]
             bucket = []
-        bucket.append(item)
     if bucket:
         yield bucket
 
@@ -113,8 +113,8 @@ def batch_decrypt_files(
             results[async_result] = batch
         for result in results:
             result.get()
-            if not keepfiles:
-                _delete_all(results[result])
+    if not keepfiles:
+        _delete_all(all_files)
 
 
 def unpacker(fname, names, ddir):
