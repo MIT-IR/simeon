@@ -374,6 +374,7 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
             # check_record_schema(outrow, schema, True)
             drop_extra_keys(outcols, schema)
             zh.write(json.dumps(outrow) + '\n')
+        zh.flush()
 
 
 def course_from_block(block):
@@ -647,6 +648,7 @@ def make_course_axis(dirname, outname='course_axis.json.gz'):
                 if not record.get('start'):
                     record['start'] = root_val.get('start')
             zh.write(json.dumps(record) + '\n')
+        zh.flush()
 
 
 def make_grades_persistent(
@@ -695,6 +697,7 @@ def make_grades_persistent(
                     if record[k] == 'NULL':
                         record[k] = None
                 zh.write(json.dumps(record) + '\n')
+            zh.flush()
 
 
 def make_grading_policy(dirname, outname='grading_policy.json.gz'):
@@ -742,6 +745,7 @@ def make_grading_policy(dirname, outname='grading_policy.json.gz'):
                 zh.write(
                     json.dumps(dict((k, grader.get(k)) for k in cols)) + '\n'
                 )
+            zh.flush()
 
 
 def _extract_mongo_values(record, key, subkey):
@@ -834,7 +838,9 @@ def make_forum_table(dirname, outname='forum.json.gz'):
                                 record[col][k] = json.dumps(record[col][k])
             record['mongoid'] = record['_id']
             drop_extra_keys(record, schema)
+            check_record_schema(record, schema, True)
             zh.write(json.dumps(record) + '\n')
+        zh.flush()
 
 
 def make_problem_analysis(state, **extras):
@@ -931,6 +937,8 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
                     created=record.get('created')
                 )
                 ph.write(json.dumps(panalysis) + '\n')
+            zh.flush()
+            ph.flush()
 
 
 def _default_roles():
@@ -1012,6 +1020,7 @@ def make_roles_table(dirname, outname='roles.json.gz'):
             if any(record.get(k) for k in staff):
                 record['roles'] = 'Staff'
             zh.write(json.dumps(record) + '\n')
+        zh.flush()
 
 
 def make_sql_tables(dirname, verbose=False, logger=None, fail_fast=False):
