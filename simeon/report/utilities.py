@@ -30,6 +30,11 @@ from simeon.exceptions import (
 from simeon.upload import utilities as uputils
 
 
+# Increase the csv module's field size limit
+csv.field_size_limit(13107200)
+
+
+# Set up schema coercion functions
 def format_str_date(d):
     # return parse_date(d).strftime('%Y-%m-%d %H:%M:%S.%f')
     return parse_date(d).isoformat()
@@ -42,7 +47,21 @@ def to_float(v):
     return v
 
 
-csv.field_size_limit(13107200)
+def stringify(v):
+    if not isinstance(v, str):
+        v = json.dumps(v)
+    return v
+
+
+BQ2PY_TYPES = {
+    'TIMESTAMP': format_str_date,
+    'STRING': stringify,
+    'INTEGER': int,
+    'FLOAT': to_float,
+    'BOOLEAN': bool,
+}
+
+
 BQ_DDL = """#standardSQL
 CREATE OR REPLACE TABLE {table} {cols}
 OPTIONS (
@@ -110,14 +129,6 @@ PROBLEM_TYPES = {
     'fieldset', 'formularesponse', 'imageresponse',
     'multiplechoiceresponse', 'numericalresponse',
     'optionresponse', 'stringresponse', 'schematicresponse',
-}
-
-BQ2PY_TYPES = {
-    'TIMESTAMP': format_str_date,
-    'STRING': str,
-    'INTEGER': int,
-    'FLOAT': to_float,
-    'BOOLEAN': bool,
 }
 
 
