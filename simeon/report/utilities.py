@@ -5,6 +5,7 @@ import csv
 import gzip
 import json
 import math
+import multiprocessing as mp
 import os
 import re
 import sys
@@ -13,7 +14,7 @@ from collections import OrderedDict, defaultdict
 from datetime import datetime
 from functools import reduce
 from multiprocessing.pool import (
-    ThreadPool, TimeoutError
+    Pool as ProcessPool, ThreadPool, TimeoutError
 )
 from xml.etree import ElementTree
 
@@ -1047,7 +1048,7 @@ def make_sql_tables(dirname, verbose=False, logger=None, fail_fast=False):
         make_student_module, make_user_info_combo,
     )
     results = dict()
-    with ThreadPool(len(reports)) as pool:
+    with ProcessPool(mp.cpu_count()) as pool:
         for maker in reports:
             cname = maker.__name__.replace('make_', '').replace('_table', '')
             if verbose and logger is not None:
