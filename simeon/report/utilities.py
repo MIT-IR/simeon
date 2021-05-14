@@ -388,6 +388,7 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
                 continue
             # check_record_schema(outrow, schema, True)
             drop_extra_keys(outcols, schema)
+            check_record_schema(outrow, schema)
             zh.write(json.dumps(outrow) + '\n')
         zh.flush()
 
@@ -685,20 +686,27 @@ def make_grades_persistent(
     infiles = dict([
         (
             'grades_persistentcoursegrade-analytics.sql',
-            first_outname,
+            (first_outname, 'schema_grades_persistent.json'),
         ),
         (
             'grades_persistentsubsectiongrade-analytics.sql',
-            second_outname,
+            (second_outname, 'schema_grades_persistent_subsection.json'),
         )
     ])
-    for file_ in infiles:
+    for file_, (outname, schema_file) in infiles.items():
         outname = os.path.join(dirname, infiles[file_])
         file_ = os.path.join(dirname, file_)
         if not os.path.exists(file_):
             raise OSError(
                 '{f} does not exist on this machine'.format(f=file_)
             )
+        schema_file = os.path.join(
+            SCHEMA_DIR, schema_file
+        )
+        with open(schema_file) as sfh:
+            sname, _ = os.path.splitext(schema_file)
+            sname = sname.replace('schema_')
+            schema = json.load(sfh).get(sname)
         with open(file_) as gh, gzip.open(outname, 'wt') as zh:
             header = [c.strip() for c in gh.readline().split('\t')]
             reader = csv.DictReader(
@@ -711,6 +719,7 @@ def make_grades_persistent(
                         record[k] = downutils.get_sql_course_id(record[k])
                     if record[k] == 'NULL':
                         record[k] = None
+                check_record_schema(record, schema)
                 zh.write(json.dumps(record) + '\n')
             zh.flush()
 
@@ -916,6 +925,16 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
         raise OSError(
             '{f} does not exist on this machine'.format(f=file_)
         )
+    module_file = os.path.join(
+        SCHEMA_DIR, 'schema_studentmodule.json'
+    )
+    with open(module_file) as sfh:
+        module_schema = json.load(sfh).get('studentmodule')
+    problem_file = os.path.join(
+        SCHEMA_DIR, 'schema_problem_analysis.json'
+    )
+    with open(problem_file) as sfh:
+        problem_schema = json.load(sfh).get('problem_analysis')
     prob_cols = ('correct_map', 'student_answers')
     with open(file_, encoding='UTF8', errors='ignore') as fh:
         header = [c.strip() for c in fh.readline().split('\t')]
@@ -933,6 +952,7 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
                         record[k] = module_from_block(v or '')
                     if (v or '').lower() == 'null':
                         record[k] = None
+                check_record_schema(record, module_schema)
                 zh.write(json.dumps(record) + '\n')
                 try:
                     state = json.loads(
@@ -951,6 +971,7 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
                     max_grade=record.get('max_grade', 0),
                     created=record.get('created')
                 )
+                check_record_schema(panalysis, problem_file)
                 ph.write(json.dumps(panalysis) + '\n')
             zh.flush()
             ph.flush()
