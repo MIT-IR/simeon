@@ -184,17 +184,16 @@ def split_sql_files(parsed_args):
                 os.path.dirname(f) for f in to_decrypt if 'ora/' not in f
             )
             parsed_args.logger.info('Making reports from course SQL files')
-            for folder in dirnames:
-                try:
-                    make_sql_tables(
-                        folder, parsed_args.verbose,
-                        parsed_args.logger, parsed_args.fail_fast
-                    )
-                except Exception as excp:
-                    if parsed_args.fail_fast:
-                        raise excp
-                    parsed_args.logger.error(excp)
-                    continue
+            try:
+                make_sql_tables(
+                    dirnames, parsed_args.verbose,
+                    parsed_args.logger, parsed_args.fail_fast
+                )
+            except Exception as excp:
+                if parsed_args.fail_fast:
+                    raise excp
+                parsed_args.logger.error(excp)
+                continue
             parsed_args.logger.info(
                 'Course reports generated with bundle {f}'.format(f=fname)
             )

@@ -29,7 +29,7 @@ def _pool_initializer(fname):
     proc_zfile = zipfile.ZipFile(fname)
     def sighandler(sig, frame):
         raise EarlyExitError(
-            'Tracking log splitting interrupted prematurely'
+            'SQL bundle splitting interrupted prematurely'
         )
     sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
     for sig in sigs:

@@ -8,6 +8,7 @@ import math
 import multiprocessing as mp
 import os
 import re
+import signal
 import sys
 import tarfile
 from collections import OrderedDict, defaultdict
@@ -24,8 +25,8 @@ from google.cloud.exceptions import NotFound
 
 from simeon.download import utilities as downutils
 from simeon.exceptions import (
-    BadSQLFileException, LoadJobException, MissingFileException,
-    MissingQueryFileException, MissingSchemaException,
+    BadSQLFileException, EarlyExitError, LoadJobException,
+    MissingFileException, MissingQueryFileException, MissingSchemaException,
     SchemaMismatchException,
 )
 from simeon.upload import utilities as uputils
@@ -133,6 +134,19 @@ PROBLEM_TYPES = {
     'multiplechoiceresponse', 'numericalresponse',
     'optionresponse', 'stringresponse', 'schematicresponse',
 }
+
+
+def _pool_initializer():
+    """
+    Process pool initializer
+    """
+    def sighandler(sig, frame):
+        raise EarlyExitError(
+            'SQL table file generation interrupted prematurely'
+        )
+    sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
+    for sig in sigs:
+        signal.signal(sig, signal.SIG_DFL)
 
 
 def wait_for_bq_jobs(job_list):
@@ -1024,15 +1038,15 @@ def make_roles_table(dirname, outname='roles.json.gz'):
         zh.flush()
 
 
-def make_sql_tables(dirname, verbose=False, logger=None, fail_fast=False):
+def make_sql_tables(dirnames, verbose=False, logger=None, fail_fast=False):
     """
     Given a SQL directory, make the SQL tables
     defined in this module.
     This convenience function calls all the report generating functions
     for the given directory name
 
-    :type dirname: str
-    :param dirname: Name of a course's SQL directory
+    :type dirnames: List[str]
+    :param dirname: Names of SQL directories
     :type verbose: bool
     :param verbose: Print a message when a report is being made
     :type logger: logging.Logger
@@ -1048,17 +1062,20 @@ def make_sql_tables(dirname, verbose=False, logger=None, fail_fast=False):
         make_student_module, make_user_info_combo,
     )
     results = dict()
-    with ProcessPool(mp.cpu_count()) as pool:
-        for maker in reports:
-            cname = maker.__name__.replace('make_', '').replace('_table', '')
-            if verbose and logger is not None:
-                msg = 'Making {f} with files in {d}'
-                logger.info(msg.format(f=cname, d=dirname))
-            results[cname] = pool.apply_async(maker, args=(dirname,))
+    with ProcessPool(mp.cpu_count(), initializer=_pool_initializer) as pool:
+        for fn in reports:
+            for dirname in dirnames:
+                tbl = fn.__name__.replace('make_', '').replace('_table', '')
+                if verbose and logger is not None:
+                    msg = 'Making {f} with files in {d}'
+                    logger.info(msg.format(f=tbl, d=dirname))
+                results[(tbl, dirname)] = pool.apply_async(
+                    fn, args=(dirname,)
+                )
         fails = []
         processed = 0
         while processed < len(results):
-            for maker, result in results.items():
+            for (tbl, dirname), result in results.items():
                 try:
                     result.get(timeout=30)
                     processed += 1
@@ -1071,7 +1088,7 @@ def make_sql_tables(dirname, verbose=False, logger=None, fail_fast=False):
                         'with the given directory {d}: {e}'
                     )
                     excp = MissingFileException(msg.format(
-                        d=dirname, n=maker, e=excp
+                        d=dirname, n=tbl, e=excp
                     ))
                     if fail_fast:
                         raise excp from None
@@ -1081,7 +1098,8 @@ def make_sql_tables(dirname, verbose=False, logger=None, fail_fast=False):
         if fails:
             for failure in fails:
                 logger.error(failure)
-        logger.info('Done processing files in {d}'.format(d=dirname))
+        for dirname in dirnames:
+            logger.info('Done processing files in {d}'.format(d=dirname))
 
 
 def make_table_from_sql(
