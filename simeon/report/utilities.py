@@ -48,6 +48,8 @@ def to_float(v):
 
 
 def stringify(v):
+    if v is None:
+        return None
     if not isinstance(v, str):
         v = json.dumps(v)
     return v
@@ -1038,11 +1040,11 @@ def make_sql_tables(dirname, verbose=False, logger=None, fail_fast=False):
     results = dict()
     with ThreadPool(len(reports)) as pool:
         for maker in reports:
-            clean_name = maker.__name__.replace('make_', '')
+            cname = maker.__name__.replace('make_', '').replace('_table', '')
             if verbose and logger is not None:
-                msg = 'Calling routine {f} on {d}'
-                logger.info(msg.format(f=maker.__name__, d=dirname))
-            results[clean_name] = pool.apply_async(maker, args=(dirname,))
+                msg = 'Making {f} with files in {d}'
+                logger.info(msg.format(f=cname, d=dirname))
+            results[cname] = pool.apply_async(maker, args=(dirname,))
         fails = []
         processed = 0
         while processed < len(results):
