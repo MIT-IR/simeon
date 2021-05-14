@@ -238,13 +238,13 @@ def make_bq_load_config(
         return bigquery.LoadJobConfig(
             schema=schema, source_format=format_,
             create_disposition=create, write_disposition=append,
-            max_bad_records=max_bad_rows,
+            max_bad_records=max_bad_rows, ignore_unknown_values=True,
         )
     return bigquery.LoadJobConfig(
         schema=schema, source_format=format_,
         create_disposition=create, write_disposition=append,
         field_delimiter=delim, skip_leading_rows=skips,
-        max_bad_records=max_bad_rows,
+        max_bad_records=max_bad_rows, ignore_unknown_values=True,
     )
 
 

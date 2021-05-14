@@ -195,7 +195,9 @@ def split_sql_files(parsed_args):
                         raise excp
                     parsed_args.logger.error(excp)
                     continue
-            parsed_args.logger.info('Course reports generated')
+            parsed_args.logger.info(
+                'Course reports generated with bundle {f}'.format(f=fname)
+            )
         except:
             _, excp, tb = sys.exc_info()
             if isinstance(excp, SystemExit):

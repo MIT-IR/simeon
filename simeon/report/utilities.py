@@ -586,7 +586,7 @@ def make_course_axis(dirname, outname='course_axis.json.gz'):
     for file_ in (fname, bundle):
         if not os.path.exists(file_):
             raise OSError(
-                '{f} could be found on this machine'.format(f=file_)
+                '{f} does not exist on this machine'.format(f=file_)
             )
     itypes = _get_itypes(bundle)
     with open(fname) as fh:
@@ -766,7 +766,7 @@ def make_forum_table(dirname, outname='forum.json.gz'):
     file_ = os.path.join(dirname, 'forum.mongo')
     if not os.path.exists(file_):
         raise OSError(
-            '{f} could not be found on this machine'.format(f=file_)
+            '{f} does not exist on this machine'.format(f=file_)
         )
     cols = {
         '$oid': (
@@ -1064,8 +1064,7 @@ def make_sql_tables(dirname, verbose=False, logger=None, fail_fast=False):
 def make_table_from_sql(
     table, course_id, client, project, append=False,
     query_dir=QUERY_DIR, wait=False,
-    geo_table='geocode.geoip',
-    youtube_table='videos.youtube',
+    geo_table='geocode.geoip', youtube_table='videos.youtube',
 ):
     """
     Generate a BigQuery table using the given table name,

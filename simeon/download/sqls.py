@@ -121,7 +121,6 @@ def unpacker(fname, names, ddir, courses=None, tables_only=False):
     """
     A worker callable to pass a Thread or Process pool
     """
-    # cid.replace('/', '__').replace('-', '_').replace('.', '_')
     global proc_zfile
     targets = []
     for name in names:
