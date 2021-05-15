@@ -1098,10 +1098,8 @@ def make_sql_tables(dirnames, verbose=False, logger=None, fail_fast=False):
         while processed < len(results):
             for (tbl, dirname), result in results.items():
                 try:
-                    result.get(timeout=30)
+                    result.get()
                     processed += 1
-                except TimeoutError:
-                    continue
                 except:
                     _, excp, _ = sys.exc_info()
                     msg = (
