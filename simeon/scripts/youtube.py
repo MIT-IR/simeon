@@ -127,6 +127,7 @@ def extract_video_info(parsed_args):
     whose paths are provided via the given Namespace object.
     """
     keys = ('youtube-token',)
+    seen = set()
     if not all(getattr(parsed_args, k.replace('-', '_'), None) for k in keys):
         msg = 'The following option(s) expected valid values: {o}'
         parsed_args.logger.error(msg.format(o=', '.join(keys)))
@@ -155,8 +156,11 @@ def extract_video_info(parsed_args):
                         subrec = (subrec.get(elm) or {})
                     value = subrec.get(path[-1])
                 record[col] = value
+            if record.get('id') in seen:
+                continue
             record['duration'] = duration_to_seconds(record['duration'])
             outfile.write(json.dumps(record) + '\n')
+            seen.add(record.get('id'))
     outfile.close()
 
 
