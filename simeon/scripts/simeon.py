@@ -608,6 +608,10 @@ def make_secondary_tables(parsed_args):
         )
         sys.exit(1)
     parsed_args.logger.info('Connection established')
+    if parsed_args.in_files:
+        parsed_args.course_ids = cli_utils.items_from_files(
+            parsed_args.course_ids
+        )
     all_jobs = dict()
     for course_id in parsed_args.course_ids:
         parsed_args.logger.info(
@@ -1171,6 +1175,14 @@ def main():
         help=(
             'Wait for asynchronous BigQuery query jobs to finish. '
             'Otherwise, simeon creates query jobs and exits.'
+        ),
+        action='store_true',
+    )
+    reporter.add_argument(
+        '--in-files', '-i',
+        help=(
+            'Whether the provided course ID arguments are text '
+            'files that contain the course IDs. One ID per line'
         ),
         action='store_true',
     )
