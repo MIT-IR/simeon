@@ -19,7 +19,8 @@ from simeon.exceptions import (
     AWSException, EarlyExitError
 )
 from simeon.report import (
-    make_sql_tables, make_table_from_sql, wait_for_bq_job_ids
+    make_sql_tables_par, make_sql_tables_seq,
+    make_table_from_sql, wait_for_bq_job_ids
 )
 from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
@@ -184,6 +185,10 @@ def split_sql_files(parsed_args):
                 os.path.dirname(f) for f in to_decrypt if 'ora/' not in f
             )
             parsed_args.logger.info('Making reports from course SQL files')
+            if len(dirnames) == 1:
+                make_sql_tables = make_sql_tables_seq
+            else:
+                make_sql_tables = make_sql_tables_par
             try:
                 rc = make_sql_tables(
                     dirnames, parsed_args.verbose,

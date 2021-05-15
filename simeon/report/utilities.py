@@ -696,12 +696,12 @@ def make_grades_persistent(
     ])
     for file_, (outname, schema_file) in infiles.items():
         file_ = os.path.join(dirname, file_)
+        outname = os.path.join(dirname, outname)
         if not os.path.exists(file_):
             raise OSError(
                 '{f} does not exist on this machine'.format(f=file_)
             )
-        schema_file = os.path.join(SCHEMA_DIR, schema_file)
-        with open(schema_file) as sfh:
+        with open(os.path.join(SCHEMA_DIR, schema_file)) as sfh:
             sname, _ = os.path.splitext(schema_file)
             sname = sname.replace('schema_', '')
             schema = json.load(sfh).get(sname)
@@ -1050,17 +1050,75 @@ def make_roles_table(dirname, outname='roles.json.gz'):
         zh.flush()
 
 
-def make_sql_tables(
+def make_sql_tables_seq(
     dirnames, verbose=False, logger=None, fail_fast=False, debug=False,
 ):
     """
-    Given a SQL directory, make the SQL tables
+    Given an iterable of SQL directories, make the SQL tables
+    defined in this module.
+    This convenience function calls all the report generating functions
+    for the given directory name
+
+    :type dirnames: Iterable[str]
+    :param dirnames: Names of SQL directories
+    :type verbose: bool
+    :param verbose: Print a message when a report is being made
+    :type logger: logging.Logger
+    :param logger: A logging.Logger object to print messages with
+    :type fail_fast: bool
+    :param fail_fast: Whether or not to bail after the first error
+    :type debug: bool
+    :param debug: Show the stacktrace that caused the error
+    :rtype: bool
+    :return: True if the files are generated, and False otherwise.
+    """
+    reports = (
+        make_course_axis, make_forum_table, make_grades_persistent,
+        make_grading_policy, make_roles_table,
+        make_student_module, make_user_info_combo,
+    )
+    fails = []
+    for dirname in dirnames:
+        for fn in reports:
+            tbl = fn.__name__.replace('make_', '').replace('_table', '')
+            if verbose and logger is not None:
+                msg = 'Making {f} with files in {d}'
+                logger.info(msg.format(f=tbl, d=dirname))
+            try:
+                fn(dirname)
+            except:
+                _, excp, tb = sys.exc_info()
+                if debug:
+                    traces = ['{e}'.format(e=excp)]
+                    traces += map(str.strip, traceback.format_tb(tb))
+                    excp = '\n'.join(traces)
+                msg = (
+                    'Error encountered while making the {n} table(s) '
+                    'with the given directory {d}: {e}'
+                )
+                excp = MissingFileException(msg.format(
+                    d=dirname, n=tbl, e=excp
+                ))
+                if fail_fast:
+                    raise excp from None
+                fails.append(excp)
+        if verbose and logger is not None:
+            for failure in fails:
+                logger.error(failure)
+    return not bool(fails)
+
+
+def make_sql_tables_par(
+    dirnames, verbose=False, logger=None, fail_fast=False, debug=False,
+):
+    """
+    Given a list of SQL directories, make the SQL tables
     defined in this module.
     This convenience function calls all the report generating functions
     for the given directory name
 
     :type dirnames: List[str]
-    :param dirname: Names of SQL directories
+    :param dirnames: Names of SQL directories
     :type verbose: bool
     :param verbose: Print a message when a report is being made
     :type logger: logging.Logger
@@ -1097,7 +1155,6 @@ def make_sql_tables(
             for (tbl, dirname), result in results.items():
                 try:
                     result.get()
-                    processed += 1
                 except:
                     _, excp, tb = sys.exc_info()
                     if debug:
@@ -1114,16 +1171,13 @@ def make_sql_tables(
                     if fail_fast:
                         raise excp from None
                     fails.append(excp)
-                    processed += 1
+                processed += 1
     if verbose and logger is not None:
-        if fails:
-            for failure in fails:
-                logger.error(failure)
+        for failure in fails:
+            logger.error(failure)
         for dirname in dirnames:
             logger.info('Done processing files in {d}'.format(d=dirname))
-    if fails:
-        return False
-    return True
+    return not bool(fails)
 
 
 def make_table_from_sql(

@@ -148,7 +148,7 @@ class TestReportUtilities(unittest.TestCase):
         Test the make_sql_tables function with a directory with no files
         """
         with self.assertRaises(rutils.MissingFileException):
-            rutils.make_sql_tables(self.fixtures_dir, fail_fast=True)
+            rutils.make_sql_tables_seq(self.fixtures_dir, fail_fast=True)
     
     def test_make_course_axis(self):
         """
