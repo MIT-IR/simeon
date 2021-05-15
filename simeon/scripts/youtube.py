@@ -138,7 +138,10 @@ def extract_video_info(parsed_args):
             resp = _generate_request(chunk, parsed_args.youtube_token)
         except Exception as excp:
             msg = 'Batch fetching YouTube video details failed with : {e}'
-            parsed_args.logger.error(msg.format(e=json.load(excp.file)))
+            if hasattr(excp, 'file'):
+                parsed_args.logger.error(msg.format(e=json.load(excp.file)))
+            else:
+                parsed_args.logger.error(msg.format(e=excp))
             continue
         data = json.load(resp)
         for item in data.get('items', []):
@@ -281,7 +284,7 @@ def main():
             'The .json.gz output file name for the YouTube video details. '
             'Default: %(default)s'
         ),
-        default='youtube.json.gz',
+        default=os.path.join(os.getcwd(), 'youtube.json.gz'),
     )
     extracter.add_argument(
         '--youtube-token', '-t',
