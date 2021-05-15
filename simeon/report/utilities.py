@@ -1078,7 +1078,10 @@ def make_sql_tables(
         make_student_module, make_user_info_combo,
     )
     results = dict()
-    with ProcessPool(mp.cpu_count(), initializer=_pool_initializer) as pool:
+    nprocs = mp.cpu_count()
+    if len(dirnames) < nprocs:
+        nprocs = len(dirnames)
+    with ProcessPool(nprocs, initializer=_pool_initializer) as pool:
         for fn in reports:
             for dirname in dirnames:
                 tbl = fn.__name__.replace('make_', '').replace('_table', '')
