@@ -179,13 +179,10 @@ def wait_for_bq_jobs(job_list):
             if job.state == 'DONE':
                 continue
             try:
-                state = job.done()
+                done += job.done()
             except NotFound:
                 msg = '{id} is not a valid BigQuery job ID'
                 raise LoadJobException(msg.format(id=job.job_id)) from None
-            if not state:
-                state = job.reload()
-            done += state
 
 
 def wait_for_bq_job_ids(job_list, client):

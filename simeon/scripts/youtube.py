@@ -117,7 +117,7 @@ def duration_to_seconds(duration):
             match = re.search(r'\d+(?={c})'.format(c=char), chunk)
             if not match:
                 continue
-            out += _convert_and_time(match.group(0), times)
+            out += (_convert_and_time(match.group(0), times) or 0)
     return out
 
 
@@ -203,14 +203,23 @@ def merge_video_data(parsed_args):
             use_storage=parsed_args.youtube_file.startswith('gs://'),
         )
     except Exception as excp:
+        _, excp, tb = sys.exc_info()
         msg = 'Merging {f} to {t} failed with the following: {e}'
-        parsed_args.logger.error(
-            msg.format(
+        if parsed_args.debug:
+            traces = ['{e}'.format(e=excp)]
+            traces += map(str.strip, traceback.format_tb(tb))
+            msg = msg.format(
+                e='\n'.join(traces),
                 f=parsed_args.youtube_file,
                 t=parsed_args.youtube_table,
-                e=excp
             )
-        )
+        else:
+            msg = msg.format(
+                e=excp,
+                f=parsed_args.youtube_file,
+                t=parsed_args.youtube_table,
+            )
+        parsed_args.logger.error(msg)
         sys.exit(1)
     msg = 'Successfully merged the records in {f} to the table {t}'
     parsed_args.logger.info(
