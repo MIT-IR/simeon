@@ -361,7 +361,7 @@ def main():
     }
     try:
         COMMANDS.get(args.command, unknown_command)(args)
-    except Exception as excp:
+    except:
         _, excp, tb = sys.exc_info()
         if isinstance(excp, SystemExit):
             raise excp
@@ -373,7 +373,7 @@ def main():
         else:
             msg = msg.format(c=args.command, e=excp)
         # msg = 'The command {c} failed with: {e}'
-        args.logger.error(msg.format(c=args.command, e=excp))
+        args.logger.error(msg)
         sys.exit(1)
 
 
