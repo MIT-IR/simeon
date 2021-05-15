@@ -11,6 +11,7 @@ import re
 import signal
 import sys
 import tarfile
+import traceback
 from collections import OrderedDict, defaultdict
 from datetime import datetime
 from functools import reduce
@@ -694,18 +695,15 @@ def make_grades_persistent(
         )
     ])
     for file_, (outname, schema_file) in infiles.items():
-        outname = os.path.join(dirname, infiles[file_])
         file_ = os.path.join(dirname, file_)
         if not os.path.exists(file_):
             raise OSError(
                 '{f} does not exist on this machine'.format(f=file_)
             )
-        schema_file = os.path.join(
-            SCHEMA_DIR, schema_file
-        )
+        schema_file = os.path.join(SCHEMA_DIR, schema_file)
         with open(schema_file) as sfh:
             sname, _ = os.path.splitext(schema_file)
-            sname = sname.replace('schema_')
+            sname = sname.replace('schema_', '')
             schema = json.load(sfh).get(sname)
         with open(file_) as gh, gzip.open(outname, 'wt') as zh:
             header = [c.strip() for c in gh.readline().split('\t')]
@@ -916,24 +914,17 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
     :rtype: None
     :return: Nothing, but writes the generated data to the target files
     """
-    outname = os.path.join(dirname, outname)
-    second = os.path.join(dirname, 'problem_analysis.json.gz')
-    file_ = os.path.join(
-        dirname, 'courseware_studentmodule-analytics.sql'
-    )
+    pjoin = os.path.join
+    outname = pjoin(dirname, outname)
+    second = pjoin(dirname, 'problem_analysis.json.gz')
+    file_ = pjoin(dirname, 'courseware_studentmodule-analytics.sql')
     if not os.path.exists(file_):
         raise OSError(
             '{f} does not exist on this machine'.format(f=file_)
         )
-    module_file = os.path.join(
-        SCHEMA_DIR, 'schema_studentmodule.json'
-    )
-    with open(module_file) as sfh:
+    with open(pjoin(SCHEMA_DIR, 'schema_studentmodule.json')) as sfh:
         module_schema = json.load(sfh).get('studentmodule')
-    problem_file = os.path.join(
-        SCHEMA_DIR, 'schema_problem_analysis.json'
-    )
-    with open(problem_file) as sfh:
+    with open(pjoin(SCHEMA_DIR, 'schema_problem_analysis.json')) as sfh:
         problem_schema = json.load(sfh).get('problem_analysis')
     prob_cols = ('correct_map', 'student_answers')
     with open(file_, encoding='UTF8', errors='ignore') as fh:
@@ -971,7 +962,7 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
                     max_grade=record.get('max_grade', 0),
                     created=record.get('created')
                 )
-                check_record_schema(panalysis, problem_file)
+                check_record_schema(panalysis, problem_schema)
                 ph.write(json.dumps(panalysis) + '\n')
             zh.flush()
             ph.flush()
@@ -1059,7 +1050,9 @@ def make_roles_table(dirname, outname='roles.json.gz'):
         zh.flush()
 
 
-def make_sql_tables(dirnames, verbose=False, logger=None, fail_fast=False):
+def make_sql_tables(
+    dirnames, verbose=False, logger=None, fail_fast=False, debug=False,
+):
     """
     Given a SQL directory, make the SQL tables
     defined in this module.
@@ -1074,8 +1067,10 @@ def make_sql_tables(dirnames, verbose=False, logger=None, fail_fast=False):
     :param logger: A logging.Logger object to print messages with
     :type fail_fast: bool
     :param fail_fast: Whether or not to bail after the first error
-    :rtype: None
-    :return: Nothing, but writes the generated data to the target files
+    :type debug: bool
+    :param debug: Show the stacktrace that caused the error
+    :rtype: bool
+    :return: True if the files are generated, and False otherwise.
     """
     reports = (
         make_course_axis, make_forum_table, make_grades_persistent,
@@ -1101,7 +1096,11 @@ def make_sql_tables(dirnames, verbose=False, logger=None, fail_fast=False):
                     result.get()
                     processed += 1
                 except:
-                    _, excp, _ = sys.exc_info()
+                    _, excp, tb = sys.exc_info()
+                    if debug:
+                        traces = ['{e}'.format(e=excp)]
+                        traces += map(str.strip, traceback.format_tb(tb))
+                        excp = '\n'.join(traces)
                     msg = (
                         'Error encountered while making the {n} table(s) '
                         'with the given directory {d}: {e}'
@@ -1119,6 +1118,9 @@ def make_sql_tables(dirnames, verbose=False, logger=None, fail_fast=False):
                 logger.error(failure)
         for dirname in dirnames:
             logger.info('Done processing files in {d}'.format(d=dirname))
+    if fails:
+        return False
+    return True
 
 
 def make_table_from_sql(

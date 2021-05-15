@@ -185,10 +185,12 @@ def split_sql_files(parsed_args):
             )
             parsed_args.logger.info('Making reports from course SQL files')
             try:
-                make_sql_tables(
+                rc = make_sql_tables(
                     dirnames, parsed_args.verbose,
-                    parsed_args.logger, parsed_args.fail_fast
+                    parsed_args.logger, parsed_args.fail_fast,
+                    parsed_args.debug,
                 )
+                failed = not rc
             except Exception as excp:
                 if parsed_args.fail_fast:
                     raise excp
