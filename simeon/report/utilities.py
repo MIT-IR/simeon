@@ -2,6 +2,7 @@
 Utility functions and classes to help with making course reports like user_info_combo, person_course, etc.
 """
 import csv
+import glob
 import gzip
 import json
 import math
@@ -38,31 +39,42 @@ csv.field_size_limit(13107200)
 
 
 # Set up schema coercion functions
-def format_str_date(d):
+def _format_str_date(d):
     # return parse_date(d).strftime('%Y-%m-%d %H:%M:%S.%f')
     return parse_date(d).isoformat()
 
 
-def to_float(v):
+def _to_float(v):
     v = float(v)
     if math.isnan(v) or math.isinf(v):
         return None
     return v
 
 
-def stringify(v):
+def _stringify(v):
     if v is None:
         return None
     if not isinstance(v, str):
         v = json.dumps(v)
-    return v
+    return v.strip()
+
+
+def _delete_incomplete_matches(dirname, patt):
+    matches = glob.iglob(
+        os.path.join(dirname, '*{p}*.json.gz'.format(p=patt))
+    )
+    for file_ in matches:
+        try:
+            os.remove(file_)
+        except:
+            continue
 
 
 BQ2PY_TYPES = {
-    'TIMESTAMP': format_str_date,
-    'STRING': stringify,
+    'TIMESTAMP': _format_str_date,
+    'STRING': _stringify,
     'INTEGER': int,
-    'FLOAT': to_float,
+    'FLOAT': _to_float,
     'BOOLEAN': bool,
 }
 
@@ -1102,9 +1114,11 @@ def make_sql_tables_seq(
                 if fail_fast:
                     raise excp from None
                 fails.append(excp)
+                _delete_incomplete_matches(dirname, tbl)
         if verbose and logger is not None:
             for failure in fails:
                 logger.error(failure)
+            logger.info('Done processing files in {d}'.format(d=dirname))
     return not bool(fails)
 
 
@@ -1150,28 +1164,26 @@ def make_sql_tables_par(
                     fn, args=(dirname,)
                 )
         fails = []
-        processed = 0
-        while processed < len(results):
-            for (tbl, dirname), result in results.items():
-                try:
-                    result.get()
-                except:
-                    _, excp, tb = sys.exc_info()
-                    if debug:
-                        traces = ['{e}'.format(e=excp)]
-                        traces += map(str.strip, traceback.format_tb(tb))
-                        excp = '\n'.join(traces)
-                    msg = (
-                        'Error encountered while making the {n} table(s) '
-                        'with the given directory {d}: {e}'
-                    )
-                    excp = MissingFileException(msg.format(
-                        d=dirname, n=tbl, e=excp
-                    ))
-                    if fail_fast:
-                        raise excp from None
-                    fails.append(excp)
-                processed += 1
+        for (tbl, dirname), result in results.items():
+            try:
+                result.get()
+            except:
+                _, excp, tb = sys.exc_info()
+                if debug:
+                    traces = ['{e}'.format(e=excp)]
+                    traces += map(str.strip, traceback.format_tb(tb))
+                    excp = '\n'.join(traces)
+                msg = (
+                    'Error encountered while making the {n} table(s) '
+                    'with the given directory {d}: {e}'
+                )
+                excp = MissingFileException(msg.format(
+                    d=dirname, n=tbl, e=excp
+                ))
+                if fail_fast:
+                    raise excp from None
+                fails.append(excp)
+                _delete_incomplete_matches(dirname, tbl)
     if verbose and logger is not None:
         for failure in fails:
             logger.error(failure)
