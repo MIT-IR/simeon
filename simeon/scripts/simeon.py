@@ -1202,7 +1202,8 @@ def main():
         '--jobs', '-j',
         help=(
             'Number of processes/threads to use when processing multiple '
-            'files using multi threading or processing. Default: %(default)s'
+            'course IDs using multi threading or processing. '
+            'Default: %(default)s'
         ),
         default=mp.cpu_count(),
         type=int,

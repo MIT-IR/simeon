@@ -350,7 +350,7 @@ def make_user_info_combo(dirname, outname='user_info_combo.json.gz'):
         file_ = os.path.join(dirname, file_)
         if not os.path.exists(file_):
             raise OSError(
-                '{f} does not exist on this machine'.format(f=file_)
+                '{f} does not exist in the SQL bundle.'.format(f=file_)
             )
     schema_file = os.path.join(
         SCHEMA_DIR, 'schema_user_info_combo.json'
@@ -651,7 +651,7 @@ def make_course_axis(dirname, outname='course_axis.json.gz'):
     for file_ in (fname, bundle):
         if not os.path.exists(file_):
             raise OSError(
-                '{f} does not exist on this machine'.format(f=file_)
+                '{f} does not exist in the SQL bundle.'.format(f=file_)
             )
     itypes = _get_itypes(bundle)
     with open(fname) as fh:
@@ -733,7 +733,7 @@ def make_grades_persistent(
         outname = os.path.join(dirname, outname)
         if not os.path.exists(file_):
             raise OSError(
-                '{f} does not exist on this machine'.format(f=file_)
+                '{f} does not exist in the SQL bundle.'.format(f=file_)
             )
         with open(os.path.join(SCHEMA_DIR, schema_file)) as sfh:
             sname, _ = os.path.splitext(schema_file)
@@ -771,7 +771,7 @@ def make_grading_policy(dirname, outname='grading_policy.json.gz'):
     file_ = os.path.join(dirname, 'course-analytics.xml.tar.gz')
     if not os.path.exists(file_):
         raise OSError(
-            '{f} does not exist on this machine'.format(f=file_)
+            '{f} does not exist in the SQL bundle'.format(f=file_)
         )
     with tarfile.open(file_) as tar:
         policy = next(
@@ -839,7 +839,7 @@ def make_forum_table(dirname, outname='forum.json.gz'):
     file_ = os.path.join(dirname, 'forum.mongo')
     if not os.path.exists(file_):
         raise OSError(
-            '{f} does not exist on this machine'.format(f=file_)
+            '{f} does not exist in the SQL bundle.'.format(f=file_)
         )
     cols = {
         '$oid': (
@@ -954,7 +954,7 @@ def make_student_module(dirname, outname='studentmodule.json.gz'):
     file_ = pjoin(dirname, 'courseware_studentmodule-analytics.sql')
     if not os.path.exists(file_):
         raise OSError(
-            '{f} does not exist on this machine'.format(f=file_)
+            '{f} does not exist in the SQL bundle.'.format(f=file_)
         )
     with open(pjoin(SCHEMA_DIR, 'schema_studentmodule.json')) as sfh:
         module_schema = json.load(sfh).get('studentmodule')
@@ -1051,7 +1051,7 @@ def make_roles_table(dirname, outname='roles.json.gz'):
         for file_ in map(lambda f: os.path.join(dirname, f), files):
             if not os.path.exists(file_):
                 raise OSError(
-                    '{f} does not exist on this machine'.format(f=file_)
+                    '{f} does not exist in the SQL bundle.'.format(f=file_)
                 )
             with open(file_) as fh:
                 line = fh.readline().replace('\tname', '\trole')
