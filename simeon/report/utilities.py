@@ -1294,7 +1294,7 @@ def make_tables_from_sql(
     tables, course_id, client, project, append=False,
     query_dir=QUERY_DIR, wait=False,
     geo_table='geocode.geoip', youtube_table='videos.youtube',
-    parallel=False,
+    parallel=False, fail_fast=False,
 ):
     """
     This is the plural/multiple tables version of make_table_from_sql
@@ -1315,6 +1315,10 @@ def make_tables_from_sql(
     :param youtube_table: Table name in BigQuery with YouTube video details
     :type wait: bool
     :param wait: Whether to wait for the query job to finish running
+    :type parallel: bool
+    :param parallel: Whether the function is running in a process pool
+    :type fail_fast: bool
+    :param fail_fast: Whether to stop processing after the first error
     :rtype: Dict[str, Dict[str, str]]
     :return: Return a dict mapping table names to their corresponding errors
     """
@@ -1328,13 +1332,15 @@ def make_tables_from_sql(
             append=append, geo_table=geo_table, wait=wait,
             query_dir=query_dir, youtube_table=youtube_table,
         )
+        if fail_fast and out[table]:
+            return out
     return out
 
 
 def make_tables_from_sql_par(
     tables, courses, project, append=False, query_dir=QUERY_DIR,
     wait=False, geo_table='geocode.geoip', youtube_table='videos.youtube',
-    safile=None, size=mp.cpu_count(), logger=None,
+    safile=None, size=mp.cpu_count(), logger=None, fail_fast=False,
 ):
     """
     Parallel version of make_tables_from_sql
@@ -1361,6 +1367,8 @@ def make_tables_from_sql_par(
     :param size: Size of the process pool to run queries in parallel
     :type logger: logging.Logger
     :param logger: A Logger object with which to report steps carried out
+    :type fail_fast: bool
+    :param fail_fast: Whether to stop processing after the first error
     :rtype: Dict[str, Dict[str, Dict[str, str]]]
     :return: A dict mapping course_ids to tables and their query errors
     """
@@ -1383,7 +1391,7 @@ def make_tables_from_sql_par(
                     tables=tables, course_id=course_id, client=None,
                     project=project, append=append, query_dir=query_dir, wait=wait,
                     geo_table=geo_table, youtube_table=youtube_table,
-                    parallel=True,
+                    parallel=True, fail_fast=fail_fast,
                 )
             )
             results[course_id] = async_result

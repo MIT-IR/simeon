@@ -625,7 +625,7 @@ def make_secondary_tables(parsed_args):
             project=parsed_args.project, append=parsed_args.append,
             geo_table=parsed_args.geo_table,
             youtube_table=parsed_args.youtube_table,
-            wait=parsed_args.wait_for_loads,
+            wait=parsed_args.wait_for_loads, fail_fast=parsed_args.fail_fast,
         )
     else:
         all_jobs.update(make_tables_from_sql_par(
@@ -635,7 +635,7 @@ def make_secondary_tables(parsed_args):
             append=parsed_args.append, geo_table=parsed_args.geo_table,
             youtube_table=parsed_args.youtube_table,
             wait=parsed_args.wait_for_loads, size=parsed_args.jobs,
-            logger=parsed_args.logger,
+            logger=parsed_args.logger, fail_fast=parsed_args.fail_fast,
         ))
     errors = 0
     num_queries = 0
