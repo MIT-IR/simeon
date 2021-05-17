@@ -19,8 +19,8 @@ from simeon.exceptions import (
     AWSException, EarlyExitError
 )
 from simeon.report import (
-    make_sql_tables_par, make_sql_tables_seq,
-    make_table_from_sql, wait_for_bq_job_ids
+    make_sql_tables_par, make_sql_tables_seq, make_tables_from_sql,
+    make_tables_from_sql_par, wait_for_bq_job_ids
 )
 from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
@@ -613,42 +613,54 @@ def make_secondary_tables(parsed_args):
             parsed_args.course_ids
         )
     all_jobs = dict()
-    for course_id in parsed_args.course_ids:
+    if len(parsed_args.course_ids) == 1:
+        course_id = parsed_args.course_ids[0]
         parsed_args.logger.info(
-            'Making secondary tables for course ID {c}'.format(c=course_id)
-        )
-        for table_name in parsed_args.tables:
-            job = make_table_from_sql(
-                table=table_name, course_id=course_id, client=client,
-                project=parsed_args.project, append=parsed_args.append,
-                geo_table=parsed_args.geo_table,
-                wait=parsed_args.wait_for_loads,
+            'Making secondary tables for course ID {cid}'.format(
+                cid=course_id
             )
-            all_jobs[(course_id, table_name)] = job
-        parsed_args.logger.info(
-            'Submitted query jobs for course ID {c}'.format(c=course_id)
         )
+        all_jobs[course_id] = make_tables_from_sql(
+            tables=parsed_args.tables, course_id=course_id, client=client,
+            project=parsed_args.project, append=parsed_args.append,
+            geo_table=parsed_args.geo_table,
+            youtube_table=parsed_args.youtube_table,
+            wait=parsed_args.wait_for_loads,
+        )
+    else:
+        all_jobs.update(make_tables_from_sql_par(
+            tables=parsed_args.tables, courses=parsed_args.course_ids,
+            safile=parsed_args.service_account_file, 
+            project=parsed_args.project,
+            append=parsed_args.append, geo_table=parsed_args.geo_table,
+            youtube_table=parsed_args.youtube_table,
+            wait=parsed_args.wait_for_loads, size=parsed_args.jobs,
+            logger=parsed_args.logger,
+        ))
     errors = 0
+    num_queries = 0
     parsed_args.logger.info('Checking for errors...')
-    for (course_id, table), job in all_jobs.items():
-        if job.errors:
-            msg = 'Making {t} for {c} failed with the following: {e}'
-            parsed_args.logger.error(msg.format(
-                t=table, c=course_id,
-                e='\n'.join(client.extract_error_messages(job.errors))
-            ))
-            errors += 1
+    for course_id, job_errors in all_jobs.items():
+        for table, error_dict in job_errors.items():
+            num_queries += 1
+            if error_dict:
+                msg = 'Making {t} for {c} failed with the following: {e}'
+                parsed_args.logger.error(msg.format(
+                    t=table, c=course_id,
+                    e='\n'.join(client.extract_error_messages(error_dict))
+                ))
+                errors += 1
     if errors:
         sys.exit(1)
     if parsed_args.wait_for_loads:
         msg = '{c} queries run and destination tables have been refreshed'
-        parsed_args.logger.info(msg.format(c=len(all_jobs)))
+        parsed_args.logger.info(msg.format(c=num_queries))
         sys.exit(0)
     msg = (
         '{c} BigQuery query jobs started. Please consult your '
         'BigQuery console for more details about the status of said jobs.'
     )
-    parsed_args.logger.info(msg.format(c=len(all_jobs)))
+    parsed_args.logger.info(msg.format(c=num_queries))
 
 
 def main():
@@ -1185,6 +1197,15 @@ def main():
             'files that contain the course IDs. One ID per line'
         ),
         action='store_true',
+    )
+    reporter.add_argument(
+        '--jobs', '-j',
+        help=(
+            'Number of processes/threads to use when processing multiple '
+            'files using multi threading or processing. Default: %(default)s'
+        ),
+        default=mp.cpu_count(),
+        type=int,
     )
     args = parser.parse_args()
     args.logger = cli_utils.make_logger(

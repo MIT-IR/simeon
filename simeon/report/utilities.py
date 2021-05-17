@@ -31,11 +31,15 @@ from simeon.exceptions import (
     MissingFileException, MissingQueryFileException, MissingSchemaException,
     SchemaMismatchException,
 )
+from simeon.upload import gcp
 from simeon.upload import utilities as uputils
 
 
 # Increase the csv module's field size limit
 csv.field_size_limit(13107200)
+
+# BigQuery client for processes in process pools
+report_bq_client = None
 
 
 # Set up schema coercion functions
@@ -149,7 +153,7 @@ PROBLEM_TYPES = {
 }
 
 
-def _pool_initializer():
+def _sql_pool_init():
     """
     Process pool initializer
     """
@@ -160,6 +164,26 @@ def _pool_initializer():
     sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
     for sig in sigs:
         signal.signal(sig, signal.SIG_DFL)
+
+
+def _report_pool_init(proj, safile=None):
+    """
+    Process pool initializer
+    """
+    global report_bq_client
+    def sighandler(sig, frame):
+        raise EarlyExitError(
+            'Secondary table generation interrupted prematurely'
+        )
+    sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
+    for sig in sigs:
+        signal.signal(sig, signal.SIG_DFL)
+    if not safile:
+        report_bq_client = gcp.BigqueryClient(project=proj)
+    else:
+        report_bq_client = gcp.BigqueryClient.from_service_account_json(
+            safile, project=proj
+        )
 
 
 def wait_for_bq_jobs(job_list):
@@ -1150,7 +1174,7 @@ def make_sql_tables_par(
     nprocs = mp.cpu_count()
     if len(dirnames) < nprocs:
         nprocs = len(dirnames)
-    with ProcessPool(nprocs, initializer=_pool_initializer) as pool:
+    with ProcessPool(nprocs, initializer=_sql_pool_init) as pool:
         for fn in reports:
             for dirname in dirnames:
                 tbl = fn.__name__.replace('make_', '').replace('_table', '')
@@ -1216,7 +1240,8 @@ def make_table_from_sql(
     :param youtube_table: Table name in BigQuery with YouTube video details
     :type wait: bool
     :param wait: Whether to wait for the query job to finish running
-    :rtype: bigquery.QueryJob
+    :rtype: Dict[str, Dict[str, str]]
+    :return: Returns the errors dictionary from the LoadJob object tied to the query
     """
     latest_dataset = uputils.course_to_bq_dataset(
         course_id, 'sql', project
@@ -1261,4 +1286,113 @@ def make_table_from_sql(
     )
     if wait:
         wait_for_bq_jobs([job])
-    return job
+    return job.errors or {}
+
+
+def make_tables_from_sql(
+    tables, course_id, client, project, append=False,
+    query_dir=QUERY_DIR, wait=False,
+    geo_table='geocode.geoip', youtube_table='videos.youtube',
+    parallel=False,
+):
+    """
+    This is the plural/multiple tables version of make_table_from_sql
+
+    :type tables: Iterable[str]
+    :param tables: BigQuery table names to create or append to
+    :type course_id: str
+    :param course_id: Course ID whose secondary reports are being generated
+    :type client: bigquery.Client
+    :param client: An authenticated bigquery.Client object
+    :type project: str
+    :param project: GCP project id where the video_axis table is loaded.
+    :type query_dir: str
+    :param query_dir: Directory where query files are saved.
+    :type geo_table: str
+    :param geo_table: Table name in BigQuery with geolocation data for IPs
+    :type youtube_table: str
+    :param youtube_table: Table name in BigQuery with YouTube video details
+    :type wait: bool
+    :param wait: Whether to wait for the query job to finish running
+    :rtype: Dict[str, Dict[str, str]]
+    :return: Return a dict mapping table names to their corresponding errors
+    """
+    global report_bq_client
+    if parallel:
+        client = report_bq_client
+    out = dict()
+    for table in tables:
+        out[table] = make_table_from_sql(
+            table=table, course_id=course_id, client=client, project=project,
+            append=append, geo_table=geo_table, wait=wait,
+            query_dir=query_dir, youtube_table=youtube_table,
+        )
+    return out
+
+
+def make_tables_from_sql_par(
+    tables, courses, project, append=False, query_dir=QUERY_DIR,
+    wait=False, geo_table='geocode.geoip', youtube_table='videos.youtube',
+    safile=None, size=mp.cpu_count(), logger=None,
+):
+    """
+    Parallel version of make_tables_from_sql
+
+    :type tables: Iterable[str]
+    :param tables: An iterable of BigQuery table names
+    :type courses: Iterable[str]
+    :param courses: An iterable of course IDs
+    :type project: str
+    :param project: The GCP project against which queries are run
+    :type append: bool
+    :param append: Whether to append query results to the target tables
+    :type query_dir: str
+    :param query_dir: The directories where the SQL query files are found
+    :type wait: bool
+    :param wait: Whether to wait for the BigQuery load jobs to complete
+    :type geo_table: str
+    :param geo_table: Table name in BigQuery with geolocation data for IPs
+    :type youtube_table: str
+    :param youtube_table: Table name in BigQuery with YouTube video details
+    :type safile: Union[None, str]
+    :param safile: GCP service account file to use to connect to BigQuery
+    :type size: int
+    :param size: Size of the process pool to run queries in parallel
+    :type logger: logging.Logger
+    :param logger: A Logger object with which to report steps carried out
+    :rtype: Dict[str, Dict[str, Dict[str, str]]]
+    :return: A dict mapping course_ids to tables and their query errors
+    """
+    if len(courses) < size:
+        size = len(courses)
+    results = dict()
+    with ProcessPool(
+        size, initializer=_report_pool_init,
+        initargs=(project, safile)
+    ) as pool:
+        for course_id in courses:
+            if logger:
+                logger.info(
+                    'Making secondary tables for course ID {cid}'.format(
+                        cid=course_id
+                    )
+                )
+            async_result = pool.apply_async(
+                func=make_tables_from_sql, kwds=dict(
+                    tables=tables, course_id=course_id, client=None,
+                    project=project, append=append, query_dir=query_dir, wait=wait,
+                    geo_table=geo_table, youtube_table=youtube_table,
+                    parallel=True,
+                )
+            )
+            results[course_id] = async_result
+        for course_id in results:
+            result = results[course_id]
+            results[course_id] = result.get()
+            if logger:
+                logger.info(
+                    'All queries submitted for course ID {cid}'.format(
+                        cid=course_id
+                    )
+                )
+    return results
