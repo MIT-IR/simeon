@@ -25,7 +25,7 @@ def process_email_file(
     :type keepfiles: bool
     :param keepfiles: Whether to keep the .gpg files after decrypting them
     :rtype: None
-    :return: Nothing
+    :return: Nothing, but generates decrypted email opt-in files
     """
     dirname, out = os.path.split(fname)
     out, _ = os.path.splitext(out)

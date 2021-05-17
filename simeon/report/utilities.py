@@ -197,13 +197,14 @@ def wait_for_bq_jobs(job_list):
     :return: Nothing
     :TODO: Improve this function to behave a little less like a tight loop
     """
-    done = 0
-    while done < len(job_list):
+    done = set()
+    while len(done) < len(job_list):
         for job in job_list:
-            if job.state == 'DONE':
-                continue
             try:
-                done += job.done()
+                if job.job_id not in done:
+                    state = job.done()
+                    if state:
+                        done.add(job.job_id)
             except NotFound:
                 msg = '{id} is not a valid BigQuery job ID'
                 raise LoadJobException(msg.format(id=job.job_id)) from None
@@ -1285,7 +1286,7 @@ def make_table_from_sql(
         job_config=config,
     )
     if wait:
-        wait_for_bq_jobs([job])
+        wait_for_bq_job_ids([job.job_id], client)
     return job.errors or {}
 
 
@@ -1317,8 +1318,8 @@ def make_tables_from_sql(
     :rtype: Dict[str, Dict[str, str]]
     :return: Return a dict mapping table names to their corresponding errors
     """
-    global report_bq_client
     if parallel:
+        global report_bq_client
         client = report_bq_client
     out = dict()
     for table in tables:

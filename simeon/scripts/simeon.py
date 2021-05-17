@@ -511,7 +511,7 @@ def push_to_gcs(parsed_args):
         if os.path.isdir(item):
             loader = client.load_dir
         else:
-            loader = client.load_on_file_to_gcs
+            loader = client.load_one_file_to_gcs
         try:
             parsed_args.logger.info(
                 'Loading {f} to GCS'.format(f=item)

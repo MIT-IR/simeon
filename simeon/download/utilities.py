@@ -450,7 +450,7 @@ def rephrase_record(record: dict):
     :type record: dict
     :param record: A deserialized JSON record
     :rtype: None
-    :return: Nothing
+    :return: Nothing, but updates the given record in place
     """
     record['course_id'] = get_course_id(record)
     record['module_id'] = get_module_id(record)

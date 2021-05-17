@@ -99,7 +99,7 @@ def batch_decrypt_files(
     :type keepfiles: bool
     :param keepfiles: Keep the encrypted files after decrypting them.
     :rtype: None
-    :return: Nothing
+    :return: Nothing, but decrypts the .sql files from the given archive
     """
     with ThreadPool(10) as pool:
         results = dict()

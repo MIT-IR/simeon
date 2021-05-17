@@ -161,7 +161,7 @@ def split_tracking_log(
     :type courses: Union[Iterable[str], None]
     :param courses: A list of course IDs whose records are exported
     :rtype: bool
-    :return: True if files have generated. False, otherwise
+    :return: True if files have been generated. False, otherwise
     """
     schema_file = os.path.join(
         rutils.SCHEMA_DIR, 'schema_tracking_log.json'

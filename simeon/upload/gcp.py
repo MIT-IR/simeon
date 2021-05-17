@@ -193,7 +193,7 @@ class BigqueryClient(bigquery.Client):
         job = loader(
             fname, temp_table, job_config=config, job_id_prefix=job_prefix
         )
-        rutils.wait_for_bq_jobs([job])
+        rutils.wait_for_bq_job_ids([job.job_id])
         if job.errors:
             msg = 'Merge job failed with: {e}'
             raise LoadJobException(msg.format(
@@ -203,7 +203,7 @@ class BigqueryClient(bigquery.Client):
             first=table, second=table + '_temp', column=col,
         )
         qjob = self.query(query)
-        rutils.wait_for_bq_jobs([qjob])
+        rutils.wait_for_bq_job_ids([qjob.job_id])
         if qjob.errors:
             msg = 'Merge job failed with: {e}'
             raise LoadJobException(msg.format(
@@ -216,7 +216,7 @@ class GCSClient(storage.Client):
     """
     Make a client to load data files to GCS
     """
-    def load_on_file_to_gcs(
+    def load_one_file_to_gcs(
         self, fname: str, file_type: str, bucket: str
     ):
         """
@@ -231,7 +231,7 @@ class GCSClient(storage.Client):
         :type overwrite: bool
         :param overwrite: Overwrite the target blob if it exists
         :rtype: None
-        :returns: Nothing
+        :returns: Nothing, but should load the given file to GCS
         :raises: Propagates everything from the underlying package
         """
         dest = storage.Blob.from_string(
@@ -256,7 +256,7 @@ class GCSClient(storage.Client):
         :type bucket: str
         :param bucket: GCS bucket name
         :rtype: None
-        :returns: Nothing
+        :returns: Nothing, but should load file(s) in dirname to GCS
         :raises: Propagates everything from the underlying package
         """
         formats = FILE_FORMATS.get(file_type, [])
@@ -269,4 +269,4 @@ class GCSClient(storage.Client):
             for format_ in formats:
                 files.extend(glob.glob(patt.format(f=format_)))
         for fname in files:
-            self.load_on_file_to_gcs(fname, file_type, bucket)
+            self.load_one_file_to_gcs(fname, file_type, bucket)
