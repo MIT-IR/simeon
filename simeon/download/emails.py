@@ -1,8 +1,13 @@
 """
 Module to process email opt-in data from edX
 """
+import csv
+import gzip
+import json
 import os
 import zipfile
+
+from dateutil.parser import parse as parse_date
 
 from simeon.download.utilities import decrypt_files
 
@@ -24,8 +29,8 @@ def process_email_file(
     :param timeout: Number of seconds to wait for the decryption to finish
     :type keepfiles: bool
     :param keepfiles: Whether to keep the .gpg files after decrypting them
-    :rtype: None
-    :return: Nothing, but generates decrypted email opt-in files
+    :rtype: str
+    :return: Returns the path to the decrypted file
     """
     dirname, out = os.path.split(fname)
     out, _ = os.path.splitext(out)
@@ -49,3 +54,39 @@ def process_email_file(
             os.remove(out)
         except OSError:
             pass
+    return os.path.splitext(out)[0]
+
+
+def compress_email_files(files, ddir):
+    """
+    Generate a GZIP JSON file in the given ddir directory
+    using the contents of the files.
+
+    :type files: Iterable[str]
+    :param files: An iterable of email opt-in CSV files to process
+    :type ddir: str
+    :param ddir: A destination directory
+    :rtype: None
+    :return: Writes the contents of files into email_opt_in.json.gz
+    """
+    outname = os.path.join(ddir, 'email_opt_in.json.gz')
+    with gzip.open(outname, 'wt') as fh:
+        for file_ in files:
+            with open(file_) as infile:
+                cols = [c.strip() for c in next(infile).split(',')]
+                reader = csv.DictReader(
+                    infile, delimiter=',',
+                    lineterminator='\n', fieldnames=cols
+                )
+                for row in reader:
+                    cid = (row.get('course_id') or '').split(':')[-1]
+                    row['course_id'] = cid.replace(
+                        '+', '/', 2
+                    ).replace('+', '_')
+                    row['preference_set_datetime'] = parse_date(
+                        row.get('preference_set_datetime')
+                    ).isoformat()
+                    is_opt = (row.get('is_opted_in_for_email') or '').strip()
+                    row['is_opted_in_for_email'] = is_opt.lower() == 'true'
+                    fh.write(json.dumps(row) + '\n')
+

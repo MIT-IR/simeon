@@ -1,0 +1,39 @@
+{
+    "email_opt_in": [
+        {
+            "name": "user_id",
+            "field_type": "STRING",
+	    "description": "edX user ID of the learner"
+        },
+        {
+            "name": "username",
+            "field_type": "STRING",
+	    "description": "edx username of the learner"
+        },
+        {
+            "name": "email",
+            "field_type": "STRING",
+	    "description": "Email address of the learner in the course whose ID is associated with this record"
+        },
+        {
+            "name": "full_name",
+            "field_type": "STRING",
+	    "description": "The full name of the learner"
+        },
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+	    "description": "Course ID formatted as ORG/NUMBER_RUN/TERM"
+        },
+        {
+            "name": "is_opted_in_for_email",
+            "field_type": "BOOLEAN",
+	    "description": "Whether or not the learner has opted to receive marketing emails"
+        },
+        {
+            "name": "preference_set_datetime",
+            "field_type": "TIMESTAMP",
+	    "description": "The timestamp the status was set"
+        }
+    ]
+}

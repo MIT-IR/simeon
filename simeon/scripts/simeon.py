@@ -220,6 +220,25 @@ def split_sql_files(parsed_args):
     sys.exit(0 if not failed else 1)
 
 
+def split_email_files(parsed_args):
+    """
+    Convert a set of email files into a json.gz file to be
+    loaded to BigQuery
+    """
+    if parsed_args.verbose:
+        parsed_args.logger(
+            'Generating json.gz from the email-opt-in CSV file(s)'
+        )
+    emails.compress_email_files(
+        files=parsed_args.downloaded_files,
+        ddir=parsed_args.destination
+    )
+    if parsed_args.verbose:
+        parsed_args.logger(
+            'Done generating json.gz file from the email-opt-in CSV file(s)'
+        )
+
+
 def split_files(parsed_args):
     """
     Split log or SQL files
@@ -235,6 +254,8 @@ def split_files(parsed_args):
         split_log_files(parsed_args)
     elif parsed_args.file_type == 'sql':
         split_sql_files(parsed_args)
+    elif parsed_args.file_type == 'email':
+        split_email_files(parsed_args)
     else:
         parsed_args.logger.error(
             'The split command does not support file type {ft}'.format(
@@ -299,11 +320,14 @@ def download_files(parsed_args):
                         'Decrypting {f}'.format(f=fullname)
                     )
                 if parsed_args.file_type == 'email':
-                    emails.process_email_file(
-                        fname=fullname, verbose=parsed_args.verbose,
-                        logger=parsed_args.logger,
-                        timeout=parsed_args.decryption_timeout,
-                        keepfiles=parsed_args.keep_encrypted
+                    parsed_args.downloaded_files = []
+                    parsed_args.downloaded_files.append(
+                        emails.process_email_file(
+                            fname=fullname, verbose=parsed_args.verbose,
+                            logger=parsed_args.logger,
+                            timeout=parsed_args.decryption_timeout,
+                            keepfiles=parsed_args.keep_encrypted
+                        )
                     )
                     if parsed_args.verbose:
                         msg = 'Downloaded and decrypted the contents of {f}'
@@ -356,6 +380,14 @@ def download_files(parsed_args):
         else:
             parsed_args.destination = parsed_args.split_destination
         split_sql_files(parsed_args)
+    elif parsed_args.file_type == 'email' and parsed_args.split:
+        if not parsed_args.split_destination:
+            parsed_args.destination = os.path.join(
+                parsed_args.destination, 'emails'
+            )
+        else:
+            parsed_args.destination = parsed_args.split_destination
+        split_email_files(parsed_args)
     rc = 0 if all(v == 2 for v in downloads.values()) else 1
     sys.exit(rc)
 
@@ -927,7 +959,7 @@ def main():
         '--file-type', '-f',
         help='The file type of the items provided. Default: %(default)s',
         default='sql',
-        choices=['log', 'sql'],
+        choices=['log', 'sql', 'email'],
     )
     splitter.add_argument(
         '--no-decryption', '-N',

@@ -41,7 +41,11 @@ def course_to_gcs_folder(course_id: str, file_type: str, bucket: str) -> str:
     """
     segment = SEGMENTS.get(file_type)
     if not segment:
-        raise ValueError('file_type is not one of these: sql, email, log')
+        raise ValueError(
+            'file_type is not one of these: {ft}'.format(
+                ft=', '.join(SEGMENTS)
+            )
+        )
     if not bucket.startswith('gs://'):
         bucket = 'gs://{b}'.format(b=bucket)
     dirname = course_id.replace('/', '__').replace('.', '_')
@@ -94,10 +98,13 @@ def course_to_bq_dataset(course_id: str, file_type: str, project: str) -> str:
     if file_type not in SEGMENTS:
         msg = 'file_type is not one of these: {s}'
         raise ValueError(msg.format(s=', '.join(SEGMENTS)))
-    suffix = 'logs'
-    if file_type in ('sql', 'email'):
-        suffix = 'latest'
-    dataset = '{d}_{s}'.format(
+    if file_type in ('sql',):
+        suffix = '_latest'
+    elif file_type == 'log':
+        suffix = '_logs'
+    else:
+        suffix = ''
+    dataset = '{d}{s}'.format(
         d=course_id.replace('/', '__').replace('.', '_').replace('-', '_'),
         s=suffix
     )
@@ -124,11 +131,14 @@ def local_to_bq_table(fname: str, file_type: str, project: str) -> str:
             )
         )
     dname, bname = os.path.split(os.path.abspath(os.path.expanduser(fname)))
-    if file_type in ('sql', 'email'):
+    if file_type in ('sql',):
         table = bname.split('.', 1)[0].replace('-', '_')
-        suffix = 'latest'
+        suffix = '_latest'
+    elif file_type in ('email',):
+        table = bname.split('.', 1)[0].replace('-', '_')
+        suffix = ''
     else:
-        suffix = 'logs'
+        suffix = '_logs'
         table = 'tracklog_' + ''.join(re.findall(r'\d+', bname))
     dataset = os.path.basename(dname).replace('.', '_').replace('-', '_')
     if not table.replace('tracklog_', '') or not dataset:
@@ -137,7 +147,7 @@ def local_to_bq_table(fname: str, file_type: str, project: str) -> str:
                 f=fname
             )
         )
-    return '{p}.{d}_{s}.{t}'.format(
+    return '{p}.{d}{s}.{t}'.format(
         d=dataset, s=suffix, p=project, t=table
     )
 
