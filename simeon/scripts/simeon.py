@@ -830,6 +830,23 @@ def main():
         help='Keep the encrypted files after decrypting them',
         action='store_true',
     )
+    downloader.add_argument(
+        '--tables-only', '-T',
+        help=(
+            'Don\'t do any unpacking of the SQL archive. Use the latter to '
+            'get directories that already contain SQL files to use to make '
+            'files to load to BigQuery.'
+        ),
+        action='store_true',
+    )
+    downloader.add_argument(
+        '--fail-fast', '-F',
+        help=(
+            'Force simeon to stop splitting if any error is encountered. '
+            'Otherwise, simeon reports the error and moves on to the next thing.'
+        ),
+        action='store_true',
+    )
     lister = subparsers.add_parser(
         'list',
         help='List edX research data with the given criteria',
@@ -909,7 +926,7 @@ def main():
     splitter.add_argument(
         '--file-type', '-f',
         help='The file type of the items provided. Default: %(default)s',
-        default='log',
+        default='sql',
         choices=['log', 'sql'],
     )
     splitter.add_argument(
