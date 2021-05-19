@@ -246,10 +246,16 @@ def split_files(parsed_args):
     items = []
     for item in parsed_args.downloaded_files:
         if '*' in item:
-            items.extend(glob.glob(item))
+            items.extend(glob.iglob(item))
         else:
             items.append(item)
-    parsed_args.downloaded_files = items
+    parsed_args.downloaded_files = list(filter(os.path.isfile, items))
+    if not parsed_args.downloaded_files:
+        parsed_args.logger.error(
+            'No valid files were given to simeon split. '
+            'Please provide existing files.'
+        )
+        sys.exit(1)
     if parsed_args.file_type == 'log':
         split_log_files(parsed_args)
     elif parsed_args.file_type == 'sql':

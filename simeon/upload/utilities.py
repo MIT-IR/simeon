@@ -134,12 +134,12 @@ def local_to_bq_table(fname: str, file_type: str, project: str) -> str:
     if file_type in ('sql',):
         table = bname.split('.', 1)[0].replace('-', '_')
         suffix = '_latest'
-    elif file_type in ('email',):
-        table = bname.split('.', 1)[0].replace('-', '_')
-        suffix = ''
-    else:
+    elif file_type in ('log',):
         suffix = '_logs'
         table = 'tracklog_' + ''.join(re.findall(r'\d+', bname))
+    else:
+        table = bname.split('.', 1)[0].replace('-', '_')
+        suffix = ''
     dataset = os.path.basename(dname).replace('.', '_').replace('-', '_')
     if not table.replace('tracklog_', '') or not dataset:
         raise BigQueryNameException(
