@@ -193,7 +193,7 @@ class BigqueryClient(bigquery.Client):
         job = loader(
             fname, temp_table, job_config=config, job_id_prefix=job_prefix
         )
-        rutils.wait_for_bq_job_ids([job.job_id])
+        rutils.wait_for_bq_job_ids([job.job_id], self)
         if job.errors:
             msg = 'Merge job failed with: {e}'
             raise LoadJobException(msg.format(
@@ -203,7 +203,7 @@ class BigqueryClient(bigquery.Client):
             first=table, second=table + '_temp', column=col,
         )
         qjob = self.query(query)
-        rutils.wait_for_bq_job_ids([qjob.job_id])
+        rutils.wait_for_bq_job_ids([qjob.job_id], self)
         if qjob.errors:
             msg = 'Merge job failed with: {e}'
             raise LoadJobException(msg.format(

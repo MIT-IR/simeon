@@ -114,8 +114,8 @@ def make_geo_data(
                     break
                 except Exception as excp:
                     msg = (
-                        'Record {i} from {f} could not be parsed: {e}'
-                        '\nSkipping it...'
+                        'Record {i} from {f} could not be parsed: {e}. '
+                        'Skipping it...'
                     ).format(i=line, f=ip_file, e=excp)
                     if logger:
                         logger.warning(msg)
