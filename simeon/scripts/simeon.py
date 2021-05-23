@@ -226,7 +226,7 @@ def split_email_files(parsed_args):
     loaded to BigQuery
     """
     if parsed_args.verbose:
-        parsed_args.logger(
+        parsed_args.logger.info(
             'Generating json.gz from the email-opt-in CSV file(s)'
         )
     emails.compress_email_files(
@@ -234,7 +234,7 @@ def split_email_files(parsed_args):
         ddir=parsed_args.destination
     )
     if parsed_args.verbose:
-        parsed_args.logger(
+        parsed_args.logger.info(
             'Done generating json.gz file from the email-opt-in CSV file(s)'
         )
 
