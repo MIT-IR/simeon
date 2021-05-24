@@ -328,10 +328,15 @@ def download_files(parsed_args):
             bucket=bucket, prefix=prefix
         )
         if parsed_args.latest and blobs:
-            blobs = [max(blobs, key=lambda b: aws.get_file_date(b.name))]
+            blobs = sorted(
+                blobs, key=lambda b: aws.get_file_date(b.name),
+                reverse=True,
+            )
             break
     downloads = dict()
     for blob in blobs:
+        if parsed_args.latest and downloads:
+            break
         fdate = aws.get_file_date(blob.name)
         if parsed_args.begin_date <= fdate <= parsed_args.end_date:
             fullname = os.path.join(
