@@ -208,7 +208,8 @@ def get_bq_schema(table: str, schema_dir: str=SCHEMA_DIR):
 
 
 def make_bq_load_config(
-    table: str, append: bool=False,
+    table: str, schema_dir=SCHEMA_DIR,
+    append: bool=False,
     create: bool=True, file_format: str='json',
     delim=',', max_bad_rows=0,
 ):
@@ -217,6 +218,8 @@ def make_bq_load_config(
 
     :type table: str
     :param table: Fully qualified table name
+    :type schema_dir: str
+    :param schema_dir: The directory where schema files live
     :type append: bool
     :param append: Whether to append the loaded to the table
     :type create: bool
@@ -228,7 +231,7 @@ def make_bq_load_config(
     :rtype: bigquery.LoadJobConfig
     :return: Makes a bigquery.LoadJobConfig object
     """
-    schema = get_bq_schema(table)
+    schema = get_bq_schema(table, schema_dir=schema_dir)
     if 'json' in file_format.lower():
         format_ = bigquery.SourceFormat.NEWLINE_DELIMITED_JSON
         delim = None

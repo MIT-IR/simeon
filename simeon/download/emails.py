@@ -12,6 +12,12 @@ from dateutil.parser import parse as parse_date
 from simeon.download.utilities import decrypt_files
 
 
+SCHEMA_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    'upload', 'schemas'
+)
+
+
 def process_email_file(
     fname, verbose=True, logger=None, timeout=60, keepfiles=False
 ):
@@ -57,15 +63,20 @@ def process_email_file(
     return os.path.splitext(out)[0]
 
 
-def compress_email_files(files, ddir):
+def compress_email_files(files, ddir, schema_dir=SCHEMA_DIR):
     """
     Generate a GZIP JSON file in the given ddir directory
     using the contents of the files.
+
+    :NOTE: schema_dir is not used yet. But we may use to check that
+    the generated records match their destination tables.
 
     :type files: Iterable[str]
     :param files: An iterable of email opt-in CSV files to process
     :type ddir: str
     :param ddir: A destination directory
+    :type schema_dir: str
+    :param schema_dir: Directory where schema files live
     :rtype: None
     :return: Writes the contents of files into email_opt_in.json.gz
     """
@@ -89,4 +100,3 @@ def compress_email_files(files, ddir):
                     is_opt = (row.get('is_opted_in_for_email') or '').strip()
                     row['is_opted_in_for_email'] = is_opt.lower() == 'true'
                     fh.write(json.dumps(row) + '\n')
-

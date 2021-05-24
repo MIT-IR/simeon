@@ -18,6 +18,12 @@ from simeon.exceptions import (
 )
 
 
+SCHEMA_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    'upload', 'schemas'
+)
+
+
 proc_zfile = None
 
 
@@ -148,7 +154,7 @@ def unpacker(fname, names, ddir, courses=None, tables_only=False):
 
 def process_sql_archive(
     archive, ddir=None, include_edge=False,
-    courses=None, size=5, tables_only=False
+    courses=None, size=5, tables_only=False,
 ):
     """
     Unpack and decrypt files inside the given archive

@@ -19,6 +19,10 @@ import simeon.scripts.utilities as cli_utils
 import simeon.upload.gcp as gcp
 
 
+SCHEMA_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    'upload', 'schemas'
+)
 API_URL = (
     'https://youtube.googleapis.com/youtube/v3/videos?'
     'part=contentDetails,snippet&id={ids}&key={token}'
@@ -205,6 +209,7 @@ def merge_video_data(parsed_args):
             fname=parsed_args.youtube_file, table=parsed_args.youtube_table,
             col=parsed_args.column,
             use_storage=parsed_args.youtube_file.startswith('gs://'),
+            schema_dir=parsed_args.schema_dir,
         )
     except Exception as excp:
         _, excp, tb = sys.exc_info()
@@ -350,6 +355,11 @@ def main():
             'Default: %(default)s'
         ),
         default='id',
+    )
+    merger.add_argument(
+        '--schema-dir', '-s',
+        help='Directory where to find schema files. Default: %(default)s',
+        default=SCHEMA_DIR,
     )
     args = parser.parse_args()
     args.logger = cli_utils.make_logger(

@@ -40,6 +40,12 @@ except ImportError:
     GeoReader = None
 
 
+SCHEMA_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    'upload', 'schemas'
+)
+
+
 def import_un_denominations(fname=None):
     """
     Import UN denominations data from GitHub if fname is
@@ -263,6 +269,14 @@ def main():
         ),
         default='ip',
     )
+    merger.add_argument(
+        '--schema-dir', '-s',
+        help=(
+            'Directory where schema file are found. '
+            'Default: %(default)s'
+        ),
+        default=SCHEMA_DIR,
+    )
     args = parser.parse_args()
     args.logger = cli_utils.make_logger(
         user='SIMEON-GEOIP:{c}'.format(c=args.command.upper()),
@@ -341,6 +355,7 @@ def main():
             client.merge_to_table(
                 fname=args.geofile, table=args.geo_table, col=args.column,
                 use_storage=args.geofile.startswith('gs://'),
+                schema_dir=args.schema_dir,
             )
         except Exception as excp:
             msg = 'Merging {f} to {t} failed with the following: {e}'

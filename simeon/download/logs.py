@@ -19,8 +19,16 @@ from typing import Dict, List, Union
 from dateutil.parser import parse as parse_date
 
 from simeon.download import utilities as utils
-from simeon.exceptions import EarlyExitError
+from simeon.exceptions import (
+    EarlyExitError, MissingSchemaException
+)
 from simeon.report import utilities as rutils
+
+
+SCHEMA_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    'upload', 'schemas'
+)
 
 
 def _process_initializer():
@@ -140,6 +148,7 @@ def process_line(
 def split_tracking_log(
     filename: str, ddir: str, dynamic_date: bool=False,
     courses: List[str]=None,
+    schema_dir=SCHEMA_DIR,
 ):
     """
     Split the records in the given GZIP tracking log file.
@@ -160,12 +169,19 @@ def split_tracking_log(
         output file names
     :type courses: Union[Iterable[str], None]
     :param courses: A list of course IDs whose records are exported
+    :type schema_dir: str
+    :param schema_dir: Directory where to find schema files
     :rtype: bool
     :return: True if files have been generated. False, otherwise
     """
     schema_file = os.path.join(
-        rutils.SCHEMA_DIR, 'schema_tracking_log.json'
+        schema_dir, 'schema_tracking_log.json'
     )
+    if not os.path.exists(schema_file):
+        raise MissingSchemaException(
+            'The schema file {f} does not exist. '
+            'Please provide a valid schema directory'.format(f=schema_file)
+        )
     with open(schema_file) as sfh:
         schema = json.load(sfh).get('tracking_log')
     if not isinstance(courses, set):
@@ -258,7 +274,7 @@ def split_tracking_log(
 def batch_split_tracking_logs(
     filenames, ddir, dynamic_date=False,
     courses=None, verbose=True, logger=None,
-    size=10
+    size=10, schema_dir=SCHEMA_DIR,
 ):
     """
     Call split_tracking_log on each file inside a process or thread pool

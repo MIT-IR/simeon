@@ -19,8 +19,9 @@ from simeon.exceptions import (
     AWSException, EarlyExitError
 )
 from simeon.report import (
-    make_sql_tables_par, make_sql_tables_seq, make_tables_from_sql,
-    make_tables_from_sql_par, wait_for_bq_job_ids
+    QUERY_DIR, SCHEMA_DIR,
+    make_sql_tables_par, make_sql_tables_seq,
+    make_tables_from_sql, make_tables_from_sql_par, wait_for_bq_job_ids
 )
 from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
@@ -112,6 +113,7 @@ def split_log_files(parsed_args):
                 ddir=parsed_args.destination,
                 dynamic_date=parsed_args.dynamic_date,
                 courses=parsed_args.courses,
+                schema_dir=parsed_args.schema_dir,
             )
             if not rc:
                 errmsg = (
@@ -130,6 +132,7 @@ def split_log_files(parsed_args):
             verbose=parsed_args.verbose,
             logger=parsed_args.logger,
             size=parsed_args.jobs,
+            schema_dir=parsed_args.schema_dir,
         )
     sys.exit(0 if success else 1)
 
@@ -191,9 +194,9 @@ def split_sql_files(parsed_args):
                 make_sql_tables = make_sql_tables_par
             try:
                 rc = make_sql_tables(
-                    dirnames, parsed_args.verbose,
-                    parsed_args.logger, parsed_args.fail_fast,
-                    parsed_args.debug,
+                    dirnames=dirnames, verbose=parsed_args.verbose,
+                    logger=parsed_args.logger, fail_fast=parsed_args.fail_fast,
+                    debug=parsed_args.debug, schema_dir=parsed_args.schema_dir,
                 )
                 failed = not rc
             except Exception as excp:
@@ -231,7 +234,8 @@ def split_email_files(parsed_args):
         )
     emails.compress_email_files(
         files=parsed_args.downloaded_files,
-        ddir=parsed_args.destination
+        ddir=parsed_args.destination,
+        schema_dir=parsed_args.schema_dir,
     )
     if parsed_args.verbose:
         parsed_args.logger.info(
@@ -666,6 +670,7 @@ def make_secondary_tables(parsed_args):
             geo_table=parsed_args.geo_table,
             youtube_table=parsed_args.youtube_table,
             wait=parsed_args.wait_for_loads, fail_fast=parsed_args.fail_fast,
+            query_dir=parsed_args.query_dir,
         )
     else:
         all_jobs.update(make_tables_from_sql_par(
@@ -676,6 +681,7 @@ def make_secondary_tables(parsed_args):
             youtube_table=parsed_args.youtube_table,
             wait=parsed_args.wait_for_loads, size=parsed_args.jobs,
             logger=parsed_args.logger, fail_fast=parsed_args.fail_fast,
+            query_dir=parsed_args.query_dir,
         ))
     errors = 0
     num_queries = 0
@@ -970,6 +976,11 @@ def main():
         choices=['log', 'sql', 'email'],
     )
     splitter.add_argument(
+        '--schema-dir', '-s',
+        help='Directory where to find schema files. Default: %(default)s',
+        default=SCHEMA_DIR,
+    )
+    splitter.add_argument(
         '--no-decryption', '-N',
         help='Don\'t decrypt the unpacked SQL files.',
         action='store_true',
@@ -1181,6 +1192,11 @@ def main():
         '--service-account-file', '-S',
         help='The service account to carry out the data load',
         type=cli_utils.optional_file
+    )
+    reporter.add_argument(
+        '--query-dir', '-q',
+        help='The directory where SQL query files live. Default: %(default)s',
+        default=QUERY_DIR,
     )
     reporter.add_argument(
         '--append', '-a',
