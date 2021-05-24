@@ -1240,9 +1240,8 @@ def main():
     reporter.add_argument(
         '--youtube-table', '-y',
         help=(
-            'The fully qualified name of the geolocation table '
-            'to join to modal_ip to extract geolocation information '
-            'for IP addresses.'
+            'Fully qualified name of the table with YouTube video metadata'
+            ' to use when making the video_axis tables.'
         ),
         default='videos.youtube',
         type=cli_utils.bq_table,
