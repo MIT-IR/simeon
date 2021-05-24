@@ -587,9 +587,11 @@ def push_generated_files(parsed_args):
                 'The given items are not valid text files: {e}'.format(e=excp)
             )
             sys.exit(1)
-    parsed_args.items = cli_utils.filter_generated_items(
-        parsed_args.items, parsed_args.courses
-    )
+    # If file type in log or sql, filter by course ID
+    if parsed_args.file_type in ('log', 'sql',):
+        parsed_args.items = cli_utils.filter_generated_items(
+            parsed_args.items, parsed_args.courses
+        )
     try:
         # Not sure if this is going to give memory back to the OS,
         # but worth the try
