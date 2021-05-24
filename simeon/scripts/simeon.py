@@ -281,6 +281,10 @@ def download_files(parsed_args):
     that match the given criteria
     """
     if parsed_args.credentials is None:
+        if parsed_args.verbose:
+            parsed_args.logger.info(
+                'Looking up S3 credentials'
+            )
         parsed_args.credentials = cli_utils.find_config(
             os.path.join('~', '.aws', 'credentials'),
             no_raise=True
@@ -296,9 +300,25 @@ def download_files(parsed_args):
     start_year = int(parsed_args.begin_date[:4])
     end_year = int(parsed_args.end_date[:4])
     info = aws.BUCKETS.get(parsed_args.file_type)
+    if parsed_args.verbose:
+        parsed_args.logger.info(
+            'Establishing a connection to S3'
+        )
     bucket = aws.make_s3_bucket(info['Bucket'], client_id, client_secret)
+    if parsed_args.verbose:
+        parsed_args.logger.info(
+            'Connection to S3 established.'
+        )
     blobs = []
-    for year in range(start_year, end_year + 1):
+    if parsed_args.latest:
+        range_ = range(end_year, start_year - 1, -1)
+    else:
+        range_ = range(start_year, end_year + 1)
+    if parsed_args.verbose:
+        parsed_args.logger.info(
+            'Fetching the blobs matching the given criteria'
+        )
+    for year in range_:
         prefix = info['Prefix'].format(
             site=parsed_args.site, year=year,
             date=parsed_args.begin_date, org=parsed_args.org,
@@ -307,6 +327,9 @@ def download_files(parsed_args):
         blobs += aws.S3Blob.from_prefix(
             bucket=bucket, prefix=prefix
         )
+        if parsed_args.latest and blobs:
+            blobs = [max(blobs, key=lambda b: aws.get_file_date(b.name))]
+            break
     downloads = dict()
     for blob in blobs:
         fdate = aws.get_file_date(blob.name)
@@ -789,6 +812,11 @@ def main():
         ),
         default=aws.END_DATE,
         type=cli_utils.parsed_date
+    )
+    downloader.add_argument(
+        '--latest', '-L',
+        help='Download the latest file only',
+        action='store_true',
     )
     downloader.add_argument(
         '--org', '-o',
