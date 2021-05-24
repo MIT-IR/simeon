@@ -765,7 +765,7 @@ def main():
         '--file-type', '-f',
         help='The type of files to get. Default: %(default)s',
         choices=['email', 'sql', 'log', 'rdx'],
-        default='sql',
+        required=True,
     )
     downloader.add_argument(
         '--destination', '-d',
@@ -905,7 +905,7 @@ def main():
         '--file-type', '-f',
         help='The type of files to list. Default: %(default)s',
         choices=['email', 'sql', 'log', 'rdx'],
-        default='sql',
+        required=True,
     )
     lister.add_argument(
         '--begin-date', '-b',
@@ -972,7 +972,7 @@ def main():
     splitter.add_argument(
         '--file-type', '-f',
         help='The file type of the items provided. Default: %(default)s',
-        default='sql',
+        required=True,
         choices=['log', 'sql', 'email'],
     )
     splitter.add_argument(
@@ -1104,7 +1104,7 @@ def main():
         '--file-type', '-f',
         help='The type of files to push. Default: %(default)s',
         choices=['email', 'sql', 'log', 'rdx', 'cold'],
-        default='sql',
+        required=True,
     )
     pusher.add_argument(
         '--no-create', '-n',
