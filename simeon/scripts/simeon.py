@@ -82,19 +82,36 @@ def list_files(parsed_args):
     info = aws.BUCKETS.get(parsed_args.file_type)
     bucket = aws.make_s3_bucket(info['Bucket'], client_id, client_secret)
     blobs = []
-    for year in range(start_year, end_year + 1):
+    if parsed_args.latest:
+        range_ = range(end_year, start_year - 1, -1)
+    else:
+        range_ = range(start_year, end_year + 1)
+    seen = set()
+    for year in range_:
+        if parsed_args.latest and seen:
+            break
         prefix = info['Prefix'].format(
             site=parsed_args.site, year=year,
             date=parsed_args.begin_date, org=parsed_args.org,
             request=parsed_args.request_id or '',
         )
-        for blob in aws.S3Blob.from_prefix(bucket=bucket, prefix=prefix):
+        blobs = aws.S3Blob.from_prefix(bucket=bucket, prefix=prefix)
+        if parsed_args.latest and blobs:
+            blobs = sorted(
+                blobs, key=lambda b: aws.get_file_date(b.name), reverse=True,
+            )
+        for blob in blobs:
+            if parsed_args.latest and seen:
+                break
+            if blob in seen:
+                continue
             fdate = aws.get_file_date(blob.name)
             if parsed_args.begin_date <= fdate <= parsed_args.end_date:
                 if parsed_args.json:
                     print(blob.to_json())
                 else:
                     print(blob)
+                seen.add(blob)
 
 
 def split_log_files(parsed_args):
@@ -957,6 +974,11 @@ def main():
         ),
         default=aws.END_DATE,
         type=cli_utils.parsed_date
+    )
+    lister.add_argument(
+        '--latest', '-L',
+        help='List only the latest file for the given file type',
+        action='store_true',
     )
     lister.add_argument(
         '--org', '-o',
