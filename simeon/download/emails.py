@@ -67,7 +67,6 @@ def compress_email_files(files, ddir, schema_dir=SCHEMA_DIR):
     """
     Generate a GZIP JSON file in the given ddir directory
     using the contents of the files.
-
     :NOTE: schema_dir is not used yet. But we may use to check that
     the generated records match their destination tables.
 

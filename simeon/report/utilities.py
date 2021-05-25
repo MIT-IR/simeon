@@ -643,7 +643,9 @@ def process_course_structure(data, start, mapping, parent=None):
     return out
 
 
-def make_course_axis(dirname, outname='course_axis.json.gz'):
+def make_course_axis(
+    dirname, schema_dir=SCHEMA_DIR, outname='course_axis.json.gz'
+):
     """
     Given a course's SQL directory, make a course_axis report
 
