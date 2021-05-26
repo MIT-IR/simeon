@@ -37,7 +37,7 @@ class BigqueryClient(bigquery.Client):
         self, dirname: str, file_type: str, project: str,
         create: bool, append: bool, use_storage: bool=False,
         bucket: str=None, max_bad_rows=0,
-        schema_dir=SCHEMA_DIR,
+        schema_dir=SCHEMA_DIR, format_='json',
     ) -> List[bigquery.LoadJob]:
         """
         Load all the files in the given directory.
@@ -60,6 +60,8 @@ class BigqueryClient(bigquery.Client):
         :param max_bad_rows: Max number of bad rows allowed during loading
         :type schema_dir: str
         :param schema_dir: Directory where schema files are found
+        :type format_: str
+        :param format_: File format (json or csv)
         :rtype: List[bigquery.LoadJob]
         :returns: List of load jobs
         :raises: Propagates everything from the underlying package
@@ -78,7 +80,7 @@ class BigqueryClient(bigquery.Client):
             jobs.append(
                 self.load_one_file_to_table(
                     file_, file_type, project, create, append,
-                    use_storage, bucket, max_bad_rows, schema_dir
+                    use_storage, bucket, max_bad_rows, schema_dir, format_,
                 )
             )
         return jobs
@@ -87,7 +89,7 @@ class BigqueryClient(bigquery.Client):
         self, fname: str, file_type: str, project: str,
         create: bool, append: bool, use_storage: bool=False,
         bucket: str=None, max_bad_rows=0,
-        schema_dir=SCHEMA_DIR,
+        schema_dir=SCHEMA_DIR, format_='json',
     ):
         """
         Load the given file to a target BigQuery table
@@ -110,6 +112,8 @@ class BigqueryClient(bigquery.Client):
         :param max_bad_rows: Max number of bad rows allowed during loading
         :type schema_dir: str
         :param schema_dir: Directory where schema files are found
+        :type format_: str
+        :param format_: File format (json or csv)
         :rtype: bigquery.LoadJob
         :returns: The LoadJob object associated with the work being done
         :raises: Propagates everything from the underlying package
@@ -121,9 +125,6 @@ class BigqueryClient(bigquery.Client):
             loader = self.load_table_from_uri
         else:
             loader = self.load_table_from_file
-        # format_ = 'json' if file_type == 'log' else 'csv'
-        # We'll force all formats to JSON
-        format_ = 'json'
         job_prefix = '{t}_data_load_{dt}-'.format(
             t=file_type, dt=datetime.now().strftime('%Y%m%d%H%M%S%f')
         )

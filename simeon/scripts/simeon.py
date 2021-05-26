@@ -503,9 +503,12 @@ def push_to_bq(parsed_args):
         # We would still need to make network calls
         # to check on their statuses when wait_for_loads is True.
         job = loader(
-            item, parsed_args.file_type, parsed_args.project,
-            parsed_args.create, parsed_args.append,
-            parsed_args.use_storage, parsed_args.bucket
+            item, file_type=parsed_args.file_type,
+            project=parsed_args.project, create=parsed_args.create,
+            append=parsed_args.append, use_storage=parsed_args.use_storage,
+            bucket=parsed_args.bucket, max_bad_rows=parsed_args.max_bad_rows,
+            schema_dir=parsed_args.schema_dir,
+            format_=parsed_args.file_format,
         )
         if parsed_args.wait_for_loads:
             if isinstance(job, (list, tuple)):
@@ -1031,7 +1034,7 @@ def main():
         choices=['log', 'sql', 'email'],
     )
     splitter.add_argument(
-        '--schema-dir', '-s',
+        '--schema-dir', '-r',
         help='Directory where to find schema files. Default: %(default)s',
         default=SCHEMA_DIR,
     )
@@ -1162,6 +1165,12 @@ def main():
         required=True,
     )
     pusher.add_argument(
+        '--file-format', '-M',
+        help='The format of the file to load. Default: %(default)s',
+        choices=['json', 'csv'],
+        default='json',
+    )
+    pusher.add_argument(
         '--no-create', '-n',
         help=(
             'Don\'t create destination tables and datasets. '
@@ -1178,6 +1187,11 @@ def main():
             ' when pushing data to BigQuery'
         ),
         action='store_true',
+    )
+    pusher.add_argument(
+        '--schema-dir', '-r',
+        help='Directory where to find schema files. Default: %(default)s',
+        default=SCHEMA_DIR,
     )
     pusher.add_argument(
         '--use-storage', '-s',
