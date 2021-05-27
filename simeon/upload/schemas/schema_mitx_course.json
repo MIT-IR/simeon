@@ -1,0 +1,159 @@
+{
+    "mitx_course": [
+        {
+            "field_type": "STRING",
+            "name": "course_title",
+            "description": "The title of the course"
+        },
+        {
+            "field_type": "STRING",
+            "name": "new_or_rerun",
+            "description": "Indicator whether the course is new or a re-run"
+        },
+        {
+            "field_type": "STRING",
+            "name": "course_id",
+            "description": "The canonical ID of the course"
+        },
+        {
+            "field_type": "STRING",
+            "name": "andrews_short_title",
+            "description": ""
+        },
+        {
+            "field_type": "STRING",
+            "name": "course_number",
+            "description": "The MIT course number this specific course falls under"
+        },
+        {
+            "field_type": "STRING",
+            "name": "instructors",
+            "description": "List of instructors associated with the course"
+        },
+        {
+            "field_type": "INTEGER",
+            "name": "self_paced",
+            "description": "Whether or not the course is self paced"
+        },
+        {
+            "field_type": "INTEGER",
+            "name": "sheetorder",
+            "description": ""
+        },
+        {
+            "field_type": "STRING",
+            "name": "Registration_Open",
+            "description": "When registration for the course opened"
+        },
+        {
+            "field_type": "STRING",
+            "name": "tags",
+            "description": "Tags associated with the course"
+        },
+        {
+            "field_type": "STRING",
+            "name": "Course_Key_Version",
+            "description": ""
+        },
+        {
+            "field_type": "DATE",
+            "name": "course_launch",
+            "description": "The date on which the course launches"
+        },
+        {
+            "field_type": "STRING",
+            "name": "New_4_way",
+            "description": ""
+        },
+        {
+            "field_type": "DATE",
+            "name": "course_wrap",
+            "description": "The date on which the course wraps up"
+        },
+        {
+            "field_type": "STRING",
+            "name": "_4_way_category_by_name",
+            "description": ""
+        },
+        {
+            "field_type": "INTEGER",
+            "name": "sheetorder2",
+            "description": ""
+        },
+        {
+            "field_type": "STRING",
+            "name": "subject_short_title",
+            "description": ""
+        },
+        {
+            "field_type": "STRING",
+            "name": "url",
+            "description": ""
+        },
+        {
+            "field_type": "STRING",
+            "name": "institution",
+            "description": ""
+        },
+        {
+            "field_type": "STRING",
+            "name": "semester",
+            "description": "The semester during which the course ID was launched"
+        },
+        {
+            "field_type": "INTEGER",
+            "name": "report_year",
+            "description": ""
+        },
+        {
+            "field_type": "STRING",
+            "name": "short_title",
+            "description": ""
+        },
+        {
+            "field_type": "STRING",
+            "name": "clean_course_number",
+            "description": ""
+        },
+        {
+            "field_type": "STRING",
+            "name": "content_type",
+            "description": ""
+        },
+        {
+            "field_type": "STRING",
+            "name": "faculty_kerberos",
+            "description": "A list of kerberos usernames of the faculty associated with the course"
+        },
+        {
+            "field_type": "STRING",
+            "name": "modules",
+            "description": ""
+        },
+        {
+            "field_type": "INTEGER",
+            "name": "finance_year",
+            "description": ""
+        },
+        {
+            "field_type": "FLOAT",
+            "name": "mit_content",
+            "description": ""
+        },
+        {
+            "field_type": "STRING",
+            "name": "phase",
+            "description": ""
+        },
+        {
+            "field_type": "STRING",
+            "name": "micromasters_description",
+            "description": "The micro-masters indicator of the course, if applicable."
+        },
+        {
+            "field_type": "INTEGER",
+            "name": "nchapters",
+            "description": "Number of chapters/modules in the course"
+        }
+    ]
+}
