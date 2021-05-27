@@ -415,6 +415,7 @@ def make_user_info_combo(
             outrow = dict()
             for k in outcols:
                 val = record.get(k)
+                val = val.strip() if val else val
                 if 'course_id' in k:
                     val = downutils.get_sql_course_id(val or '') or None
                 if 'certificate_grade' in k:
