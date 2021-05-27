@@ -1367,10 +1367,16 @@ def main():
             cli_arg = getattr(args, attr, None)
             config_arg = cgetter(configs, k, attr, fallback=None)
             if attr.replace('-', '_') == 'clistings_file':
-                if args.command == 'push':
-                    config_arg = cli_utils.course_paths_from_file(config_arg)
-                else:
-                    config_arg = cli_utils.courses_from_file(config_arg)
+                try:
+                    if args.command == 'push':
+                        config_arg = cli_utils.course_paths_from_file(
+                            config_arg
+                        )
+                    else:
+                        config_arg = cli_utils.courses_from_file(config_arg)
+                except Exception as excp:
+                    args.logger.error(str(excp).replace('\n', ' '))
+                    sys.exit(1)
             if not cli_arg and config_arg:
                 setattr(args, attr, config_arg)
     # Combine --courses with --clistings-file
