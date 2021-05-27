@@ -258,6 +258,7 @@ def make_bq_load_config(
         create_disposition=create, write_disposition=append,
         field_delimiter=delim, skip_leading_rows=skips,
         max_bad_records=max_bad_rows, ignore_unknown_values=True,
+        allow_quoted_newlines=True
     )
 
 

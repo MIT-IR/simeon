@@ -16,6 +16,9 @@ CONFIGS = {
         ('org', configparser.ConfigParser.get),
         ('clistings_file', configparser.ConfigParser.get),
         ('youtube_token', configparser.ConfigParser.get),
+        ('file_format', configparser.ConfigParser.get),
+        ('schema_dir', configparser.ConfigParser.get),
+        ('max_bad_rows', configparser.ConfigParser.getint),
     ),
     'GCP': (
         ('project', configparser.ConfigParser.get),
@@ -26,6 +29,9 @@ CONFIGS = {
         ('geo_table', configparser.ConfigParser.get),
         ('youtube_table', configparser.ConfigParser.get),
         ('youtube_token', configparser.ConfigParser.get),
+        ('file_format', configparser.ConfigParser.get),
+        ('schema_dir', configparser.ConfigParser.get),
+        ('max_bad_rows', configparser.ConfigParser.getint),
     ),
     'AWS': (
         ('aws_cred_file', configparser.ConfigParser.get),
