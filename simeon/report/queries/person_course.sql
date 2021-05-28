@@ -62,7 +62,7 @@ select
     pc_day.nprogcheck,
     pc_day.nproblem_check,
     pc_forum.nforum as nforum_events,
-    uic.enrollment_mode as mode,
+    trim(uic.enrollment_mode) as mode,
     uic.enrollment_is_active as is_active,
     uic.certificate_created_date as cert_created_date,
     uic.certificate_modified_date as cert_modified_date,
