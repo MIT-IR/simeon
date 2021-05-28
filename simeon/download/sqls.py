@@ -144,6 +144,19 @@ def unpacker(fname, names, ddir, courses=None, tables_only=False):
         if tables_only:
             targets.append(target_name)
             continue
+        if 'ccx' in cfolder:
+            dir_segments = cfolder.replace('-', '__', 1).split('-')
+            clean = '{f}__{s}'.format(
+                f='_'.join(dir_segments[:-3]), s='_'.join(dir_segments[-3:])
+            )
+        else:
+            clean = (
+                '__'.join(cfolder.replace('-', '__', 1).rsplit('-', 1))
+                .replace('-', '_')
+            )
+        clean = clean.replace('.', '_')
+        target_dir = target_dir.replace(cfolder, clean)
+        target_name = target_name.replace(cfolder, clean)
         os.makedirs(target_dir, exist_ok=True)
         with proc_zfile.open(name) as zh, open(target_name, 'wb') as fh:
             for line in zh:
@@ -176,7 +189,7 @@ def process_sql_archive(
     """
     cpaths = set()
     for c in (courses or []):
-        cpaths.add(c.replace('/', '__').replace('-', '_').replace('.', '_'))
+        cpaths.add(c.replace('/', '-'))
     if ddir is None:
         ddir, _ = os.path.split(archive)
     out = []

@@ -175,7 +175,8 @@ def format_sql_filename(fname: str) -> (str, str):
         fname,
         os.path.join(
             site, dirname,
-            cid.replace('-', '__', 2).replace('-', '_').replace('.', '_'),
+            cid,
+            # cid.replace('-', '__', 2).replace('-', '_').replace('.', '_'),
             out,
         )
     )

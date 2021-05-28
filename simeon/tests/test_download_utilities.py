@@ -331,23 +331,23 @@ class TestDownloadUtilities(unittest.TestCase):
         self.sql_file_names = [
             {
                 'input': 'prod-foo-bar-baz-bif.gz.gpg',
-                'good-output': "baz/prod__foo/bar-bif.gz.gpg",
+                'good-output': "baz/prod-foo/bar-bif.gz.gpg",
             },
             {
                 'input': 'prod-foo-bar-baz-bif.failed.gpg',
-                'good-output': "baz/prod__foo/bar-bif.failed.gpg",
+                'good-output': "baz/prod-foo/bar-bif.failed.gpg",
             },
             {
                 'input': 'prod-foo-bar-baz-bif.json.gpg',
-                'good-output': 'baz/prod__foo/bar-bif.json.gpg',
+                'good-output': 'baz/prod-foo/bar-bif.json.gpg',
             },
             {
                 'input': 'prod-foo-bar-baz-bif.sql.gpg',
-                'good-output': 'baz/prod__foo/bar-bif.sql.gpg',
+                'good-output': 'baz/prod-foo/bar-bif.sql.gpg',
             },
             {
                 'input': 'ora/prod-foo-bar-baz-bif.gz.gpg',
-                'good-output': "baz/prod__foo/ora/bar-bif.gz.gpg",
+                'good-output': "baz/prod-foo/ora/bar-bif.gz.gpg",
             },
             {
                 'input': 'prod-foo.mongo.gpg',
