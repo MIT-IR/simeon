@@ -108,9 +108,15 @@ def list_files(parsed_args):
             fdate = aws.get_file_date(blob.name)
             if parsed_args.begin_date <= fdate <= parsed_args.end_date:
                 if parsed_args.json:
-                    print(blob.to_json())
+                    if parsed_args.names_only:
+                        print(blob.name)
+                    else:
+                        print(blob.to_json())
                 else:
-                    print(blob)
+                    if parsed_args.names_only:
+                        print(blob.name)
+                    else:
+                        print(blob)
                 seen.add(blob)
 
 
@@ -981,6 +987,11 @@ def main():
     lister.add_argument(
         '--latest', '-L',
         help='List only the latest file for the given file type',
+        action='store_true',
+    )
+    lister.add_argument(
+        '--names-only', '-n',
+        help='Only print the names of the matched blobs',
         action='store_true',
     )
     lister.add_argument(
