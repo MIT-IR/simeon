@@ -118,6 +118,7 @@ def list_files(parsed_args):
                     else:
                         print(blob)
                 seen.add(blob)
+    sys.exit(0 if seen else 1)
 
 
 def split_log_files(parsed_args):
@@ -273,10 +274,24 @@ def split_files(parsed_args):
     items = []
     for item in parsed_args.downloaded_files:
         if '*' in item:
-            items.extend(glob.iglob(item))
+            nsubs = 0
+            for subitem in glob.iglob(item):
+                if not os.path.isfile(subitem):
+                    msg = 'Skipping {f!r} because it is not a valid file'
+                    parsed_args.logger.warning(msg.format(f=subitem))
+                    continue 
+                items.append(subitem)
+                nsubs += 1
+            if nsubs == 0:
+                msg = 'The glob pattern {p!r} did not match any file'
+                parsed_args.logger.warning(msg.format(p=item))
         else:
+            if not os.path.isfile(item):
+                msg = 'Skipping {f!r} because it is not a valid file'
+                parsed_args.logger.warning(msg.format(f=item))
+                continue
             items.append(item)
-    parsed_args.downloaded_files = list(filter(os.path.isfile, items))
+    parsed_args.downloaded_files = items
     if not parsed_args.downloaded_files:
         parsed_args.logger.error(
             'No valid files were given to simeon split. '
@@ -444,7 +459,7 @@ def download_files(parsed_args):
     elif parsed_args.file_type == 'email' and parsed_args.split:
         if not parsed_args.split_destination:
             parsed_args.destination = os.path.join(
-                parsed_args.destination, 'emails'
+                parsed_args.destination, 'email_opt_in'
             )
         else:
             parsed_args.destination = parsed_args.split_destination
@@ -465,8 +480,8 @@ def push_to_bq(parsed_args):
         )
         sys.exit(1)
     if not parsed_args.items:
-        parsed_args.logger.info('No items to process')
-        sys.exit(0)
+        parsed_args.logger.warning('No items to process. Exiting...')
+        sys.exit(1)
     parsed_args.logger.info('Connecting to BigQuery')
     try:
         if parsed_args.service_account_file is not None:
@@ -491,7 +506,7 @@ def push_to_bq(parsed_args):
         parsed_args.use_storage = storage or item.startswith('gs://')
         if not parsed_args.use_storage and not os.path.exists(item):
             errmsg = 'Skipping {f!r}. It does not exist.'
-            parsed_args.logger.error(errmsg.format(f=item))
+            parsed_args.logger.warning(errmsg.format(f=item))
             if parsed_args.fail_fast:
                 parsed_args.logger.error('Exiting...')
                 sys.exit(1)
@@ -573,8 +588,8 @@ def push_to_gcs(parsed_args):
         )
         sys.exit(1)
     if not parsed_args.items:
-        parsed_args.logger.info('No items to process')
-        sys.exit(0)
+        parsed_args.logger.warning('No items to process. Exiting...')
+        sys.exit(1)
     parsed_args.logger.info(
         'Connecting to Google Cloud Storage'
     )
@@ -596,12 +611,13 @@ def push_to_gcs(parsed_args):
         )
         sys.exit(1)
     failed = False
+    nitems = 0
     for item in parsed_args.items:
         if not os.path.exists(item):
             errmsg = 'Skipping {f!r}. It does not exist.'
-            parsed_args.logger.error(errmsg.format(f=item))
+            parsed_args.logger.warning(errmsg.format(f=item))
             if parsed_args.fail_fast:
-                parsed_args.logger.error('Exiting...')
+                parsed_args.logger.error('Error encountered. Exiting...')
                 sys.exit(1)
             continue
         if os.path.isdir(item):
@@ -619,6 +635,7 @@ def push_to_gcs(parsed_args):
             parsed_args.logger.info(
                 'Done loading {f} to GCS'.format(f=item)
             )
+            nitems += 1
         except Exception as excp:
             errmsg = 'Failed to load {f} to GCS: {e}'
             parsed_args.logger.error(errmsg.format(f=item, e=excp))
@@ -629,7 +646,7 @@ def push_to_gcs(parsed_args):
                 parsed_args.logger.error('Exiting...')
                 sys.exit(1)
             failed = True
-    sys.exit(1 if failed else 0)
+    sys.exit(1 if failed or nitems == 0 else 0)
 
 
 def push_generated_files(parsed_args):
@@ -778,6 +795,7 @@ def main():
     parser = ArgumentParser(
         description=__doc__,
         formatter_class=RawDescriptionHelpFormatter,
+        epilog=cli_utils.CLI_MAIN_EPILOG,
     )
     parser.add_argument(
         '--quiet', '-Q',
