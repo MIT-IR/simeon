@@ -1161,7 +1161,11 @@ def main():
     )
     pusher.add_argument(
         'items',
-        help='The items (file or folder) to push to GCS or BigQuery',
+        help=(
+            'The items (files or folders) to push to GCS or BigQuery, or '
+            'paths to txt files containing the actual paths of items to be '
+            'loaded (if --in-files is provided)'
+        ),
         nargs='+',
     )
     pusher.add_argument(
@@ -1279,7 +1283,11 @@ def main():
     reporter.set_defaults(command='report')
     reporter.add_argument(
         'course_ids',
-        help='Course IDs whose secondary datasets are generated',
+        help=(
+            'Course IDs whose secondary datasets are generated, '
+            'or paths to txt files containing course IDs '
+            '(if --in-files is provided)'
+        ),
         nargs='+',
     )
     reporter.add_argument(
