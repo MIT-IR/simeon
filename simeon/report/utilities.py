@@ -822,6 +822,9 @@ def make_grading_policy(
                 grader['fraction_of_overall_grade'] = grader.get('weight')
                 for k, v in grading_policy.get('GRADE_CUTOFFS', {}).items():
                     grader['overall_cutoff_for_{k}'.format(k=k.lower())] = v
+                pgrade = grader.get('overall_cutoff_for_pass')
+                if pgrade is not None:
+                    grader['overall_cutoff_for_c'] = pgrade
                 zh.write(
                     json.dumps(dict((k, grader.get(k)) for k in cols)) + '\n'
                 )
