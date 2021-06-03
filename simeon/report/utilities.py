@@ -812,19 +812,28 @@ def make_grading_policy(
         cols = (
             'assignment_type', 'name', 'fraction_of_overall_grade',
             'min_count', 'drop_count', 'short_label',
-            'overall_cutoff_for_a', 'overall_cutoff_for_b',
-            'overall_cutoff_for_c',
+            'overall_lower_cutoff', 'overall_lower_cutoff_label',
+            'overall_upper_cutoff', 'overall_upper_cutoff_label',
         )
         with gzip.open(outname, 'wt') as zh:
             for grader in grading_policy.get('GRADER', []):
                 grader['assignment_type'] = grader.get('type')
                 grader['name'] = grader.get('type')
                 grader['fraction_of_overall_grade'] = grader.get('weight')
-                for k, v in grading_policy.get('GRADE_CUTOFFS', {}).items():
-                    grader['overall_cutoff_for_{k}'.format(k=k.lower())] = v
-                pgrade = grader.get('overall_cutoff_for_pass')
-                if pgrade is not None:
-                    grader['overall_cutoff_for_c'] = pgrade
+                cutoffs = sorted(
+                    (grading_policy.get('GRADE_CUTOFFS') or {}).items(),
+                    key=lambda t: t[1]
+                )
+                if cutoffs:
+                    grader['overall_lower_cutoff'] = cutoffs[0][1]
+                    grader['overall_lower_cutoff_label'] = cutoffs[0][0]
+                    grader['overall_upper_cutoff'] = cutoffs[-1][1]
+                    grader['overall_upper_cutoff_label'] = cutoffs[-1][0]
+                else:
+                    grader['overall_lower_cutoff'] = None
+                    grader['overall_lower_cutoff_label'] = None
+                    grader['overall_upper_cutoff'] = None
+                    grader['overall_upper_cutoff_label'] = None
                 zh.write(
                     json.dumps(dict((k, grader.get(k)) for k in cols)) + '\n'
                 )

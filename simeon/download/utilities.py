@@ -51,7 +51,7 @@ def _extract_values(record, paths):
         yield subrec.get(end, '')
 
 
-def decrypt_files(fnames, verbose=True, logger=None, timeout=60):
+def decrypt_files(fnames, verbose=True, logger=None, timeout=None):
     """
     Decrypt the given file with gpg.
     This assumes that the gpg command

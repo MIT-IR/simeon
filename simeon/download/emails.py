@@ -19,7 +19,7 @@ SCHEMA_DIR = os.path.join(
 
 
 def process_email_file(
-    fname, verbose=True, logger=None, timeout=60, keepfiles=False
+    fname, verbose=True, logger=None, timeout=None, keepfiles=False
 ):
     """
     Email opt-in files are kind of different in that
@@ -31,7 +31,7 @@ def process_email_file(
     :param verbose: Whether to print stuff when decrypting
     :type logger: logging.Logger
     :param logger: A Logger object to print messages with
-    :type timeout: int
+    :type timeout: Union[int, None]
     :param timeout: Number of seconds to wait for the decryption to finish
     :type keepfiles: bool
     :param keepfiles: Whether to keep the .gpg files after decrypting them

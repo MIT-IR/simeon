@@ -32,18 +32,23 @@
         },
         {
             "field_type": "FLOAT",
-            "name": "overall_cutoff_for_a",
-            "description": "The cutoff grade needed to get an A"
+            "name": "overall_lower_cutoff",
+            "description": "The lowest grade required to pass the course"
         },
         {
             "field_type": "FLOAT",
-            "name": "overall_cutoff_for_b",
-            "description": "The cutoff grade needed to get a B"
+            "name": "overall_lower_cutoff_label",
+            "description": "The label associated with the lowest grade required to pass the course"
         },
         {
             "field_type": "FLOAT",
-            "name": "overall_cutoff_for_c",
-            "description": "The cutoff grade needed to get a C"
+            "name": "overall_upper_cutoff",
+            "description": "The lowest grade required to receive the highest letter grade in the course"
+        },
+        {
+            "field_type": "FLOAT",
+            "name": "overall_upper_cutoff_label",
+            "description": "Label fo the lowest grade required to receive the highest letter grade in the course"
         }
     ]
 }
