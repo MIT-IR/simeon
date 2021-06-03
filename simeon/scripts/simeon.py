@@ -729,7 +729,7 @@ def make_secondary_tables(parsed_args):
         )
     all_jobs = dict()
     if len(parsed_args.course_ids) == 1:
-        course_id = parsed_args.course_ids[0]
+        course_id = list(parsed_args.course_ids)[0]
         parsed_args.logger.info(
             'Making secondary tables for course ID {cid}'.format(
                 cid=course_id
