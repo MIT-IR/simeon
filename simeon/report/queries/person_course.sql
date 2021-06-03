@@ -8,7 +8,7 @@ select
     IF(safe_divide(pc_nchapters.nchapters, 
         (SELECT COUNT(*) FROM `{latest_dataset}.course_axis` where category = "chapter")) >= 0.5, True, False) as explored,
     if(uic.certificate_status = "downloadable", true, false) as certified,
-    if(grades.percent_grade >= (SELECT MAX(overall_cutoff_for_c) from `{latest_dataset}.grading_policy`), True, False) as completed,
+    if(grades.percent_grade >= (SELECT MAX(overall_lower_cutoff) from `{latest_dataset}.grading_policy`), True, False) as completed,
     -- if(uic.enrollment_mode = "verified", true, false) as verified,
     modal_ip.modal_ip as ip,
     {% if geo_table is defined and geo_table %}
@@ -44,7 +44,7 @@ select
     uic.profile_year_of_birth as YoB,
     uic.profile_gender as gender,
     grades.percent_grade as grade,
-    (SELECT MAX(overall_cutoff_for_c) from `{latest_dataset}.grading_policy`) as passing_grade,
+    (SELECT MAX(overall_lower_cutoff) from `{latest_dataset}.grading_policy`) as passing_grade,
     uic.enrollment_created as start_time,
     pc_day.first_event,
     pc_day.last_event,
