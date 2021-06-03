@@ -904,6 +904,15 @@ def main():
         ),
     )
     downloader.add_argument(
+        '--jobs', '-j',
+        help=(
+            'Number of processes/threads to use when splitting multiple '
+            'files using multi threading or processing. Default: %(default)s'
+        ),
+        default=mp.cpu_count(),
+        type=int,
+    )
+    downloader.add_argument(
         '--dynamic-date', '-m',
         help=(
             'If splitting the downloaded files, use the '
