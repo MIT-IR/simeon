@@ -36,7 +36,7 @@
             "description": "The lowest grade required to pass the course"
         },
         {
-            "field_type": "FLOAT",
+            "field_type": "STRING",
             "name": "overall_lower_cutoff_label",
             "description": "The label associated with the lowest grade required to pass the course"
         },
@@ -46,7 +46,7 @@
             "description": "The lowest grade required to receive the highest letter grade in the course"
         },
         {
-            "field_type": "FLOAT",
+            "field_type": "STRING",
             "name": "overall_upper_cutoff_label",
             "description": "Label fo the lowest grade required to receive the highest letter grade in the course"
         }
