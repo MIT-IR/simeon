@@ -913,6 +913,11 @@ def main():
         type=int,
     )
     downloader.add_argument(
+        '--schema-dir', '-R',
+        help='Directory where to find schema files. Default: %(default)s',
+        default=SCHEMA_DIR,
+    )
+    downloader.add_argument(
         '--dynamic-date', '-m',
         help=(
             'If splitting the downloaded files, use the '
@@ -1072,7 +1077,7 @@ def main():
         choices=['log', 'sql', 'email'],
     )
     splitter.add_argument(
-        '--schema-dir', '-r',
+        '--schema-dir', '-R',
         help='Directory where to find schema files. Default: %(default)s',
         default=SCHEMA_DIR,
     )
@@ -1231,7 +1236,7 @@ def main():
         action='store_true',
     )
     pusher.add_argument(
-        '--schema-dir', '-r',
+        '--schema-dir', '-R',
         help='Directory where to find schema files. Default: %(default)s',
         default=SCHEMA_DIR,
     )
