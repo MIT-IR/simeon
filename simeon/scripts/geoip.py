@@ -279,13 +279,6 @@ def main():
         default=SCHEMA_DIR,
     )
     args = parser.parse_args()
-    files = []
-    for file_ in args.ip_files:
-        if '*' in file_:
-            files.extend(glob.iglob(file_))
-        else:
-            files.append(file_)
-    args.ip_files = files
     args.logger = cli_utils.make_logger(
         user='SIMEON-GEOIP:{c}'.format(c=args.command.upper()),
         verbose=args.verbose,
@@ -299,6 +292,13 @@ def main():
         )
         sys.exit(1)
     if args.command == 'extract':
+        files = []
+        for file_ in args.ip_files:
+            if '*' in file_:
+                files.extend(glob.iglob(file_))
+            else:
+                files.append(file_)
+        args.ip_files = files
         if not args.ip_files:
             msg = 'No valid IP data provided. Exiting...'
             if args.logger:
