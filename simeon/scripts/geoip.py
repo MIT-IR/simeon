@@ -21,6 +21,7 @@ The above command will merge the given file into the target table given by the
 into it.
 """
 import csv
+import glob
 import gzip
 import json
 import os
@@ -278,6 +279,13 @@ def main():
         default=SCHEMA_DIR,
     )
     args = parser.parse_args()
+    files = []
+    for file_ in args.ip_files:
+        if '*' in file_:
+            files.extend(glob.iglob(file_))
+        else:
+            files.append(file_)
+    args.ip_files = files
     args.logger = cli_utils.make_logger(
         user='SIMEON-GEOIP:{c}'.format(c=args.command.upper()),
         verbose=args.verbose,
@@ -291,6 +299,12 @@ def main():
         )
         sys.exit(1)
     if args.command == 'extract':
+        if not args.ip_files:
+            msg = 'No valid IP data provided. Exiting...'
+            if args.logger:
+                args.logger.error(msg)
+            else:
+                print(msg, file=sys.stderr)
         try:
             os.remove(args.output)
         except OSError:
