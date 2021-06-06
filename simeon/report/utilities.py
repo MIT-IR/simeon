@@ -29,7 +29,7 @@ from simeon.download import utilities as downutils
 from simeon.exceptions import (
     BadSQLFileException, EarlyExitError, LoadJobException,
     MissingFileException, MissingQueryFileException, MissingSchemaException,
-    SchemaMismatchException,
+    SchemaMismatchException, SQLQueryException,
 )
 from simeon.upload import gcp
 from simeon.upload import utilities as uputils
@@ -1254,6 +1254,11 @@ def make_sql_tables_par(
         for (tbl, dirname), result in results.items():
             try:
                 result.get()
+            except KeyboardInterrupt:
+                logger.error(
+                    'Report generation interrupted by user.'
+                )
+                raise EarlyExitError()
             except:
                 _, excp, tb = sys.exc_info()
                 if debug:
@@ -1337,20 +1342,28 @@ def make_table_from_sql(
     query = Template(query).render(
         geo_table=geo_table, youtube_table=youtube_table
     )
-    job = client.query(
-        query.format(
-            latest_dataset=latest_dataset,
-            log_dataset=log_dataset,
-            geo_table=geo_table,
-            youtube_table=youtube_table,
-            course_id=course_id
-        ),
-        job_id='{t}_{dt}'.format(
-            t=table.replace('.', '_'),
-            dt=datetime.now().strftime('%Y%m%d%H%M%S')
-        ),
-        job_config=config,
-    )
+    try:
+        job = client.query(
+            query.format(
+                latest_dataset=latest_dataset,
+                log_dataset=log_dataset,
+                geo_table=geo_table,
+                youtube_table=youtube_table,
+                course_id=course_id
+            ),
+            job_id='{t}_{dt}'.format(
+                t=table.replace('.', '_'),
+                dt=datetime.now().strftime('%Y%m%d%H%M%S')
+            ),
+            job_config=config,
+        )
+    except Exception as excp:
+        errors = getattr(excp, 'errors', [None])
+        if errors:
+            msg = errors[0].get('message')
+        else:
+            msg = str(excp)
+        raise SQLQueryException(msg)
     if wait:
         wait_for_bq_job_ids([job.job_id], client)
     return job.errors or {}

@@ -20,7 +20,7 @@ from dateutil.parser import parse as parse_date
 
 from simeon.download import utilities as utils
 from simeon.exceptions import (
-    EarlyExitError, MissingSchemaException
+    EarlyExitError, MissingSchemaException, SplitException,
 )
 from simeon.report import utilities as rutils
 
@@ -274,7 +274,7 @@ def split_tracking_log(
 def batch_split_tracking_logs(
     filenames, ddir, dynamic_date=False,
     courses=None, verbose=True, logger=None,
-    size=10, schema_dir=SCHEMA_DIR,
+    size=10, schema_dir=SCHEMA_DIR, debug=False,
 ):
     """
     Call split_tracking_log on each file inside a process or thread pool
@@ -321,16 +321,24 @@ def batch_split_tracking_logs(
                         logger.warning('Done splitting {f}'.format(f=fname))
                 except TimeoutError:
                     continue
+                except KeyboardInterrupt:
+                    msg = 'Failed to split {f}: Interrupted by the user'
+                    logger.error(msg.format(f=fname))
+                    return False
                 except:
                     _, excp, tb = sys.exc_info()
-                    if isinstance(excp, (SystemExit, EarlyExitError)):
-                        return False
+                    msg = 'Failed to split {f}{e}'
+                    exit_excepts = (EarlyExitError, SystemExit)
+                    if isinstance(excp, exit_excepts):
+                        raise SplitException(
+                            msg.format(f=fname, e='')
+                        )
+                    else:
+                        if debug:
+                            traces = [': {e}'.format(e=excp)]
+                            traces += map(str.strip, traceback.format_tb(tb))
+                            excp_str = '\n'.join(traces)
+                        logger.error(msg.format(f=fname, e=excp_str))
                     results[fname] = (result, True)
                     processed += 1
-                    msg = 'Failed to split {f}: {e}'
-                    if verbose:
-                        traces = ['{e}'.format(e=excp)]
-                        traces += map(str.strip, traceback.format_tb(tb))
-                        excp = '\n'.join(traces)
-                    logger.error(msg.format(f=fname, e=excp))
     return splits == len(filenames)

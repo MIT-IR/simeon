@@ -166,8 +166,8 @@ def unpacker(fname, names, ddir, courses=None, tables_only=False):
 
 
 def process_sql_archive(
-    archive, ddir=None, include_edge=False,
-    courses=None, size=5, tables_only=False,
+    archive, ddir=None, include_edge=False, courses=None,
+    size=5, tables_only=False, debug=False,
 ):
     """
     Unpack and decrypt files inside the given archive
@@ -184,6 +184,8 @@ def process_sql_archive(
     :param size: The size of the thread or process pool doing the unpacking
     :type tables_only: bool
     :param tables_only: Whether to extract file names only (no unarchiving)
+    :type debug: bool
+    :param debug: Show the stacktrace when an error occurs
     :rtype: Iterable[str]
     :return: List of file names
     """
@@ -214,11 +216,17 @@ def process_sql_archive(
                     out.extend(targets or [])
                 except TimeoutError:
                     continue
+                except KeyboardInterrupt:
+                    raise SplitException(
+                        'The SQL bundle unpacking was interrupted by '
+                        'the user.'
+                    )
                 except:
                     _, excp, tb = sys.exc_info()
                     traces = ['{e}'.format(e=excp)]
-                    traces += map(str.strip, traceback.format_tb(tb))
-                    excp = '\n'.join(traces)
+                    if debug:
+                        traces += map(str.strip, traceback.format_tb(tb))
+                        excp = '\n'.join(traces)
                     msg = 'Failed to unpack items from archive {a}: {e}'
                     raise SplitException(msg.format(a=archive, e=excp))
     return out
