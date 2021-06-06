@@ -41,8 +41,6 @@ def bail_out(sig, frame):
     children = mp.active_children()
     for child in children:
         try:
-            # os.kill(child.pid, sig)
-            # os.waitpid(child.pid, 0)
             child.terminate()
         except:
             continue
@@ -157,6 +155,7 @@ def split_log_files(parsed_args):
             logger=parsed_args.logger,
             size=parsed_args.jobs,
             schema_dir=parsed_args.schema_dir,
+            debug=parsed_args.debug,
         )
     sys.exit(0 if success else 1)
 
@@ -178,6 +177,7 @@ def split_sql_files(parsed_args):
                 courses=parsed_args.courses,
                 size=parsed_args.jobs,
                 tables_only=parsed_args.tables_only,
+                debug=parsed_args.debug,
             )
             if not to_decrypt:
                 errmsg = (
@@ -1068,7 +1068,7 @@ def main():
     splitter.add_argument(
         'downloaded_files',
         help='List of tracking log or SQL archives to split',
-        nargs='+'
+        nargs='+',
     )
     splitter.add_argument(
         '--file-type', '-f',
@@ -1440,14 +1440,9 @@ def main():
     # Also, set the global logger variable, so the signal handler can use it.
     sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
     logger = args.logger
-    if args.command == 'split':
-        conds = (
-            len(args.downloaded_files) > 1 and not args.dynamic_date,
-            args.file_type == 'sql'
-        )
-        if any(conds):
-            for sig in sigs:
-                signal.signal(sig, bail_out)
+    if cli_utils.is_parallel(args):
+        for sig in sigs:
+            signal.signal(sig, bail_out)
     # Call the function matching the given command
     try:
         COMMANDS.get(args.command)(args)
@@ -1455,13 +1450,11 @@ def main():
         _, excp, tb = sys.exc_info()
         if isinstance(excp, (EarlyExitError, SystemExit)):
             raise excp
-        msg = 'The command {c} failed: {e}'
+        msg = str(excp)
         if args.debug:
-            traces = ['{e}'.format(e=excp)]
+            traces = [msg]
             traces += map(str.strip, traceback.format_tb(tb))
             msg = msg.format(c=args.command, e='\n'.join(traces))
-        else:
-            msg = msg.format(c=args.command, e=excp)
         args.logger.error(msg)
         sys.exit(1)
 

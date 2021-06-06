@@ -467,3 +467,33 @@ def items_from_files(files):
         with open(file_) as fh:
             out.update(map(str.strip, fh))
     return out
+
+
+def expand_paths(items):
+    """
+    Expand glob patterns in items
+    """
+    out = []
+    for path in items:
+        out.extend(glob.iglob(path))
+    return out
+
+
+def is_parallel(args):
+    """
+    Take a parsed argparse.Namespace and check that simeon
+    will be using some paraellism.
+    It also sets an is_parallel on the Namespace object
+    """
+    if getattr(args, 'command', '') not in ('download', 'split', 'report'):
+        args.is_parallel = False
+    elif getattr(args, 'dynamic_date', False):
+        args.is_parallel = False
+    elif hasattr(args, 'in_files'):
+        args.is_parallel = True
+    else:
+        items = getattr(
+            args, 'downloaded_files', getattr(args, 'course_ids', [])
+        )
+        args.is_parallel = len(expand_paths(items)) > 1
+    return args.is_parallel
