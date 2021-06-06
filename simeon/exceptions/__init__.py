@@ -77,3 +77,9 @@ class SplitException(Exception):
     Raised when an issue happens during a split operation
     """
     pass
+
+
+class SQLQueryException(Exception):
+    """
+    Raised when calling client.query raises an error
+    """
