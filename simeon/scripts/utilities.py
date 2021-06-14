@@ -290,7 +290,7 @@ def make_logger(user='SIMEON', verbose=True, stream=None):
     if stream is None:
         stream = sys.stdout
     if not hasattr(stream, 'write'):
-        stream = open(stream, 'w')
+        stream = open(stream, 'a')
     level = logging.INFO if verbose else logging.WARN
     formatter = logging.Formatter(
         '%(asctime)s:%(levelname)s:%(name)s:%(message)s',

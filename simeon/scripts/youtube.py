@@ -47,7 +47,7 @@ DATE_SECS = {
 }
 
 
-def _batch_ids(files, size=50):
+def _batch_ids(files, size=10):
     """
     Batch YouTube video IDs by the given size
     from the list of file names.
@@ -138,7 +138,7 @@ def extract_video_info(parsed_args):
         sys.exit(1)
     os.makedirs(os.path.dirname(parsed_args.output), exist_ok=True)
     outfile = gzip.open(parsed_args.output, 'wt')
-    for chunk in _batch_ids(parsed_args.course_axes):
+    for chunk in _batch_ids(parsed_args.course_axes, parsed_args.batch_size):
         try:
             resp = _generate_request(chunk, parsed_args.youtube_token)
         except Exception as excp:
@@ -310,6 +310,14 @@ def main():
             'YouTube data V3 API token generated from the account hosting '
             'the lecture videos.'
         )
+    )
+    extracter.add_argument(
+        '--batch-size', '-s',
+        help=(
+            'How many YouTube video ID\'s to batch together when making HTTP '
+            'requests for video metadata. Default: %(default)s'
+        ),
+        default=10,
     )
     extracter.add_argument(
         'course_axes',
