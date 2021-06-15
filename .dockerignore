@@ -1,0 +1,12 @@
+.git
+.coverage
+tox.ini
+data/
+logs/
+venv/
+docs/
+simeon.egg-info/
+*.txt
+!requirements.txt
+LICENSE
+README.md
