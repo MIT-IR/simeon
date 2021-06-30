@@ -8,5 +8,7 @@ docs/
 simeon.egg-info/
 *.txt
 !requirements.txt
+*.cfg
+*.json
 LICENSE
 README.md

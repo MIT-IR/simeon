@@ -21,6 +21,11 @@ cd simeon && python -m pip install .[geoip]
 simeon --help
 ```
 
+### Using Docker
+```sh
+docker run -it mitir/simeon:latest
+simeon --help
+```
 
 ### Developing
 ```sh

@@ -28,6 +28,14 @@ Installing with git clone
    # Then invoke the CLI tool with
    simeon --help
 
+Using Docker
+~~~~~~~~~~~~
+
+.. code:: sh
+
+   docker run -it mitir/simeon:latest
+   simeon --help
+
 Developing
 ~~~~~~~~~~
 
