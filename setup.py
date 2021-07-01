@@ -46,7 +46,7 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
-        'Intended Audience :: Data Analysts :: Data Engineers',
+        'Intended Audience :: Science/Research',
         'Natural Language :: English',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
@@ -56,6 +56,6 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: Implementation :: CPython',
-        'Topic :: Data Analysis',
+        'Topic :: Text Processing',
     ],
 )
