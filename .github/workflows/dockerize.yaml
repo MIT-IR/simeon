@@ -2,11 +2,11 @@
 name: Dockerize simeon
 
 on:
-  release:
-    types: [published]
+  create:
 
 jobs:
   docker:
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
     steps:
       -
