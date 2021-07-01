@@ -1,8 +1,10 @@
 # Build a Docker image and push it to Docker Hub
 name: Dockerize simeon
+
 on:
   release:
     types: [published]
+
 jobs:
   docker:
     runs-on: ubuntu-latest
@@ -23,10 +25,6 @@ jobs:
       -
         name: Build and push
         id: docker_build
-        run: |
-          echo $SOURCE_NAME
-          echo $SOURCE_BRANCH
-          echo $SOURCE_TAG
         env:
           SOURCE_NAME: ${{ steps.branch_name.outputs.SOURCE_NAME }}
           SOURCE_BRANCH: ${{ steps.branch_name.outputs.SOURCE_BRANCH }}
