@@ -1,9 +1,12 @@
+import os
 from setuptools import find_packages, setup
 
+# Get the value of __version__ from the library's __init__.py file
+exec(open(os.path.join('simeon', '__init__.py')).read())
 
 setup(
     name='simeon',
-    version='0.0.1',
+    version=globals().get('__version__', '0.0.1'),
     author='MIT Institutional Research',
     author_email='irx@mit.edu',
     packages=find_packages(exclude=('docs',)),

@@ -10,7 +10,6 @@ WORKDIR /simeon
 RUN apt-get update -y
 # Install python packages needed by simeon
 RUN pip install -U wheel
-RUN pip install -r requirements.txt
 # Install simeon with geoip support
 RUN pip install .[geoip]
 # Start a shell

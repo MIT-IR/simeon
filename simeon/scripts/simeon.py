@@ -12,6 +12,7 @@ from argparse import (
     ArgumentParser, FileType, RawDescriptionHelpFormatter
 )
 
+import simeon
 from simeon.download import (
     aws, emails, logs, sqls, utilities as downutils
 )
@@ -819,6 +820,11 @@ def main():
         help='Log file to use when simeon prints messages. Default: stdout',
         type=FileType('a'),
         default=sys.stdout,
+    )
+    parser.add_argument(
+        '--version', '-v',
+        action='version',
+        version='%(prog)s {v}'.format(v=simeon.__version__)
     )
     subparsers = parser.add_subparsers(
         description='Choose a subcommand to carry out a task with simeon',

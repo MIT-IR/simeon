@@ -32,6 +32,7 @@ from argparse import (
 )
 from datetime import datetime
 
+import simeon
 import simeon.scripts.utilities as cli_utils
 import simeon.upload.gcp as gcp
 
@@ -184,6 +185,11 @@ def main():
         help=(
             'The INI configuration file to use for default arguments.'
         ),
+    )
+    parser.add_argument(
+        '--version', '-v',
+        action='version',
+        version='%(prog)s {v}'.format(v=simeon.__version__)
     )
     subparsers = parser.add_subparsers(
         description='Choose a subcommand to carry out a task with simeon-geoip',
