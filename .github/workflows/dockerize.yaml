@@ -34,5 +34,12 @@ jobs:
           push: true
           tags: mitir/simeon:${{ env.SOURCE_TAG }}
       -
+        name: Publish Latest Tag
+        id: docker_build_laest
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: mitir/simeon:latest
+      -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

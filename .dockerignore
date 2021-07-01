@@ -1,4 +1,6 @@
 .git
+.gitignore
+.github/
 .coverage
 tox.ini
 data/
