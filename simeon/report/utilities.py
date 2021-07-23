@@ -605,6 +605,7 @@ def process_course_structure(data, start, mapping, parent=None):
     targets = (
         ('name', 'display_name'), ('gformat', 'format'),
         ('due', 'due'), ('start', 'start'), ('graded', 'graded'),
+        ('visible_to_staff_only', 'visible_to_staff_only'),
     )
     for (key, target) in targets:
         item[key] = _get_first_axis_meta(

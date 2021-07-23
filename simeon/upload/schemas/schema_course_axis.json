@@ -108,6 +108,11 @@
 	    "description": "boolean specifying if the seciton (aka sequential) has graded content or not"
         },
         {
+            "field_type": "BOOLEAN",
+            "name": "visible_to_staff_only",
+            "description": "Indicates the setting selected for the Hide from Students option for the section, subsection, or unit on the Studio Course Outline page."
+        },
+        {
             "field_type": "STRING",
             "name": "parent",
 	    "description": "url_name of parent item"
