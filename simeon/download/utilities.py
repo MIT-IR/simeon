@@ -80,8 +80,9 @@ def decrypt_files(fnames, verbose=True, logger=None, timeout=None):
     proc =  sb.Popen(cmd.split(), stdout=sb.PIPE, stderr=sb.PIPE)
     if proc.wait(timeout=timeout) != 0:
         err = proc.stderr.read().decode('utf8', 'ignore').strip()
+        msg = 'Failed to decrypt file names {f} with return code {rc}: {e}'
         raise DecryptionError(
-            'Failed to decrypt {f}: {e}'.format(f=' '.join(fnames), e=err)
+            msg.format(f=' '.join(fnames), e=err, rc=proc.returncode)
         )
     if verbose and logger is not None:
         for line in proc.stdout:
