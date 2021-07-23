@@ -14,7 +14,7 @@ from simeon.download.utilities import (
     decrypt_files, format_sql_filename
 )
 from simeon.exceptions import (
-    EarlyExitError, SplitException
+    DecryptionError, EarlyExitError, SplitException
 )
 
 
@@ -107,7 +107,7 @@ def batch_decrypt_files(
     :rtype: None
     :return: Nothing, but decrypts the .sql files from the given archive
     """
-    with ThreadPool(10) as pool:
+    with ThreadPool(5) as pool:
         results = dict()
         for batch in _batch_them(all_files, size):
             async_result = pool.apply_async(
@@ -117,8 +117,18 @@ def batch_decrypt_files(
                     )
             )
             results[async_result] = batch
+        failures = 0
         for result in results:
-            result.get()
+            try:
+                result.get()
+            except DecryptionError as excp:
+                failures += 1
+                if logger:
+                    logger.error(excp)
+    if failures:
+        raise DecryptionError(
+            'Multiple files failed to decrypt. Please consult the logs.'
+        )
     if not keepfiles:
         _delete_all(all_files)
 
