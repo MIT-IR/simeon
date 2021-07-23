@@ -209,6 +209,8 @@ def split_sql_files(parsed_args):
                 parsed_args.logger.info(
                     msg.format(f=fname, w='Done decrypting the contents in')
                 )
+            if parsed_args.unpack_only:
+                continue
             dirnames = set(
                 os.path.dirname(f) for f in to_decrypt if 'ora/' not in f
             )
@@ -503,6 +505,15 @@ def push_to_bq(parsed_args):
         sys.exit(1)
     all_jobs = []
     storage = parsed_args.use_storage
+    tmp = parsed_args.items
+    parsed_args.items = []
+    for item in tmp:
+        if item.startswith('gs'):
+            parsed_args.items.append(item)
+        elif '*' in item:
+            parsed_args.items.extend(glob.iglob(item))
+        else:
+            parsed_args.items.append(item)
     for item in parsed_args.items:
         parsed_args.use_storage = storage or item.startswith('gs://')
         if not parsed_args.use_storage and not os.path.exists(item):
@@ -613,6 +624,13 @@ def push_to_gcs(parsed_args):
         sys.exit(1)
     failed = False
     nitems = 0
+    tmp = parsed_args.items
+    parsed_args.items = []
+    for item in tmp:
+        if '*' in item:
+            parsed_args.items.extend(glob.iglob(item))
+        else:
+            parsed_args.items.append(item)
     for item in parsed_args.items:
         if not os.path.exists(item):
             errmsg = 'Skipping {f!r}. It does not exist.'
@@ -1155,6 +1173,15 @@ def main():
             'Don\'t do any unpacking of the SQL archive. Use the latter to '
             'get directories that already contain SQL files to use to make '
             'files to load to BigQuery.'
+        ),
+        action='store_true',
+    )
+    splitter.add_argument(
+        '--unpack-only', '-u',
+        help=(
+            'Only unpack the archive and decrypt the encrypted files. '
+            'Don\'t make any of the json.gz files for course_axis, '
+            'studentmodule, etc.'
         ),
         action='store_true',
     )
