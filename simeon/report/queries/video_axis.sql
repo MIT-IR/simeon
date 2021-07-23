@@ -24,6 +24,7 @@ FROM (
     ON youtubes.id = ARRAY_REVERSE(SPLIT(data.ytid, ':'))[SAFE_ORDINAL(1)]
     {% endif %}
     WHERE category = "video"
+    AND (NOT visible_to_staff_only OR visible_to_staff_only IS NULL)
 ) as videos
 LEFT JOIN (
     SELECT name, module_id, index
