@@ -542,6 +542,7 @@ def push_to_bq(parsed_args):
             bucket=parsed_args.bucket, max_bad_rows=parsed_args.max_bad_rows,
             schema_dir=parsed_args.schema_dir,
             format_=parsed_args.file_format,
+            patch=parsed_args.update_description,
         )
         if parsed_args.wait_for_loads:
             if isinstance(job, (list, tuple)):
@@ -760,7 +761,7 @@ def make_secondary_tables(parsed_args):
             geo_table=parsed_args.geo_table,
             youtube_table=parsed_args.youtube_table,
             wait=parsed_args.wait_for_loads, fail_fast=parsed_args.fail_fast,
-            query_dir=parsed_args.query_dir,
+            query_dir=parsed_args.query_dir, schema_dir=parsed_args.schema_dir,
         )
     else:
         all_jobs.update(make_tables_from_sql_par(
@@ -771,7 +772,7 @@ def make_secondary_tables(parsed_args):
             youtube_table=parsed_args.youtube_table,
             wait=parsed_args.wait_for_loads, size=parsed_args.jobs,
             logger=parsed_args.logger, fail_fast=parsed_args.fail_fast,
-            query_dir=parsed_args.query_dir,
+            query_dir=parsed_args.query_dir, schema_dir=parsed_args.schema_dir,
         ))
     errors = 0
     num_queries = 0
@@ -938,8 +939,10 @@ def main():
     )
     downloader.add_argument(
         '--schema-dir', '-R',
-        help='Directory where to find schema files. Default: %(default)s',
-        default=SCHEMA_DIR,
+        help=(
+            'Directory where to find schema files. '
+            'Default: {d}'.format(d=SCHEMA_DIR)
+        ),
     )
     downloader.add_argument(
         '--dynamic-date', '-m',
@@ -1102,8 +1105,10 @@ def main():
     )
     splitter.add_argument(
         '--schema-dir', '-R',
-        help='Directory where to find schema files. Default: %(default)s',
-        default=SCHEMA_DIR,
+        help=(
+            'Directory where to find schema files. '
+            'Default: {d}'.format(d=SCHEMA_DIR)
+        ),
     )
     splitter.add_argument(
         '--no-decryption', '-N',
@@ -1270,8 +1275,19 @@ def main():
     )
     pusher.add_argument(
         '--schema-dir', '-R',
-        help='Directory where to find schema files. Default: %(default)s',
-        default=SCHEMA_DIR,
+        help=(
+            'Directory where to find schema files. '
+            'Default: {d}'.format(d=SCHEMA_DIR)
+        ),
+    )
+    pusher.add_argument(
+        '--update-description', '-u',
+        help=(
+            'Applies only to push bq and updates the description '
+            'of the destination table with the "description" value'
+            ' from the corresponding schema file'
+        ),
+        action='store_true',
     )
     pusher.add_argument(
         '--use-storage', '-s',
@@ -1348,8 +1364,17 @@ def main():
     )
     reporter.add_argument(
         '--query-dir', '-q',
-        help='The directory where SQL query files live. Default: %(default)s',
-        default=QUERY_DIR,
+        help=(
+            'The directory where SQL query files live. '
+            'Default: {d}'.format(d=QUERY_DIR)
+        ),
+    )
+    reporter.add_argument(
+        '--schema-dir', '-R',
+        help=(
+            'Directory where to find schema files. '
+            'Default: {d}'.format(d=SCHEMA_DIR)
+        ),
     )
     reporter.add_argument(
         '--append', '-a',

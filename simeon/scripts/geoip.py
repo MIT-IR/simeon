@@ -280,9 +280,16 @@ def main():
         '--schema-dir', '-s',
         help=(
             'Directory where schema file are found. '
-            'Default: %(default)s'
+            'Default: {d}'.format(d=SCHEMA_DIR)
         ),
-        default=SCHEMA_DIR,
+    )
+    merger.add_argument(
+        '--update-description', '-u',
+        help=(
+            'Update the description of the destination table with '
+            'the "description" value from the corresponding schema file'
+        ),
+        action='store_true',
     )
     args = parser.parse_args()
     args.logger = cli_utils.make_logger(
@@ -375,7 +382,7 @@ def main():
             client.merge_to_table(
                 fname=args.geofile, table=args.geo_table, col=args.column,
                 use_storage=args.geofile.startswith('gs://'),
-                schema_dir=args.schema_dir,
+                schema_dir=args.schema_dir, patch=args.update_description,
             )
         except Exception as excp:
             msg = 'Merging {f} to {t} failed with the following: {e}'

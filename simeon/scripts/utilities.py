@@ -189,6 +189,9 @@ CONFIGS = {
         ('file_format', configparser.ConfigParser.get),
         ('schema_dir', configparser.ConfigParser.get),
         ('max_bad_rows', configparser.ConfigParser.getint),
+        ('update_description', configparser.ConfigParser.getboolean),
+        ('schema_dir', configparser.ConfigParser.get),
+        ('query_dir', configparser.ConfigParser.get),
     ),
     'GCP': (
         ('project', configparser.ConfigParser.get),

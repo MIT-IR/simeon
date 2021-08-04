@@ -211,6 +211,7 @@ def merge_video_data(parsed_args):
             col=parsed_args.column,
             use_storage=parsed_args.youtube_file.startswith('gs://'),
             schema_dir=parsed_args.schema_dir,
+            patch=parsed_args.update_description,
         )
     except Exception as excp:
         _, excp, tb = sys.exc_info()
@@ -372,8 +373,18 @@ def main():
     )
     merger.add_argument(
         '--schema-dir', '-s',
-        help='Directory where to find schema files. Default: %(default)s',
-        default=SCHEMA_DIR,
+        help=(
+            'Directory where to find schema files. '
+            'Default: {d}'.format(d=SCHEMA_DIR)
+        ),
+    )
+    merger.add_argument(
+        '--update-description', '-u',
+        help=(
+            'Update the description of the destination table with '
+            'the "description" value from the corresponding schema file'
+        ),
+        action='store_true',
     )
     args = parser.parse_args()
     args.logger = cli_utils.make_logger(
