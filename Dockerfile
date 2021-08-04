@@ -8,6 +8,8 @@ COPY . /simeon
 WORKDIR /simeon
 # Update the repositories used by apt
 RUN apt-get update -y
+# Install gpg
+RUN apt-get install -y gnupg2
 # Install python packages needed by simeon
 RUN pip install -U wheel
 # Install simeon with geoip support
