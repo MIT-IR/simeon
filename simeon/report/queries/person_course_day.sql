@@ -47,8 +47,19 @@ FROM (
                     IF(event_type = "play_video", 1, 0) AS bvideo,
                     IF(event_type = "problem_check", 1, 0) AS bproblem_check,
                     IF(username != "", 1, 0) AS bevent,
-                    IF(REGEXP_CONTAINS(event_type, "^/courses/{course_id}/discussion/.*"), 1, 0) as bforum,
-                    IF(REGEXP_CONTAINS(event_type, "^/courses/{course_id}/progress"), 1, 0) as bprogress,
+                    {% if course_id is defined and course_id %}
+                    CASE WHEN (
+                        event_type LIKE "/courses/{{course_id}}/discussion%"
+                        OR event_type LIKE "/courses/course-v1:{{ course_id | replace("/", "+") }}/discussion%"
+                    ) THEN 1 ELSE 0 END AS bforum,
+                    CASE WHEN (
+                        event_type LIKE "/courses/{{course_id}}/progress%"
+                        OR event_type LIKE "/courses/course-v1:{{ course_id | replace("/", "+") }}/progress%"
+                    ) THEN 1 ELSE 0 END AS bprogress,
+                    {% else %}
+                    IF(event_type LIKE "/courses/{course_id}/discussion%"), 1, 0) as bforum,
+                    IF(event_type LIKE "/courses/{course_id}/progress%"), 1, 0) as bprogress,
+                    {% endif %}
                     IF(event_type IN ("show_answer", "showanswer"), 1, 0) AS bshow_answer,
                     IF(event_type = 'show_transcript', 1, 0) AS bshow_transcript,
                     IF(event_type = 'seq_goto', 1, 0) AS bseq_goto,
