@@ -349,6 +349,7 @@ def make_user_info_combo(
     :rtype: None
     :return: Nothing, but writes the generated data to the outname argument
     """
+    schema_dir = schema_dir or SCHEMA_DIR
     for (file_, _) in USER_INFO_COLS:
         file_ = os.path.join(dirname, file_)
         if not os.path.exists(file_):
@@ -658,6 +659,7 @@ def make_course_axis(
     :rtype: None
     :return: Nothing, but writes the generated data to the outname argument
     """
+    schema_dir = schema_dir or SCHEMA_DIR
     fname = os.path.join(dirname, 'course_structure-analytics.json')
     bundle = os.path.join(dirname, 'course-analytics.xml.tar.gz')
     for file_ in (fname, bundle):
@@ -731,6 +733,7 @@ def make_grades_persistent(
     :rtype: None
     :return: Nothing, but writes the generated data to the target files
     """
+    schema_dir = schema_dir or SCHEMA_DIR
     infiles = dict([
         (
             'grades_persistentcoursegrade-analytics.sql',
@@ -786,13 +789,14 @@ def make_grading_policy(
 
     :type dirname: str
     :param dirname: Name of a course's directory of SQL files
-    :type schema_dir: str
+    :type schema_dir: Union[None, str]
     :param schema_dir: Directory where schema files live
     :type outname: str
     :param outname: The filename to give it to the generated report
     :rtype: None
     :return: Nothing, but writes the generated data to the target file
     """
+    schema_dir = schema_dir or SCHEMA_DIR
     file_ = os.path.join(dirname, 'course-analytics.xml.tar.gz')
     if not os.path.exists(file_):
         raise OSError(
@@ -878,6 +882,7 @@ def make_forum_table(
     :rtype: None
     :return: Nothing, but writes the generated data to the target file
     """
+    schema_dir = schema_dir or SCHEMA_DIR
     outname = os.path.join(dirname, outname)
     file_ = os.path.join(dirname, 'forum.mongo')
     if not os.path.exists(file_):
@@ -1002,6 +1007,7 @@ def make_student_module(
     :rtype: None
     :return: Nothing, but writes the generated data to the target files
     """
+    schema_dir = schema_dir or SCHEMA_DIR
     pjoin = os.path.join
     outname = pjoin(dirname, outname)
     second = pjoin(dirname, 'problem_analysis.json.gz')
@@ -1081,13 +1087,14 @@ def make_roles_table(
 
     :type dirname: str
     :param dirname: Name of a course's directory of SQL files
-    :type schema_dir: str
+    :type schema_dir: Union[None, str]
     :param schema_dir: Directory where schema files live
     :type outname: str
     :param outname: The filename to give it to the generated report
     :rtype: None
     :return: Nothing, but writes the generated data to the target files
     """
+    schema_dir = schema_dir or SCHEMA_DIR
     files = {
         'student_courseaccessrole-analytics.sql',
         'django_comment_client_role_users-analytics.sql',
@@ -1169,6 +1176,7 @@ def make_sql_tables_seq(
     :rtype: bool
     :return: True if the files are generated, and False otherwise.
     """
+    schema_dir = schema_dir or SCHEMA_DIR
     reports = (
         make_course_axis, make_forum_table, make_grades_persistent,
         make_grading_policy, make_roles_table,
@@ -1232,6 +1240,7 @@ def make_sql_tables_par(
     :rtype: bool
     :return: True if the files are generated, and False otherwise.
     """
+    schema_dir = schema_dir or SCHEMA_DIR
     reports = (
         make_course_axis, make_forum_table, make_grades_persistent,
         make_grading_policy, make_roles_table,
@@ -1304,8 +1313,10 @@ def make_table_from_sql(
     :param client: An authenticated bigquery.Client object
     :type project: str
     :param project: GCP project id where the video_axis table is loaded.
-    :type query_dir: str
+    :type query_dir: Union[None, str]
     :param query_dir: Directory where query files are saved.
+    :type schema_dir: Union[None, str]
+    :param schema_dir: Directory where schema files live
     :type geo_table: str
     :param geo_table: Table name in BigQuery with geolocation data for IPs
     :type youtube_table: str
@@ -1315,6 +1326,8 @@ def make_table_from_sql(
     :rtype: Dict[str, Dict[str, str]]
     :return: Returns the errors dictionary from the LoadJob object tied to the query
     """
+    schema_dir = schema_dir or SCHEMA_DIR
+    query_dir = query_dir or QUERY_DIR
     latest_dataset = uputils.course_to_bq_dataset(
         course_id, 'sql', project
     )
@@ -1323,11 +1336,13 @@ def make_table_from_sql(
     )
     try:
         cols = []
-        for f in uputils.get_bq_schema(table, schema_dir):
+        fields, schema_desc = uputils.get_bq_schema(table, schema_dir)
+        for f in fields:
             cols.append(uputils.sqlify_bq_field(f))
         cols = ',\n'.join(cols)
     except MissingSchemaException:
         cols = ''
+        schema_desc = ''
     query, description = extract_table_query(table, query_dir)
     table = '{d}.{t}'.format(d=latest_dataset, t=table)
     if append:
@@ -1336,20 +1351,18 @@ def make_table_from_sql(
         config = uputils.make_bq_query_config(plain=True)
         query = BQ_DDL.format(
             table=table,
-            description=description.strip(),
+            description=(schema_desc or description.strip()),
             query=query,
             cols='({c})'.format(c=cols) if cols else ''
         )
     query = Template(query).render(
-        geo_table=geo_table, youtube_table=youtube_table
+        geo_table=geo_table, youtube_table=youtube_table, course_id=course_id,
     )
     try:
         job = client.query(
             query.format(
-                latest_dataset=latest_dataset,
-                log_dataset=log_dataset,
-                geo_table=geo_table,
-                youtube_table=youtube_table,
+                latest_dataset=latest_dataset, log_dataset=log_dataset,
+                geo_table=geo_table, youtube_table=youtube_table,
                 course_id=course_id
             ),
             job_id='{t}_{dt}'.format(
@@ -1375,6 +1388,7 @@ def make_tables_from_sql(
     query_dir=QUERY_DIR, wait=False,
     geo_table='geocode.geoip', youtube_table='videos.youtube',
     parallel=False, fail_fast=False,
+    schema_dir=SCHEMA_DIR,
 ):
     """
     This is the plural/multiple tables version of make_table_from_sql
@@ -1387,7 +1401,7 @@ def make_tables_from_sql(
     :param client: An authenticated bigquery.Client object
     :type project: str
     :param project: GCP project id where the video_axis table is loaded.
-    :type query_dir: str
+    :type query_dir: Union[None, str]
     :param query_dir: Directory where query files are saved.
     :type geo_table: str
     :param geo_table: Table name in BigQuery with geolocation data for IPs
@@ -1399,9 +1413,13 @@ def make_tables_from_sql(
     :param parallel: Whether the function is running in a process pool
     :type fail_fast: bool
     :param fail_fast: Whether to stop processing after the first error
+    :type schema_dir: Union[None, str]
+    :param schema_dir: Directory where schema files live
     :rtype: Dict[str, Dict[str, str]]
     :return: Return a dict mapping table names to their corresponding errors
     """
+    query_dir = query_dir or QUERY_DIR
+    schema_dir = schema_dir or SCHEMA_DIR
     if parallel:
         global report_bq_client
         client = report_bq_client
@@ -1411,6 +1429,7 @@ def make_tables_from_sql(
             table=table, course_id=course_id, client=client, project=project,
             append=append, geo_table=geo_table, wait=wait,
             query_dir=query_dir, youtube_table=youtube_table,
+            schema_dir=schema_dir,
         )
         if fail_fast and out[table]:
             return out
@@ -1421,6 +1440,7 @@ def make_tables_from_sql_par(
     tables, courses, project, append=False, query_dir=QUERY_DIR,
     wait=False, geo_table='geocode.geoip', youtube_table='videos.youtube',
     safile=None, size=mp.cpu_count(), logger=None, fail_fast=False,
+    schema_dir=SCHEMA_DIR,
 ):
     """
     Parallel version of make_tables_from_sql
@@ -1449,9 +1469,13 @@ def make_tables_from_sql_par(
     :param logger: A Logger object with which to report steps carried out
     :type fail_fast: bool
     :param fail_fast: Whether to stop processing after the first error
+    :type schema_dir: Union[None, str]
+    :param schema_dir: Directory where schema files live
     :rtype: Dict[str, Dict[str, Dict[str, str]]]
     :return: A dict mapping course_ids to tables and their query errors
     """
+    query_dir = query_dir or QUERY_DIR
+    schema_dir = schema_dir or SCHEMA_DIR
     if len(courses) < size:
         size = len(courses)
     results = dict()
@@ -1471,7 +1495,7 @@ def make_tables_from_sql_par(
                     tables=tables, course_id=course_id, client=None,
                     project=project, append=append, query_dir=query_dir, wait=wait,
                     geo_table=geo_table, youtube_table=youtube_table,
-                    parallel=True, fail_fast=fail_fast,
+                    parallel=True, fail_fast=fail_fast, schema_dir=schema_dir,
                 )
             )
             results[course_id] = async_result
