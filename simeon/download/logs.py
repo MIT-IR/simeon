@@ -169,11 +169,12 @@ def split_tracking_log(
         output file names
     :type courses: Union[Iterable[str], None]
     :param courses: A list of course IDs whose records are exported
-    :type schema_dir: str
+    :type schema_dir: Union[None, str]
     :param schema_dir: Directory where to find schema files
     :rtype: bool
     :return: True if files have been generated. False, otherwise
     """
+    schema_dir = schema_dir or SCHEMA_DIR
     schema_file = os.path.join(
         schema_dir, 'schema_tracking_log.json'
     )
@@ -279,6 +280,7 @@ def batch_split_tracking_logs(
     """
     Call split_tracking_log on each file inside a process or thread pool
     """
+    schema_dir = schema_dir or SCHEMA_DIR
     if not size or size > len(filenames):
         size = len(filenames)
     splits = 0

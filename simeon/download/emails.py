@@ -74,11 +74,12 @@ def compress_email_files(files, ddir, schema_dir=SCHEMA_DIR):
     :param files: An iterable of email opt-in CSV files to process
     :type ddir: str
     :param ddir: A destination directory
-    :type schema_dir: str
+    :type schema_dir: Union[None, str]
     :param schema_dir: Directory where schema files live
     :rtype: None
     :return: Writes the contents of files into email_opt_in.json.gz
     """
+    schema_dir = schema_dir or SCHEMA_DIR
     outname = os.path.join(ddir, 'email_opt_in.json.gz')
     with gzip.open(outname, 'wt') as fh:
         for file_ in files:
