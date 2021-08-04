@@ -192,6 +192,11 @@ CONFIGS = {
         ('update_description', configparser.ConfigParser.getboolean),
         ('schema_dir', configparser.ConfigParser.get),
         ('query_dir', configparser.ConfigParser.get),
+        ('project', configparser.ConfigParser.get),
+        ('bucket', configparser.ConfigParser.get),
+        ('service_account_file', configparser.ConfigParser.get),
+        ('geo_table', configparser.ConfigParser.get),
+        ('youtube_table', configparser.ConfigParser.get),
     ),
     'GCP': (
         ('project', configparser.ConfigParser.get),
@@ -204,6 +209,7 @@ CONFIGS = {
         ('youtube_token', configparser.ConfigParser.get),
         ('file_format', configparser.ConfigParser.get),
         ('schema_dir', configparser.ConfigParser.get),
+        ('query_dir', configparser.ConfigParser.get),
         ('max_bad_rows', configparser.ConfigParser.getint),
     ),
     'AWS': (
