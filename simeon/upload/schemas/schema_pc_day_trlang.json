@@ -1,0 +1,53 @@
+{
+    "pc_day_trlang": [
+        {
+            "name": "username",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "Learner's username on the edX platform"
+        },
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "date",
+            "field_type": "DATE",
+            "mode": "NULLABLE",
+            "description": "The date for which the transcript download analytics are computed."
+        },
+        {
+            "name": "last_time",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "The last timestamp when the learner would have triggered a transcript download event"
+        },
+        {
+            "name": "resource",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The resource whose transcript is downloaded"
+        },
+        {
+            "name": "resource_event_data",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The tracking log event data associated with a given resource"
+        },
+        {
+            "name": "resource_event_type",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The tracking event type associated with the record"
+        },
+        {
+            "name": "langcount",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The number of times a transcript download is requested in a given language"
+        }
+    ],
+    "description": "Table generated with SQL query file pc_day_trlang.sql using the simeon CLI tool. It tracks daily transcript downloads and the languages associated with those transcripts."
+}

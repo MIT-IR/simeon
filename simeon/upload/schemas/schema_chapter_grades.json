@@ -1,0 +1,53 @@
+{
+    "chapter_grades": [
+        {
+            "name": "user_id",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The numeric user ID of the learner from the edX platform"
+        },
+        {
+            "name": "chapter_mid",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The module ID of a given chapter"
+        },
+        {
+            "name": "user_chapter_max_grade",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The maximum grade a learner achieved within a given chapter"
+        },
+        {
+            "name": "chgrade",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The grade achieved by a learner in a given chapter"
+        },
+        {
+            "name": "due_date_max",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "The maximum due date of the items in a given chapter"
+        },
+        {
+            "name": "due_date_min",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "The minimum due date of the items in a given chapter"
+        },
+        {
+            "name": "median_grade",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The median grade achieved by a learner in a given chapter"
+        },
+        {
+            "name": "chmax",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The chapter's maximum grade"
+        }
+    ],
+    "description": "Table generated with SQL query file chapter_grades.sql using the simeon CLI tool. It computes the grade details of a learner by chapter."
+}

@@ -1,0 +1,59 @@
+{
+    "enrollment_events": [
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "time",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "Timestamp indicating when the enrollment event took place"
+        },
+        {
+            "name": "user_id",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "A numeric ID of the learner on the edX platform"
+        },
+        {
+            "name": "mode",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The mode of enrollment (honor, audit, verified, no-id-professional, etc.)"
+        },
+        {
+            "name": "activated",
+            "field_type": "BOOLEAN",
+            "mode": "NULLABLE",
+            "description": "Whether or not the corresponding enrollment mode is activated."
+        },
+        {
+            "name": "deactivated",
+            "field_type": "BOOLEAN",
+            "mode": "NULLABLE",
+            "description": "Whether or not the corresponding enrollment mode is deactivated."
+        },
+        {
+            "name": "mode_changed",
+            "field_type": "BOOLEAN",
+            "mode": "NULLABLE",
+            "description": "Whether or not the enrollment event was a change of mode"
+        },
+        {
+            "name": "upgraded",
+            "field_type": "BOOLEAN",
+            "mode": "NULLABLE",
+            "description": "Whether or not the enrollment event indicates an upgrade to a paid mode (verified)"
+        },
+        {
+            "name": "event_type",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The type of the enrollment event. This is one of the log events from the tracking logs"
+        }
+    ],
+    "description": "Table generated with SQL query file enrollment_events.sql using the simeon CLI tool. It tracks enrollment event modes (audit, honor, verified, etc.)"
+}

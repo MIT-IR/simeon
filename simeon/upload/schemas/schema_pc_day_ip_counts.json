@@ -1,0 +1,35 @@
+{
+    "pc_day_ip_counts": [
+        {
+            "name": "username",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The learner's username on the edX platform"
+        },
+        {
+            "name": "ip",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "A v4 or v6 IP address"
+        },
+        {
+            "name": "date",
+            "field_type": "DATE",
+            "mode": "NULLABLE",
+            "description": "The date on which the IP address was used by the learner"
+        },
+        {
+            "name": "ipcount",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The number of times the IP has been seen"
+        },
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        }
+    ],
+    "description": "Table generated with SQL query file pc_day_ip_counts.sql using the simeon CLI tool. It tracks the daily IP address counts of a learner on the edX platform"
+}

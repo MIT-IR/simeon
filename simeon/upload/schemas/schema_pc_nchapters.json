@@ -1,0 +1,17 @@
+{
+    "pc_nchapters": [
+        {
+            "name": "user_id",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Numerical user ID of a learner on the edX platform"
+        },
+        {
+            "name": "nchapters",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of chapters with which a learner has interacted"
+        }
+    ],
+    "description": "Table generated with SQL query file pc_nchapters.sql using the simeon CLI tool. It tracks the number of chapters with which a learner has interacted."
+}

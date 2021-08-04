@@ -1,0 +1,53 @@
+{
+    "person_item": [
+        {
+            "name": "user_id",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Numerical user ID of a learner on the edX platform"
+        },
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "item_short_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "Short ID assigned to course items"
+        },
+        {
+            "name": "item_nid",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Numerical index of the item along the course axis"
+        },
+        {
+            "name": "item_grade",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Indicates whether or not the learner's solution for the item is correct: 1 if correct, and 0 otherwise."
+        },
+        {
+            "name": "grade",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The grade obtained on the item"
+        },
+        {
+            "name": "n_attempts",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of attempts made"
+        },
+        {
+            "name": "date",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "Timestamp when the learner interacted with the item"
+        }
+    ],
+    "description": "Table generated with SQL query file person_item.sql using the simeon CLI tool. It tracks a learner engagement with course items."
+}

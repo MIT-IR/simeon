@@ -1,0 +1,29 @@
+{
+    "person_enrollment_verified": [
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "user_id",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Numerical user ID of a learner on the edX platform"
+        },
+        {
+            "name": "verified_enroll_time",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "Timestamp at which a learner enrollment as a verified student"
+        },
+        {
+            "name": "verified_unenroll_time",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "Timestamp at which a learner enrolled from the verified track. NULL if a learner never did."
+        }
+    ],
+    "description": "Table generated with SQL query file person_enrollment_verified.sql using the simeon CLI tool. It tracks the learners who enrolled in the verified track."
+}

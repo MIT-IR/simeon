@@ -1,0 +1,221 @@
+{
+    "person_course_day": [
+        {
+            "name": "username",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "A learner's username on the edX platform"
+        },
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "date",
+            "field_type": "DATE",
+            "mode": "NULLABLE",
+            "description": "The date for which the analytics are computed"
+        },
+        {
+            "name": "nevents",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of events (all events combined)"
+        },
+        {
+            "name": "nprogcheck",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of progress checks"
+        },
+        {
+            "name": "nshow_answer",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of times a learner requsted to see the answer to an assessment"
+        },
+        {
+            "name": "nvideo",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of videos"
+        },
+        {
+            "name": "nproblem_check",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of times a solution to a problem is submitted for grading"
+        },
+        {
+            "name": "nforum",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of forum events"
+        },
+        {
+            "name": "ntranscript",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of transcript download/viewing requests"
+        },
+        {
+            "name": "nseq_goto",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of times course navigation events are tracked"
+        },
+        {
+            "name": "nseek_video",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of times a leaner used the seek feature of a video to move around it."
+        },
+        {
+            "name": "npause_video",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of times a learner paused a video"
+        },
+        {
+            "name": "nvideos_viewed",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of videos VIEWED by a learner"
+        },
+        {
+            "name": "nvideos_watched_sec",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Daily number of seconds of videos watched by a learner"
+        },
+        {
+            "name": "nforum_reads",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of forum content readings"
+        },
+        {
+            "name": "nforum_posts",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of times a learner posted in the forums of a course"
+        },
+        {
+            "name": "nforum_threads",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of forum threads in which a learner got engaged"
+        },
+        {
+            "name": "nproblems_answered",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of problems a learner has had actually graded"
+        },
+        {
+            "name": "nproblems_attempted",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of problems a learner has attempted"
+        },
+        {
+            "name": "nproblems_multiplechoice",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of multiple choice problems with which a learner has engaged"
+        },
+        {
+            "name": "nproblems_choice",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of choice problems with which a learner has engaged"
+        },
+        {
+            "name": "nproblems_numerical",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of numerical problems with which a learner has engaged"
+        },
+        {
+            "name": "nproblems_option",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of options problems with which a learner has engaged"
+        },
+        {
+            "name": "nproblems_custom",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of custom problems with which a learner has engaged"
+        },
+        {
+            "name": "nproblems_string",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of string/text/textarea problems with which a learner has engaged"
+        },
+        {
+            "name": "nproblems_mixed",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of mixed problems with which a learner has engaged"
+        },
+        {
+            "name": "nproblems_forumula",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of formula problems with which a learner has engaged"
+        },
+        {
+            "name": "nproblems_other",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Daily number of other types of problems with which a learner has engaged"
+        },
+        {
+            "name": "first_event",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "Timestamp indicating the first time a learner engaged with the course"
+        },
+        {
+            "name": "last_event",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "Timestamp indicating the last time a learner engaged with the course"
+        },
+        {
+            "name": "avg_dt",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Daily average duration (time interval) a learner engaged with the course"
+        },
+        {
+            "name": "sdv_dt",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Daily standard deviation of the duration (time interval) a learner engaged with the course"
+        },
+        {
+            "name": "max_dt",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Daily max duration (time interval) a learner engaged with the course"
+        },
+        {
+            "name": "n_dt",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Total duration (time interval) a learner engaged with the course so far"
+        },
+        {
+            "name": "sum_dt",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Sum of daily durations (time intervals) a learner engaged with the course so far"
+        }
+    ],
+    "description": "Table generated with SQL query file person_course_day.sql using the simeon CLI tool. It tracks daily learner activities."
+}

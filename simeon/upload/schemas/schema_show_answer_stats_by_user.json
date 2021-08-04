@@ -1,0 +1,101 @@
+{
+    "show_answer_stats_by_user": [
+        {
+            "name": "user_id",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Numerical user ID of a learner on the edX platform"
+        },
+        {
+            "name": "pct_show_answer_problem_seen",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Percentage of times a learner has requested to see the answer to an assessment"
+        },
+        {
+            "name": "pct_show_answer_not_attempted",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Percentage of times a learner has requested to see the answer to an assessment without having attempted the assessment"
+        },
+        {
+            "name": "pct_show_answer_attempted",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Percentage of times a learner has requested to see the answer to an assessment after an attempt"
+        },
+        {
+            "name": "pct_show_answer_perfect",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Percentage of times a learner has requested to see the answer to an assessment and has gotten a perfect score"
+        },
+        {
+            "name": "pct_show_answer_partial",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment and has gotten a partial score"
+        },
+        {
+            "name": "n_show_answer_problem_seen",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of times a learner has requested to see the answer to an assessment"
+        },
+        {
+            "name": "n_problems_seen",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of problems seeen"
+        },
+        {
+            "name": "n_show_answer_not_attempted",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of times a learner has requested to see the answer to an assessment without having attempted the assessment"
+        },
+        {
+            "name": "n_not_attempted",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of unattempted problems"
+        },
+        {
+            "name": "n_show_answer_attempted",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of times a learner has requested to see the answer to an assessment after an attempt"
+        },
+        {
+            "name": "n_attempted",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of attempted problems"
+        },
+        {
+            "name": "n_show_answer_perfect",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of times a learner has requested to see the answer to an assessment and has gotten a perfect score"
+        },
+        {
+            "name": "n_perfect",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of problems where the learner got a perfect score"
+        },
+        {
+            "name": "n_show_answer_partial",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of times a learner has requested to see the answer to an assessment and has gotten a partial score"
+        },
+        {
+            "name": "n_partial",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of problems where the learner got a partial score (not perfect)"
+        }
+    ],
+    "description": "Table generated with SQL query file show_answer_stats_by_user.sql using the simeon CLI tool. It tracks the analytics around how many times learners request to see the answers to assessments. The granularity is at the user level."
+}

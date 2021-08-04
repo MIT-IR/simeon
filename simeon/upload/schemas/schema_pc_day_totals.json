@@ -1,0 +1,125 @@
+{
+    "pc_day_totals": [
+        {
+            "name": "username",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "A learner's username on the edX platform"
+        },
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "ndays_act",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of days a learner is active on the platform"
+        },
+        {
+            "name": "nevents",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Total number of daily events triggered by a learner"
+        },
+        {
+            "name": "nprogcheck",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of times a learner has checked their progress"
+        },
+        {
+            "name": "nshow_answer",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of times a learner has checked the answer to an assignment/assessment"
+        },
+        {
+            "name": "nvideo",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The number of video related events in which a learner has been involved"
+        },
+        {
+            "name": "nproblem_check",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The number of problem_check events in which a learner has been involved"
+        },
+        {
+            "name": "nforum",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The number of forum events in which a learner has been involved"
+        },
+        {
+            "name": "ntranscript",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The number of transcript download events in which a learner has been involved"
+        },
+        {
+            "name": "nseq_goto",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The number of seq_goto course navigation events in which a learner has been involved"
+        },
+        {
+            "name": "nseek_video",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The number of video seek events in which a learner has been involved"
+        },
+        {
+            "name": "npause_video",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The number of video pause events in which a learner has been involved"
+        },
+        {
+            "name": "first_event",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "Timestamp of a learner's first event in the course"
+        },
+        {
+            "name": "last_event",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "Timestamp of a learner's most recent event in the course"
+        },
+        {
+            "name": "avg_dt",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average time duration a learner has interacted with the contents of the course"
+        },
+        {
+            "name": "sdv_dt",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The standard deviation of the time durations a learner has interacted with the contents of the course"
+        },
+        {
+            "name": "max_dt",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The maximum of the time durations a learner has interacted with the contents of the course"
+        },
+        {
+            "name": "n_dt",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": null
+        },
+        {
+            "name": "sum_dt",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The sum total of the time durations a learner has interacted with the contents of the course"
+        }
+    ],
+    "description": "Table generated with SQL query file pc_day_totals.sql using the simeon CLI tool"
+}

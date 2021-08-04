@@ -1,0 +1,41 @@
+{
+    "problem_grades": [
+        {
+            "name": "user_id",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": null
+        },
+        {
+            "name": "module_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": null
+        },
+        {
+            "name": "grade",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": null
+        },
+        {
+            "name": "max_grade",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": null
+        },
+        {
+            "name": "perfect",
+            "field_type": "BOOLEAN",
+            "mode": "NULLABLE",
+            "description": null
+        },
+        {
+            "name": "attempted",
+            "field_type": "BOOLEAN",
+            "mode": "NULLABLE",
+            "description": null
+        }
+    ],
+    "description": "Table generated with SQL query file problem_grades.sql using the simeon CLI tool"
+}

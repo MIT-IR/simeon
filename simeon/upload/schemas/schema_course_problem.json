@@ -1,0 +1,77 @@
+{
+    "course_problem": [
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "problem_nid",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "A sequential number assigned to the problem indicating their numerical index along the course axis"
+        },
+        {
+            "name": "problem_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "An ID assigned to the problem on the platform"
+        },
+        {
+            "name": "problem_short_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "Short ID assigned to problem items"
+        },
+        {
+            "name": "avg_problem_raw_score",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The average raw score obtained by learners on a given problem"
+        },
+        {
+            "name": "sdv_problem_raw_score",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The standard deviation of raw scores obtained by learners on a given problem"
+        },
+        {
+            "name": "max_possible_raw_score",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The maximum possible raw score obtained by learners on a given problem"
+        },
+        {
+            "name": "avg_problem_pct_score",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The average percentage score obtained by learners on a given problem"
+        },
+        {
+            "name": "n_unique_users_attempted",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of unique users that attempted the problem"
+        },
+        {
+            "name": "problem_name",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "Name of the problem among the course items"
+        },
+        {
+            "name": "is_split",
+            "field_type": "BOOLEAN",
+            "mode": "NULLABLE",
+            "description": "Whether or not the problem is a split tested item; for example an A/B tested item"
+        },
+        {
+            "name": "split_name",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "If the item is part of an A/B test, the name given to the split where the item ended up"
+        }
+    ],
+    "description": "Table generated with SQL query file course_problem.sql using the simeon CLI tool. It tracks the analytics of problems in a given course."
+}

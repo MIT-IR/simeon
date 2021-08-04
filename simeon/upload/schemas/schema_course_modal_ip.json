@@ -1,0 +1,29 @@
+{
+    "course_modal_ip": [
+        {
+            "name": "username",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The username of the learner on the edX platform"
+        },
+        {
+            "name": "modal_ip",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The most frequently used IP address of the learner"
+        },
+        {
+            "name": "ip_count",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The number of times the modal IP address has been used by the learner throughout the course"
+        },
+        {
+            "name": "n_different_ip",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The number of different IP addresses the learner has used throughout the course"
+        }
+    ],
+    "description": "Table generated with SQL query file course_modal_ip.sql using the simeon CLI tool. It tracks the IP address analytics for each user."
+}

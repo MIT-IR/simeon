@@ -1,0 +1,227 @@
+{
+    "course_item": [
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "item_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The ID of an course item"
+        },
+        {
+            "name": "problem_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The ID of the problem under which the item is found"
+        },
+        {
+            "name": "problem_nid",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "A sequential number assigned to the items indicating their numerical index along the course axis"
+        },
+        {
+            "name": "assignment_short_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "An ID given to the assignment"
+        },
+        {
+            "name": "item_weight",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The grading weight of the item"
+        },
+        {
+            "name": "n_user_responses",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of users who provided responses to this assessment item"
+        },
+        {
+            "name": "chapter_name",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The name of the chapter in which the assessment item is found"
+        },
+        {
+            "name": "section_name",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The name of the course section in which the assessment item is found"
+        },
+        {
+            "name": "vertical_name",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": null
+        },
+        {
+            "name": "problem_name",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The name of the problem"
+        },
+        {
+            "name": "assignment_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "An unique ID given to the assignment"
+        },
+        {
+            "name": "n_problems_in_assignment",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The number of problems in the assessment item"
+        },
+        {
+            "name": "assignment_type",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "Type of the assessment/assignment"
+        },
+        {
+            "name": "assignment_type_weight",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The weight given to this type of assignment/assessment"
+        },
+        {
+            "name": "n_assignments_of_type",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of assignments/assessment of this type within the course"
+        },
+        {
+            "name": "assignment_seq_num",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The numerical index of the assignment item within its section"
+        },
+        {
+            "name": "chapter_number",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The numerical index of the chapter in which this item is found"
+        },
+        {
+            "name": "content_index",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The overall numerical index of the item along the entire course axis"
+        },
+        {
+            "name": "section_number",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The numerical index of the section in which the item is found"
+        },
+        {
+            "name": "problem_number",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Numerical index of the problem within its parent item"
+        },
+        {
+            "name": "problem_weight",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Weight assigned to the problem item"
+        },
+        {
+            "name": "item_points_possible",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The number of possible points associated with the assignment/assessment item"
+        },
+        {
+            "name": "problem_points_possible",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The number of possible points associated with the problem item"
+        },
+        {
+            "name": "emperical_item_points_possible",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Number of points possible in the item"
+        },
+        {
+            "name": "emperical_problem_points_possible",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Number of points possible if it's a problem item"
+        },
+        {
+            "name": "item_number",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The numerical index of the item along the entire course axis"
+        },
+        {
+            "name": "n_items",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Total number of items in the course"
+        },
+        {
+            "name": "start_date",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "The item's start date; i.e. the date it's available to learners"
+        },
+        {
+            "name": "due_date",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "The item's due date; i.e. the date by which learners should submit it"
+        },
+        {
+            "name": "is_split",
+            "field_type": "BOOLEAN",
+            "mode": "NULLABLE",
+            "description": "Whether or not the item is a split tested item; for example an A/B tested item"
+        },
+        {
+            "name": "split_name",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "If the item is part of an A/B test, the name given to the split where the item ended up"
+        },
+        {
+            "name": "problem_path",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The path that leads to the problem starting from the root course item"
+        },
+        {
+            "name": "problem_short_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "Short ID assigned to problem items"
+        },
+        {
+            "name": "item_short_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "Short ID assigned to assignment items"
+        },
+        {
+            "name": "item_nid",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": null
+        },
+        {
+            "name": "cumulative_item_weight",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": null
+        }
+    ],
+    "description": "Table generated with SQL query file course_item.sql using the simeon CLI tool. It tracks the analytics of course items that are assessments."
+}

@@ -1,0 +1,41 @@
+{
+    "enrollday_all": [
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "time",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "Timestamp indicating when the enrollment event took place"
+        },
+        {
+            "name": "user_id",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "A numeric ID of the learner on the edX platform"
+        },
+        {
+            "name": "diff_enrollment_honor",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Indicator for whether the enrollment event was an honor enrollment. 1 means that the user is honor enrolled; -1 means that the user unenrolled from honor; 0 means the user neither enrolled in honor, not did they ever unenroll from honor"
+        },
+        {
+            "name": "diff_enrollment_verified",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Indicator for whether the enrollment event was an verified enrollment. 1 means that the user is verified enrolled; -1 means that the user unenrolled from verified; 0 means the user neither enrolled in verified, not did they ever unenroll from verified"
+        },
+        {
+            "name": "diff_enrollment_audit",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Indicator for whether the enrollment event was an audit enrollment. 1 means that the user is audit enrolled; -1 means that the user unenrolled from audit; 0 means the user neither enrolled in audit, not did they ever unenroll from audit"
+        }
+    ],
+    "description": "Table generated with SQL query file enrollday_all.sql using the simeon CLI tool. It tracks the enrollment events made by a learner"
+}

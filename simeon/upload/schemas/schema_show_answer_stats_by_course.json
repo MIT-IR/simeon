@@ -1,0 +1,251 @@
+{
+    "show_answer_stats_by_course": [
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "avg_pct_show_answer_problem_seen",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment"
+        },
+        {
+            "name": "avg_pct_show_answer_not_attempted",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment without making any attempts"
+        },
+        {
+            "name": "avg_pct_show_answer_attempted",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment after an attempt"
+        },
+        {
+            "name": "avg_pct_show_answer_perfect",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment and has gotten a perfect score"
+        },
+        {
+            "name": "avg_pct_show_answer_partial",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment and has gotten a partial score"
+        },
+        {
+            "name": "avg_pct_show_answer_problem_seen_certified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment, while enrolled as a certified learner"
+        },
+        {
+            "name": "avg_pct_show_answer_not_attempted_certified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment without having attempted the assessment, while enrolled as a certified learner"
+        },
+        {
+            "name": "avg_pct_show_answer_attempted_certified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment after an attempt, while enrolled as a certified learner"
+        },
+        {
+            "name": "avg_pct_show_answer_perfect_certified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment and has gotten a perfect score, while enrolled as a certified learner"
+        },
+        {
+            "name": "avg_pct_show_answer_partial_certified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment and has gotten a partial score, while enrolled as a certified learner"
+        },
+        {
+            "name": "avg_pct_show_answer_problem_seen_explored",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment, while having explored 50% of the course"
+        },
+        {
+            "name": "avg_pct_show_answer_not_attempted_explored",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment without having attempted the assessment, while having explored 50% of the course"
+        },
+        {
+            "name": "avg_pct_show_answer_attempted_explored",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment after an attempt, while having explored 50% of the course"
+        },
+        {
+            "name": "avg_pct_show_answer_perfect_explored",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment and has gotten a perfect score, while having explored 50% of the course"
+        },
+        {
+            "name": "avg_pct_show_answer_partial_explored",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment and has gotten a partial score, while having explored 50% of the course"
+        },
+        {
+            "name": "avg_pct_show_answer_problem_seen_verified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment, while verified"
+        },
+        {
+            "name": "avg_pct_show_answer_not_attempted_verified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment without having attempted the assessment, while verified"
+        },
+        {
+            "name": "avg_pct_show_answer_attempted_verified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment after an attempt, while verified"
+        },
+        {
+            "name": "avg_pct_show_answer_perfect_verified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment and has gotten a perfect score, while verified"
+        },
+        {
+            "name": "avg_pct_show_answer_partial_verified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Average of the percentage of times a learner has requested to see the answer to an assessment and has gotten a partial score, while verified"
+        },
+        {
+            "name": "median_pct_show_answer_problem_seen",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment"
+        },
+        {
+            "name": "median_pct_show_answer_not_attempted",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment without having attempted the assessment"
+        },
+        {
+            "name": "median_pct_show_answer_attempted",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment after an attempt"
+        },
+        {
+            "name": "median_pct_show_answer_perfect",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment and has gotten a perfect score"
+        },
+        {
+            "name": "median_pct_show_answer_partial",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment and has gotten a partial score"
+        },
+        {
+            "name": "median_pct_show_answer_problem_seen_explored",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment, while having explored 50% of the course"
+        },
+        {
+            "name": "median_pct_show_answer_not_attempted_explored",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment without having attempted the assessment, while having explored 50% of the course"
+        },
+        {
+            "name": "median_pct_show_answer_attempted_explored",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment after an attempt, while having explored 50% of the course"
+        },
+        {
+            "name": "median_pct_show_answer_perfect_explored",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment and has gotten a perfect score, while having explored 50% of the course"
+        },
+        {
+            "name": "median_pct_show_answer_partial_explored",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment and has gotten a partial score, while having explored 50% of the course"
+        },
+        {
+            "name": "median_pct_show_answer_problem_seen_certified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment, while enrolled as a certified learner"
+        },
+        {
+            "name": "median_pct_show_answer_not_attempted_certified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment without having attempted the assessment, while enrolled as a certified learner"
+        },
+        {
+            "name": "median_pct_show_answer_attempted_certified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment after an attempt, while enrolled as a certified learner"
+        },
+        {
+            "name": "median_pct_show_answer_perfect_certified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment and has gotten a perfect score, while enrolled as a certified learner"
+        },
+        {
+            "name": "median_pct_show_answer_partial_certified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment and has gotten a partial score, while enrolled as a certified learner"
+        },
+        {
+            "name": "median_pct_show_answer_problem_seen_verified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment, while verified"
+        },
+        {
+            "name": "median_pct_show_answer_not_attempted_verified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment without having attempted the assessment, while verified"
+        },
+        {
+            "name": "median_pct_show_answer_attempted_verified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment after an attempt, while verified"
+        },
+        {
+            "name": "median_pct_show_answer_perfect_verified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment and has gotten a perfect score, while verified"
+        },
+        {
+            "name": "median_pct_show_answer_partial_verified",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Median of the percentage of times a learner has requested to see the answer to an assessment and has gotten a partial score, while verified"
+        }
+    ],
+    "description": "Table generated with SQL query file show_answer_stats_by_course.sql using the simeon CLI tool. It tracks the analytics around how many times learners request to see the answers to assessments. The granularity is at the course level."
+}

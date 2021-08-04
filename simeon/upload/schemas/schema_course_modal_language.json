@@ -1,0 +1,47 @@
+{
+    "course_modal_language": [
+        {
+            "name": "username",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The username of the learner on the edX platform"
+        },
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "resource",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The course resource whose language details are tracked"
+        },
+        {
+            "name": "language",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The language associated with the given resource"
+        },
+        {
+            "name": "language_download",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of times the learner downloaded a transcript of a resource in the given language"
+        },
+        {
+            "name": "language_nevents",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of times the learner triggered an event in the given language on the platform"
+        },
+        {
+            "name": "language_ndiff",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Total number of different languages used by the learner"
+        }
+    ],
+    "description": "Table generated with SQL query file course_modal_language.sql using the simeon CLI tool. It tracks details about the various languages used by the learners on the platform"
+}

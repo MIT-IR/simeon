@@ -1,0 +1,59 @@
+{
+    "language_multi_transcripts": [
+        {
+            "name": "username",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "A learner's username on the edX platform"
+        },
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "resource",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The resource whose transcript is downloaded"
+        },
+        {
+            "name": "resource_event_data",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "Some details about the resource whose transcript is downloade. These details are from the tracking logs"
+        },
+        {
+            "name": "transcript_download",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of times the resource's transcript has been downloaded by a learner"
+        },
+        {
+            "name": "n_events",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of events in which the language at hand was involved"
+        },
+        {
+            "name": "last_time_used_lang",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "The last time the learner used the language in question"
+        },
+        {
+            "name": "n_diff_lang",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of different languages involved in transcript downloads"
+        },
+        {
+            "name": "rank_num",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": null
+        }
+    ],
+    "description": "Table generated with SQL query file language_multi_transcripts.sql using the simeon CLI tool. It tracks the transcript download events and the languages associated with them"
+}

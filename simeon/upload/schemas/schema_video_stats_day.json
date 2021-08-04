@@ -1,0 +1,29 @@
+{
+    "video_stats_day": [
+        {
+            "name": "date",
+            "field_type": "DATE",
+            "mode": "NULLABLE",
+            "description": null
+        },
+        {
+            "name": "username",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": null
+        },
+        {
+            "name": "video_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": null
+        },
+        {
+            "name": "position",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": null
+        }
+    ],
+    "description": "Table generated with SQL query file video_stats_day.sql using the simeon CLI tool"
+}

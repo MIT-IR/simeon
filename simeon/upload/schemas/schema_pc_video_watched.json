@@ -1,0 +1,41 @@
+{
+    "pc_video_watched": [
+        {
+            "name": "user_id",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Numerical user ID of a learner on the edX platform"
+        },
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "n_unique_videos_watched",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of unique videos watched by a learner"
+        },
+        {
+            "name": "fract_total_videos_watched",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The fraction of videos a learner has watched"
+        },
+        {
+            "name": "certified",
+            "field_type": "BOOLEAN",
+            "mode": "NULLABLE",
+            "description": "Whether or not the learner is verified"
+        },
+        {
+            "name": "verified",
+            "field_type": "BOOLEAN",
+            "mode": "NULLABLE",
+            "description": "Whether or not the learner is enrolled in verified mode"
+        }
+    ],
+    "description": "Table generated with SQL query file pc_video_watched.sql using the simeon CLI tool. It tracks the number of course videos with which the learner engaged."
+}

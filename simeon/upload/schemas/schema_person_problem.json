@@ -1,0 +1,53 @@
+{
+    "person_problem": [
+        {
+            "name": "user_id",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Numerical user ID of a learner on the edX platform"
+        },
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "problem_nid",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Numerical index of a problem item along the course axis"
+        },
+        {
+            "name": "problem_raw_score",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The raw numeric score of the problem"
+        },
+        {
+            "name": "problem_pct_score",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "The percentage of the score relative to the max possible score on the problem"
+        },
+        {
+            "name": "grade",
+            "field_type": "FLOAT",
+            "mode": "NULLABLE",
+            "description": "Grade obtained on the problem"
+        },
+        {
+            "name": "n_attempts",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of attempts"
+        },
+        {
+            "name": "date",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "Timestamp indicating the date of engagement"
+        }
+    ],
+    "description": "Table generated with SQL query file person_problem.sql using the simeon CLI tool. It tracks a learner engagement with course problem items."
+}

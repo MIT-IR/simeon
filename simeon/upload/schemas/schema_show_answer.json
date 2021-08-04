@@ -1,0 +1,29 @@
+{
+    "show_answer": [
+        {
+            "name": "time",
+            "field_type": "TIMESTAMP",
+            "mode": "NULLABLE",
+            "description": "Time of the Show answer request"
+        },
+        {
+            "name": "username",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "username of a learner on the edX platform"
+        },
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "module_id",
+            "field_type": "STRING",
+            "mode": "NULLABLE",
+            "description": "The module ID of the item whose answer is requested"
+        }
+    ],
+    "description": "Table generated with SQL query file show_answer.sql using the simeon CLI tool. It tracks items for which a learner has requested to show an answer."
+}

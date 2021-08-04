@@ -1,0 +1,47 @@
+{
+    "pc_forum": [
+        {
+            "name": "user_id",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Numeric user ID of a learner on the edX platform"
+        },
+        {
+            "name": "nforum",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of forum events"
+        },
+        {
+            "name": "nvotes",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of forum votes"
+        },
+        {
+            "name": "npinned",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of forum pins (how many forums items a leaner has pinned)"
+        },
+        {
+            "name": "nendorsed",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of forum endorsements"
+        },
+        {
+            "name": "nthread",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "The number of forum threads a learner interacted with"
+        },
+        {
+            "name": "ncomment",
+            "field_type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Number of comments left by a learner"
+        }
+    ],
+    "description": "Table generated with SQL query file pc_forum.sql using the simeon CLI tool. It tracks a learner's forum activities."
+}
