@@ -7,8 +7,9 @@ import os
 from datetime import datetime
 from typing import List
 
-from google.cloud import bigquery
-from google.cloud import storage
+from google.cloud import (
+    bigquery, exceptions as gcp_exceptions, storage
+)
 
 from simeon.upload import utilities as uputils
 from simeon.report import utilities as rutils
@@ -37,7 +38,7 @@ class BigqueryClient(bigquery.Client):
         self, dirname: str, file_type: str, project: str,
         create: bool, append: bool, use_storage: bool=False,
         bucket: str=None, max_bad_rows=0,
-        schema_dir=SCHEMA_DIR, format_='json',
+        schema_dir=SCHEMA_DIR, format_='json', patch=False,
     ) -> List[bigquery.LoadJob]:
         """
         Load all the files in the given directory.
@@ -62,10 +63,13 @@ class BigqueryClient(bigquery.Client):
         :param schema_dir: Directory where schema files are found
         :type format_: str
         :param format_: File format (json or csv)
+        :type patch: bool
+        :param patch: Whether or not to patch the description of the table
         :rtype: List[bigquery.LoadJob]
         :returns: List of load jobs
         :raises: Propagates everything from the underlying package
         """
+        schema_dir = schema_dir or SCHEMA_DIR
         formats = FILE_FORMATS.get(file_type, [])
         patts = (
             os.path.join(dirname, '*.{f}*.gz'),
@@ -81,6 +85,7 @@ class BigqueryClient(bigquery.Client):
                 self.load_one_file_to_table(
                     file_, file_type, project, create, append,
                     use_storage, bucket, max_bad_rows, schema_dir, format_,
+                    patch
                 )
             )
         return jobs
@@ -89,7 +94,7 @@ class BigqueryClient(bigquery.Client):
         self, fname: str, file_type: str, project: str,
         create: bool, append: bool, use_storage: bool=False,
         bucket: str=None, max_bad_rows=0,
-        schema_dir=SCHEMA_DIR, format_='json',
+        schema_dir=SCHEMA_DIR, format_='json', patch=False,
     ):
         """
         Load the given file to a target BigQuery table
@@ -110,14 +115,17 @@ class BigqueryClient(bigquery.Client):
         :param bucket: GCS bucket name to use
         :type max_bad_rows: int
         :param max_bad_rows: Max number of bad rows allowed during loading
-        :type schema_dir: str
+        :type schema_dir: Union[None, str]
         :param schema_dir: Directory where schema files are found
         :type format_: str
         :param format_: File format (json or csv)
+        :type patch: bool
+        :param patch: Whether or not to patch the description of the table
         :rtype: bigquery.LoadJob
         :returns: The LoadJob object associated with the work being done
         :raises: Propagates everything from the underlying package
         """
+        schema_dir = schema_dir or SCHEMA_DIR
         use_storage = use_storage or fname.startswith('gs://')
         if use_storage:
             if bucket is None:
@@ -136,11 +144,21 @@ class BigqueryClient(bigquery.Client):
                 fname = uputils.local_to_gcs_path(fname, file_type, bucket)
         else:
             fname = gzip.open(fname, 'rb')
-        config = uputils.make_bq_load_config(
+        config, desc = uputils.make_bq_load_config(
             table=dest, schema_dir=schema_dir,
             append=append, create=create, file_format=format_,
             max_bad_rows=max_bad_rows
         )
+        dest = bigquery.Table.from_string(dest)
+        dest.description = desc
+        if patch:
+            # Update the destination table's description.
+            # Catch the error raised when the destination table
+            # does not exist.
+            try:
+                self.update_table(dest, ['description'])
+            except gcp_exceptions.NotFound:
+                pass
         return loader(
             fname, dest, job_config=config, job_id_prefix=job_prefix
         )
@@ -163,7 +181,7 @@ class BigqueryClient(bigquery.Client):
 
     def merge_to_table(
         self, fname, table, col,
-        schema_dir=SCHEMA_DIR, use_storage=False
+        schema_dir=SCHEMA_DIR, use_storage=False, patch=False,
     ):
         """
         Merge the given file to the target table name.
@@ -176,27 +194,40 @@ class BigqueryClient(bigquery.Client):
         :param table: Fully qualified BigQuery table name
         :type col: str
         :param col: Column by which to merge
-        :type schema_dir: str
+        :type schema_dir: Union[None, str]
         :param schema_dir: The directory where schema files live
         :type use_storage: bool
         :param use_storage: Whether or not the given path is a GCS URI
+        :type patch: bool
+        :param patch: Whether or not to patch the description of the table
         :rtype: bigquery.QueryJob
         :returns: The QueryJob object associated with the merge carried out
         :raises: Propagates everything from the underlying package
         """
+        schema_dir = schema_dir or SCHEMA_DIR
         if len(table.split('.')) < 3:
             table = '{p}.{t}'.format(p=self.project, t=table)
         dataset = table.rsplit('.', 1)[0]
         bqtable = bigquery.Table.from_string(table)
         temp_table = bigquery.Table.from_string(table + '_temp')
-        schema = uputils.get_bq_schema(table, schema_dir=schema_dir)
+        schema, desc = uputils.get_bq_schema(table, schema_dir=schema_dir)
         bqtable.schema = schema
+        bqtable.description = desc
         temp_table.schema = schema
+        if patch:
+            # Update the destination table's description.
+            # Catch the error raised when the destination table
+            # does not exist.
+            try:
+                self.update_table(bqtable, ['description'])
+            except gcp_exceptions.NotFound:
+                pass
+        temp_table.description = desc
         job_prefix = '{t}_data_load_{dt}-'.format(
             t=bqtable.table_id,
             dt=datetime.now().strftime('%Y%m%d%H%M%S%f')
         )
-        config = uputils.make_bq_load_config(
+        config, _ = uputils.make_bq_load_config(
             table=table, schema_dir=schema_dir, append=False,
             create=True, file_format='json',
         )
