@@ -180,8 +180,9 @@ def get_bq_schema(table: str, schema_dir: str=SCHEMA_DIR):
     :param table: A BigQuery (bare) table name
     :type schema_dir: str
     :param schema_dir: Directory where schema JSON file is looked up
-    :rtype: List[bigquery.SchemaField]
-    :return: A list of bigquery.SchemaField objects
+    :rtype: Tuple[List[bigquery.SchemaField], str]
+    :return: A 2-tuple with list of bigquery.SchemaField objects and
+        a description text for the target table
     """
     bname = table.split('.')[-1]
     if all(k in bname for k in ('track', 'log')):
@@ -204,17 +205,15 @@ def get_bq_schema(table: str, schema_dir: str=SCHEMA_DIR):
             'with a name matching the given table {t}'
         )
         raise MissingSchemaException(msg.format(f=schema_file, t=table))
-    return out
+    return out, schema.get('description')
 
 
 def make_bq_load_config(
-    table: str, schema_dir=SCHEMA_DIR,
-    append: bool=False,
-    create: bool=True, file_format: str='json',
-    delim=',', max_bad_rows=0,
+    table: str, schema_dir=SCHEMA_DIR, append: bool=False,
+    create: bool=True, file_format: str='json', delim=',', max_bad_rows=0,
 ):
     """
-    Make a bigquery.LoadJobConfig object
+    Make a bigquery.LoadJobConfig object and description of a table
 
     :type table: str
     :param table: Fully qualified table name
@@ -228,10 +227,12 @@ def make_bq_load_config(
     :param file_format: One of sql, json, csv, txt
     :type delim: str
     :param delim: The delimiter of the file being loaded
-    :rtype: bigquery.LoadJobConfig
-    :return: Makes a bigquery.LoadJobConfig object
+    :rtype: Tuple[bigquery.LoadJobConfig, str]
+    :return: A 2-tuple with a bigquery.LoadJobConfig object and
+        a description text for the destination table
     """
-    schema = get_bq_schema(table, schema_dir=schema_dir)
+    schema_dir = schema_dir or SCHEMA_DIR
+    schema, desc = get_bq_schema(table, schema_dir=schema_dir)
     if 'json' in file_format.lower():
         format_ = bigquery.SourceFormat.NEWLINE_DELIMITED_JSON
         delim = None
@@ -248,18 +249,21 @@ def make_bq_load_config(
     else:
         append = bigquery.WriteDisposition.WRITE_TRUNCATE
     if 'json' in file_format.lower():
-        return bigquery.LoadJobConfig(
+        config = bigquery.LoadJobConfig(
             schema=schema, source_format=format_,
             create_disposition=create, write_disposition=append,
             max_bad_records=max_bad_rows, ignore_unknown_values=True,
+            destination_table_description=desc,
         )
-    return bigquery.LoadJobConfig(
+        return config, desc
+    config = bigquery.LoadJobConfig(
         schema=schema, source_format=format_,
         create_disposition=create, write_disposition=append,
         field_delimiter=delim, skip_leading_rows=skips,
         max_bad_records=max_bad_rows, ignore_unknown_values=True,
-        allow_quoted_newlines=True
+        allow_quoted_newlines=True, destination_table_description=desc,
     )
+    return config, desc
 
 
 def make_bq_query_config(append: bool=False, plain=True):
