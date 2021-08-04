@@ -1,8 +1,8 @@
 SELECT 
   user_id,
-  explored,
-  certified,
-  verified,
+  -- explored,
+  -- certified,
+  -- verified,
  safe_divide(n_show_answer_problem_seen, n_problems_seen) * 100 as pct_show_answer_problem_seen,
  safe_divide(n_show_answer_not_attempted, n_not_attempted) * 100
  as pct_show_answer_not_attempted,
@@ -26,9 +26,9 @@ FROM
 (
     SELECT
         A.user_id as user_id,
-        "tbd" as explored, -- replace when person_course is filled in
-        "tbd" as certified, -- replace when person_course is filled in
-        "tbd" as verified, -- replace when person_course is filled in
+        -- "tbd" as explored, -- replace when person_course is filled in
+        -- "tbd" as certified, -- replace when person_course is filled in
+        -- "tbd" as verified, -- replace when person_course is filled in
         A.n_show_answer_not_attempted as n_show_answer_not_attempted,
         A.n_not_attempted as n_not_attempted,
         A.n_show_answer_attempted as n_show_answer_attempted,
