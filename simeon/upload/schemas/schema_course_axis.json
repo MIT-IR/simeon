@@ -8,104 +8,104 @@
         {
             "field_type": "INTEGER",
             "name": "index",
-	    "description": "sequence index giving order in which this content appears within the course"
+            "description": "sequence index giving order in which this content appears within the course"
         },
         {
             "field_type": "STRING",
             "name": "url_name",
-	    "description": "unique database key for this module element of the course"
+            "description": "unique database key for this module element of the course"
         },
         {
             "field_type": "STRING",
             "name": "name",
-	    "description": "human-readable name for this module element of the course"
+            "description": "human-readable name for this module element of the course"
         },
         {
             "field_type": "STRING",
             "name": "gformat",
-	    "description": "grading format, aka the name of the assignment into which this element's grade is aggregated"
+            "description": "grading format, aka the name of the assignment into which this element's grade is aggregated"
         },
         {
             "field_type": "TIMESTAMP",
             "name": "due",
-	    "description": "due date for this element"
+            "description": "due date for this element"
         },
         {
             "field_type": "TIMESTAMP",
             "name": "start",
-	    "description": "start date for this element"
+            "description": "start date for this element"
         },
         {
             "field_type": "STRING",
             "name": "module_id",
-	    "description": "org/number/category/url_name for this element (note this leaves out the semester-ID, and while it is unique within a course, is not unique across semester re-runs)"
+            "description": "org/number/category/url_name for this element (note this leaves out the semester-ID, and while it is unique within a course, is not unique across semester re-runs)"
         },
         {
             "field_type": "STRING",
             "name": "course_id",
-	    "description": "org/number/semester course_id"
+            "description": "org/number/semester course_id"
         },
         {
             "field_type": "STRING",
             "name": "path",
-	    "description": "slash separated path of url_name's to this element, from the course root; gives parents for the element, including chapter and section"
+            "description": "slash separated path of url_name's to this element, from the course root; gives parents for the element, including chapter and section"
         },
         {
             "field_type": "RECORD",
             "name": "data",
-	    "description": "additional data associated with this element of the course, e.g. you-tube ID for videos",
-                    "fields": [
-                        {
-                            "field_type": "STRING",
-                            "name": "ytid",
-			                "description": "youtube ID of video element, or of youtube video within an iframe in an HTML element"
-                        },
-                        {
-                            "field_type": "FLOAT",
-                            "name": "weight",
-			                "description": "grading weight (for problems)"
-                        },
-                        {
-                            "field_type": "STRING",
-                            "name": "group_id_to_child",
-			                "description": "children in A/B test partition (for split_test)"
-                        },
-                        {
-                            "field_type": "STRING",
-                            "name": "user_partition_id",
-			                "description": "A/B user partition ID (for split_test)"
-                        },
-                        {
-                            "field_type": "STRING",
-                            "name": "itype",
-                            "description": "Problem type for problems found in course.xml - only searches within a list of known problem types"
-                        },
-                        {
-                            "field_type": "INTEGER",
-                            "name": "num_items",
-                            "description": "Number of problem sub-parts, or the number of ptypes found in a single problem"
-                        },
-                        {
-                            "field_type": "BOOLEAN",
-                            "name": "has_solution",
-                            "description": "Boolean as to whether a solution exists in the problem."
-                        },
-                        {
-                            "field_type": "BOOLEAN",
-                            "name": "has_image",
-                            "description": "Boolean as to whether the problem contains an image."
-                        }
-                    ]
+            "description": "additional data associated with this element of the course, e.g. you-tube ID for videos",
+            "fields": [
+                {
+                    "field_type": "STRING",
+                    "name": "ytid",
+                    "description": "youtube ID of video element, or of youtube video within an iframe in an HTML element"
+                },
+                {
+                    "field_type": "FLOAT",
+                    "name": "weight",
+                    "description": "grading weight (for problems)"
+                },
+                {
+                    "field_type": "STRING",
+                    "name": "group_id_to_child",
+                    "description": "children in A/B test partition (for split_test)"
+                },
+                {
+                    "field_type": "STRING",
+                    "name": "user_partition_id",
+                    "description": "A/B user partition ID (for split_test)"
+                },
+                {
+                    "field_type": "STRING",
+                    "name": "itype",
+                    "description": "Problem type for problems found in course.xml - only searches within a list of known problem types"
+                },
+                {
+                    "field_type": "INTEGER",
+                    "name": "num_items",
+                    "description": "Number of problem sub-parts, or the number of ptypes found in a single problem"
+                },
+                {
+                    "field_type": "BOOLEAN",
+                    "name": "has_solution",
+                    "description": "Boolean as to whether a solution exists in the problem."
+                },
+                {
+                    "field_type": "BOOLEAN",
+                    "name": "has_image",
+                    "description": "Boolean as to whether the problem contains an image."
+                }
+            ]
         },
         {
             "field_type": "STRING",
             "name": "chapter_mid",
-	    "description": "module-id of chapter within which this module element exists"
+            "description": "module-id of chapter within which this module element exists"
         },
         {
             "field_type": "BOOLEAN",
             "name": "graded",
-	    "description": "boolean specifying if the seciton (aka sequential) has graded content or not"
+            "description": "boolean specifying if the seciton (aka sequential) has graded content or not"
         },
         {
             "field_type": "BOOLEAN",
@@ -115,18 +115,19 @@
         {
             "field_type": "STRING",
             "name": "parent",
-	    "description": "url_name of parent item"
+            "description": "url_name of parent item"
         },
         {
             "field_type": "BOOLEAN",
             "name": "is_split",
-	    "description": "boolean specifying if this element is in a split_test or not"
+            "description": "boolean specifying if this element is in a split_test or not"
         },
         {
             "field_type": "STRING",
             "name": "split_url_name",
-	    "description": "url_name for the split_test if this element is within a split_test"
+            "description": "url_name for the split_test if this element is within a split_test"
         }
 
-    ]
+    ],
+    "description": "course_axis is the table that tracks the items of a course and their details. It's generated from course_structure-analytics.json and course-analytics.xml.tar.gz; two files from the SQL bundle."
 }

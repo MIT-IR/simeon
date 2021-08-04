@@ -160,5 +160,6 @@
             "field_type": "STRING",
             "name": "body"
         }
-   ]
+   ],
+   "description": "forum is the canonical that contains all forum activities in a semi-relational structure. It's generated from a mongo DB that ships with the SQL bundle."
 }

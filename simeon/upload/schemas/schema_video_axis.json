@@ -45,5 +45,6 @@
             "name": "video_length",
             "description": "Video Length in seconds"
         }
-    ]
+    ],
+    "description": "Table generated with SQL query file course_axis.sql using the simeon CLI tool. It contains attributes of the videos in the target course."
 }

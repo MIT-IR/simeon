@@ -2,171 +2,214 @@
     "user_info_combo": [
         {
             "field_type": "INTEGER",
-            "name": "user_id"
+            "name": "user_id",
+            "description": "Numerical user ID of a learner on the edX platform"
         },
         {
             "field_type": "STRING",
-            "name": "username"
+            "name": "username",
+            "description": "The username of the learner on the edX platform"
         },
         {
             "field_type": "STRING",
-            "name": "email"
+            "name": "email",
+            "description": "The current default email address of the learner on the edX platform"
         },
         {
             "field_type": "INTEGER",
-            "name": "is_staff"
+            "name": "is_staff",
+            "description": "Whether or the user is a staff member"
         },
         {
             "field_type": "TIMESTAMP",
-            "name": "last_login"
+            "name": "last_login",
+            "description": "Timestamp indicating the last time the user logged into the edX platform"
         },
         {
             "field_type": "TIMESTAMP",
-            "name": "date_joined"
+            "name": "date_joined",
+            "description": "Timestamp indicating when the user joined the edX platform"
         },
         {
             "field_type": "STRING",
-            "name": "profile_name"
+            "name": "profile_name",
+            "description": "The full name of the learner on the edX platform"
         },
         {
             "field_type": "STRING",
-            "name": "profile_language"
+            "name": "profile_language",
+            "description": "Language selected by the learner as their default profile language"
         },
         {
             "field_type": "STRING",
-            "name": "profile_location"
+            "name": "profile_location",
+            "description": "A location choosen by the learner on their profile"
         },
         {
             "field_type": "STRING",
-            "name": "profile_meta"
+            "name": "profile_meta",
+            "description": "Extra metadata from the profile of a learner"
         },
         {
             "field_type": "STRING",
-            "name": "profile_courseware"
+            "name": "profile_courseware",
+            "description": "The courseware under which the profile was created"
         },
         {
             "field_type": "STRING",
-            "name": "profile_gender"
+            "name": "profile_gender",
+            "description": "Gender selected by the learner on their profile"
         },
         {
             "field_type": "STRING",
-            "name": "profile_mailing_address"
+            "name": "profile_mailing_address",
+            "description": "Mailing address provided by the learner on their profile"
         },
         {
             "field_type": "INTEGER",
-            "name": "profile_year_of_birth"
+            "name": "profile_year_of_birth",
+            "description": "A year of birth provided the learner on their profile"
         },
         {
             "field_type": "STRING",
-            "name": "profile_level_of_education"
+            "name": "profile_level_of_education",
+            "description": "The level of education provided by the learner on their profile"
         },
         {
             "field_type": "STRING",
-            "name": "profile_goals"
+            "name": "profile_goals",
+            "description": "The intended goals of the learner provided on their profile"
         },
         {
             "field_type": "INTEGER",
-            "name": "profile_allow_certificate"
+            "name": "profile_allow_certificate",
+            "description": "Whether or not the profile allows certificates"
         },
         {
             "field_type": "STRING",
-            "name": "profile_country"
+            "name": "profile_country",
+            "description": "Country selected by the learner on their profile"
         },
         {
             "field_type": "STRING",
-            "name": "profile_city"
+            "name": "profile_city",
+            "description": "City selected the learner on their profile"
         },
         {
             "field_type": "STRING",
-            "name": "enrollment_course_id"
+            "name": "enrollment_course_id",
+            "description": "course ID in the standard format as org/number/semester"
         },
         {
             "field_type": "TIMESTAMP",
-            "name": "enrollment_created"
+            "name": "enrollment_created",
+            "description": "Timestamp indicating when the enrollment event was created"
         },
         {
             "field_type": "INTEGER",
-            "name": "enrollment_is_active"
+            "name": "enrollment_is_active",
+            "description": "Whether or not the enrollment is active"
         },
         {
             "field_type": "STRING",
-            "name": "enrollment_mode"
+            "name": "enrollment_mode",
+            "description": "Mode of enrollment: mode, no-id-professional, audit, honor, verified, professional, credit"
         },
         {
             "field_type": "INTEGER",
-            "name": "certificate_id"
+            "name": "certificate_id",
+            "description": "The ID of the certificate obtained by the user. Null if the user obtained no certificate."
         },
         {
             "field_type": "INTEGER",
-            "name": "certificate_user_id"
+            "name": "certificate_user_id",
+            "description": "The user ID tied to the certificate"
         },
         {
             "field_type": "STRING",
-            "name": "certificate_download_url"
+            "name": "certificate_download_url",
+            "description": "A download URL exclusively generated for the corresponding certificate ID"
         },
         {
             "field_type": "FLOAT",
-            "name": "certificate_grade"
+            "name": "certificate_grade",
+            "description": "The grade of the learner when the certificate was generated"
         },
         {
             "field_type": "STRING",
-            "name": "certificate_course_id"
+            "name": "certificate_course_id",
+            "description": "The course ID associated with the certificate"
         },
         {
             "field_type": "STRING",
-            "name": "certificate_key"
+            "name": "certificate_key",
+            "description": "An edX platform key associated the certificate"
         },
         {
             "field_type": "INTEGER",
-            "name": "certificate_distinction"
+            "name": "certificate_distinction",
+            "description": "The distinction listed on the certificate"
         },
         {
             "field_type": "STRING",
-            "name": "certificate_status"
+            "name": "certificate_status",
+            "description": "Status of the generation of the certificate (downloadable, pending, etc.)"
         },
         {
             "field_type": "STRING",
-            "name": "certificate_verify_uuid"
+            "name": "certificate_verify_uuid",
+            "description": "A UUID generated along with the certificate to indicate uniqueness"
         },
         {
             "field_type": "STRING",
-            "name": "certificate_download_uuid"
+            "name": "certificate_download_uuid",
+            "description": "A UUID generated when the download URL is generated to indicate uniqueness"
         },
         {
             "field_type": "STRING",
-            "name": "certificate_name"
+            "name": "certificate_name",
+            "description": "The name of the learner that is listed on the certificate"
         },
         {
             "field_type": "TIMESTAMP",
-            "name": "certificate_created_date"
+            "name": "certificate_created_date",
+            "description": "Timestamp indicating when the certificate was created"
         },
         {
             "field_type": "TIMESTAMP",
-            "name": "certificate_modified_date"
+            "name": "certificate_modified_date",
+            "description": "Timestamp indicating the last time the certificate was modified"
         },
         {
             "field_type": "STRING",
-            "name": "certificate_error_reason"
+            "name": "certificate_error_reason",
+            "description": "Text to indicate any errors encountered during certificate generation"
         },
         {
             "field_type": "STRING",
-            "name": "certificate_mode"
+            "name": "certificate_mode",
+            "description": "The enrollment mode associated with the certificate"
         },
         {
             "field_type": "STRING",
-            "name": "id_map_hash_id"
+            "name": "id_map_hash_id",
+            "description": "A hashed ID mapping learner user ID's to external systems like survey platforms"
         },
         {
             "field_type": "FLOAT",
-            "name": "edxinstructordash_Grade"
+            "name": "edxinstructordash_Grade",
+            "description": "A grade downloaded separately from the instructor dashboards. This is mostly null for all tables generated by the simeon CLI tool version 0.0.1"
         },
         {
             "field_type": "STRING",
-            "name": "edxinstructordash_Grade_timestamp"
+            "name": "edxinstructordash_Grade_timestamp",
+            "description": "Timestamp indicating when the grades from the instructor dashboards were generated"
         },
         {
             "field_type": "INTEGER",
-            "name": "y1_anomalous"
+            "name": "y1_anomalous",
+            "description": "relic from processes that the edx2bigquery package used to handle"
         }
-    ]
+    ],
+    "description": "Table generated by combining files auth_user-analytics.sql, auth_userprofile-analytics.sql, student_courseenrollment-analytics.sql, certificates_generatedcertificate-analytics.sql, and user_id_map-analytics.sql from the SQL bundle. It was made by the simeon CLI tool. It tracks profile, enrollment, certificate details of learners in a given course."
 }

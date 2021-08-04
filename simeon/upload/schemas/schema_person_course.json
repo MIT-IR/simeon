@@ -8,12 +8,12 @@
         {
             "field_type": "INTEGER",
             "name": "user_id",
-            "description": "user ID number"
+            "description": "Numerical user ID of a learner on the edX platform"
         },
         {
             "field_type": "STRING",
             "name": "username",
-            "description": "username"
+            "description": "username of a learner on the edX platform"
         },
         {
             "field_type": "BOOLEAN",
@@ -410,5 +410,6 @@
             "name": "forumRoles_isStudent",
             "description":  "1 if user is student on the forum; null means that user does not have a discussion forum role assigned"
         }
-    ]
+    ],
+    "description": "Table generated with SQL query file person_course.sql using the simeon CLI tool. It is the canonical datasets that tracks both user activities and certain demographics."
 }

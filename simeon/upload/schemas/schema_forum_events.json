@@ -45,5 +45,6 @@
             "name": "event_GET",
             "description": "GET parameter for event. Unavailable before June 1, 2015"
         }
-    ] 
+    ],
+    "description": "Table generated with SQL query file forum_events.sql using the simeon CLI tool. It tracks forum interactions between users in a given course."
 }

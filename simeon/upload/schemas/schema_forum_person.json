@@ -85,5 +85,6 @@
             "name": "last_time",
             "description": "time when last of the actions (read, write, ...) occurred"
         }
-    ]
+    ],
+    "description": "Table generated with SQL query file forum_person.sql using the simeon CLI tool. It tracks forum events for each learner in a given course."
 }

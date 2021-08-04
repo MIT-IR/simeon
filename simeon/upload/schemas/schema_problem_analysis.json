@@ -83,5 +83,6 @@
             "name": "created",
 	    "description": "creation date of this entry in the edX platform database"
         }
-    ]
+    ],
+	"description": "Table generated with SQL query file problem_analysis.sql using the simeon CLI tool. It tracks user analytics on problem items."
 }

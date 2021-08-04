@@ -20,5 +20,6 @@
             "name": "role",
             "description": "course role, e.g. instructor, staff"
         }
-    ]
+    ],
+    "description": "Table that keeps track of the staff of the course."
 }

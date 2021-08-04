@@ -55,5 +55,6 @@
             "name": "body_preview",
             "description": "Preview of first 100 characters of the content of the forum thread/response/comment"
         }
-    ]
+    ],
+    "description": "Table generated with SQL query file forum_posts.sql using the simeon CLI tool. It tracks the posts made by learners in course forums."
 }

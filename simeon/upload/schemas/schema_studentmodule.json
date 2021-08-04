@@ -2,47 +2,59 @@
     "studentmodule": [
         {
             "field_type": "INTEGER",
-            "name": "id"
+            "name": "id",
+            "description": "A numerical index of the module (primary key in edX's databases)"
         },
         {
             "field_type": "STRING",
-            "name": "module_type"
+            "name": "module_type",
+            "description": "The type of the module touched by the learner"
         },
         {
             "field_type": "STRING",
-            "name": "module_id"
+            "name": "module_id",
+            "description": "The ID of the module touched by the learner"
         },
         {
             "field_type": "INTEGER",
-            "name": "student_id"
+            "name": "student_id",
+            "description": "The user ID of the learner"
         },
         {
             "field_type": "STRING",
-            "name": "state"
+            "name": "state",
+            "description": "The state of the module encoded as a JSON string"
         },
         {
             "field_type": "STRING",
-            "name": "grade"
+            "name": "grade",
+            "description": "The current grade the learner has earned in the module"
         },
         {
             "field_type": "TIMESTAMP",
-            "name": "created"
+            "name": "created",
+            "description": "The timestamp at which the state was created"
         },
         {
             "field_type": "TIMESTAMP",
-            "name": "modified"
+            "name": "modified",
+            "description": "A timestamp at which the state was modified"
         },
         {
             "field_type": "STRING",
-            "name": "max_grade"
+            "name": "max_grade",
+            "description": "The max grade that can be obtained in this module"
         },
         {
             "field_type": "STRING",
-            "name": "done"
+            "name": "done",
+            "description": "A string indicating whether the learner is done with the module"
         },
         {
             "field_type": "STRING",
-            "name": "course_id"
+            "name": "course_id",
+            "description": "course ID in the standard format as org/number/semester"
         }
-    ]
+    ],
+    "description": "Table generated with the file courseware_studentmodule-analytics.sql from the SQL bundle by the simeon CLI tool. It tracks the module states for each learner"
 }

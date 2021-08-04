@@ -68,7 +68,8 @@
         {
             "field_type": "STRING",
             "name": "roles",
-            "description":  " One of 3 values, 'Student', Staff' or null; null means that user does not have course role or discussion forum role assigned from edX data"
+            "description":  "One of 3 values, 'Student', Staff' or null; null means that user does not have course role or discussion forum role assigned from edX data"
         }
-    ]
+    ],
+    "description": "Table generated with files student_courseaccessrole-analytics.sql and django_comment_client_role_users-analytics.sql from the SQL bundle. It tracks the course roles a particular user has."
 }
