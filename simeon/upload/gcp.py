@@ -169,7 +169,13 @@ class BigqueryClient(bigquery.Client):
         Return the error messages from given list of error objects (dict)
         """
         messages = []
-        for err in errors:
+        if isinstance(errors, dict):
+            members = []
+            for e in errors.values():
+                members += e
+        else:
+            members = errors
+        for err in members:
             msg = err.get('message', '')
             if not msg:
                 continue

@@ -1379,7 +1379,8 @@ def make_table_from_sql(
             msg = str(excp)
         raise SQLQueryException(msg)
     if wait:
-        wait_for_bq_job_ids([job.job_id], client)
+        status = wait_for_bq_job_ids([job.job_id], client)
+        return status[job.job_id]
     return job.errors or {}
 
 
