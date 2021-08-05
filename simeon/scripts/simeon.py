@@ -1385,25 +1385,12 @@ def main():
     )
     reporter.add_argument(
         '--tables', '-t',
-        help='table or tables to be processed. Default: %(default)s',
+        help=(
+            'Table or tables to be computed using corresponding query files. '
+            'Default: {t}'.format(t=' '.join(cli_utils.REPORT_TABLES))
+        ),
         nargs='*',
-        default=[
-            'video_axis', 'forum_events', 
-            'problem_grades', 'chapter_grades', 
-            'show_answer', 'video_stats_day',
-            'show_answer_stats_by_user', 'show_answer_stats_by_course',
-            'course_item', 'person_item', 
-            'person_problem', 'course_problem',
-            'person_course_day', 'pc_video_watched',
-            'pc_day_totals', 'pc_day_trlang',
-            'pc_day_ip_counts', 'language_multi_transcripts',
-            'pc_nchapters', 'pc_forum',
-            'course_modal_language', 'course_modal_ip',
-            'forum_posts', 'forum_person',
-            'enrollment_events', 'enrollday_all',
-            'person_enrollment_verified', ''
-            'person_course'
-        ]
+        default=cli_utils.REPORT_TABLES,
     )
     reporter.add_argument(
         '--geo-table', '-g',
@@ -1412,7 +1399,6 @@ def main():
             'to join to modal_ip to extract geolocation information '
             'for IP addresses.'
         ),
-        default='geocode.geoip',
         type=cli_utils.bq_table,
     )
     reporter.add_argument(
@@ -1421,7 +1407,6 @@ def main():
             'Fully qualified name of the table with YouTube video metadata'
             ' to use when making the video_axis tables.'
         ),
-        default='videos.youtube',
         type=cli_utils.bq_table,
     )
     reporter.add_argument(

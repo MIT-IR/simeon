@@ -217,6 +217,17 @@ CONFIGS = {
         ('profile_name', configparser.ConfigParser.get),
     ),
 }
+REPORT_TABLES = [
+    'video_axis', 'forum_events', 'problem_grades', 'chapter_grades',
+    'show_answer', 'video_stats_day', 'show_answer_stats_by_user',
+    'show_answer_stats_by_course', 'course_item', 'person_item',
+    'person_problem', 'course_problem', 'person_course_day',
+    'pc_video_watched', 'pc_day_totals', 'pc_day_trlang',
+    'pc_day_ip_counts', 'language_multi_transcripts', 'pc_nchapters',
+    'pc_forum', 'course_modal_language', 'course_modal_ip',
+    'forum_posts', 'forum_person', 'enrollment_events', 'enrollday_all',
+    'person_enrollment_verified', 'person_course',
+]
 
 
 def parsed_date(datestr: str) -> str:
@@ -256,6 +267,8 @@ def bq_table(name):
     Check that the given BigQuery table name
     is a fully qualified one: dataset.table or project.dataset.table
     """
+    if not name:
+        return None
     chunks = name.split('.')
     if len(chunks) not in (2, 3):
         raise ArgumentTypeError(
