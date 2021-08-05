@@ -7,6 +7,24 @@
             "description": "Numerical user ID of a learner on the edX platform"
         },
         {
+            "name": "explored",
+            "field_type": "BOOLEAN",
+            "mode": "NULLABLE",
+            "description": "Whether or not the learner explored 50% or more of the course contents"
+        },
+        {
+            "name": "certified",
+            "field_type": "BOOLEAN",
+            "mode": "NULLABLE",
+            "description": "Whether or not the learner eventually got a certificate from the course"
+        },
+        {
+            "name": "verified",
+            "field_type": "BOOLEAN",
+            "mode": "NULLABLE",
+            "description": "Whether or not the learner enrolled as a verified learner (paid)"
+        },
+        {
             "name": "pct_show_answer_problem_seen",
             "field_type": "FLOAT",
             "mode": "NULLABLE",
