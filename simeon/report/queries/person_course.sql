@@ -1,6 +1,6 @@
 -- Canonical dataset of learner details and activities per course
 select
-    '{course_id}' as course_id,
+    distinct '{course_id}' as course_id,
     uic.user_id,
     uic.username,
     True as registered,
