@@ -12,7 +12,8 @@ import sys
 import traceback
 import urllib.request as request
 from argparse import (
-    ArgumentParser, FileType, RawDescriptionHelpFormatter
+    ArgumentParser, ArgumentTypeError,
+    FileType, RawDescriptionHelpFormatter
 )
 
 import simeon
@@ -48,12 +49,31 @@ DATE_SECS = {
 }
 
 
+def batch_size_type(val):
+    """
+    Make sure that val is an integer and is between 5 and 50.
+    This is used for --batch-size to indicate the range of batch sizes
+    allowed.
+    """
+    try:
+        val = int(val)
+    except Exception:
+        raise ArgumentTypeError(
+            '{v} is not a valid integer value. '
+            'Please provide a valid number.'.format(v=val)
+        )
+    if val < 5 or val > 50:
+        raise ArgumentTypeError('Expected batch sizes range between 5 and 50')
+    return val
+
+
 def _batch_ids(files, size=10):
     """
     Batch YouTube video IDs by the given size
     from the list of file names.
     """
     out = []
+    seen = set()
     for file_ in files:
         for path in glob.iglob(file_):
             with gzip.open(path, 'rt') as fh:
@@ -65,7 +85,11 @@ def _batch_ids(files, size=10):
                     id_ = (line.get('data') or {}).get('ytid', '')
                     if not id_:
                         continue
-                    out.append(id_.split(':', 2)[-1].strip())
+                    id_ = id_.split(':', 2)[-1].strip()
+                    if id_ in seen:
+                        continue
+                    out.append(id_)
+                    seen.add(id_)
                     if len(out) >= size:
                         yield out
                         out = []
@@ -80,7 +104,7 @@ def _generate_request(ids, token):
     and send a GET request to the global API_URL.
     All the exceptions raised by urllib are propagated downstream
     """
-    joined_ids = ','.join(id_ for id_ in ids)
+    joined_ids = ','.join(ids)
     url = API_URL.format(ids=joined_ids, token=token)
     headers = {
         # 'Authorization': 'Bearer {t}'.format(t=token),
@@ -143,11 +167,18 @@ def extract_video_info(parsed_args):
         try:
             resp = _generate_request(chunk, parsed_args.youtube_token)
         except Exception as excp:
-            msg = 'Batch fetching YouTube video details failed with : {e}'
+            msg = (
+                'Batch fetching YouTube video details '
+                'for ID(s) {ids} failed: {e}'
+            )
             if hasattr(excp, 'file'):
-                parsed_args.logger.error(msg.format(e=json.load(excp.file)))
+                parsed_args.logger.error(
+                    msg.format(ids=', '.join(chunk), e=json.load(excp.file))
+                )
             else:
-                parsed_args.logger.error(msg.format(e=excp))
+                parsed_args.logger.error(
+                    msg.format(ids=', '.join(chunk), e=excp)
+                )
             continue
         data = json.load(resp)
         for item in data.get('items', []):
@@ -324,6 +355,7 @@ def main():
             'How many YouTube video ID\'s to batch together when making HTTP '
             'requests for video metadata. Default: %(default)s'
         ),
+        type=batch_size_type,
         default=10,
     )
     extracter.add_argument(
@@ -427,3 +459,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
