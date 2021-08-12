@@ -86,7 +86,7 @@ BQ2PY_TYPES = {
 BQ_DDL = """#standardSQL
 CREATE OR REPLACE TABLE {table} {cols}
 OPTIONS (
-    description = "{description}"
+    description = '''{description}'''
 ) AS
 {query}"""
 USER_INFO_COLS = OrderedDict([

@@ -313,21 +313,21 @@ def sqlify_bq_field(field, named=True):
         type_ = field.field_type
     if type_ != 'RECORD':
         if field.mode != 'REPEATED':
-            return '{n} {t} {m} OPTIONS(description="{d}")'.format(
+            return '{n} {t} {m} OPTIONS(description="""{d}""")'.format(
                 n=field.name if named else '',
                 t=type_,
                 m=nullability,
                 d=field.description or '',
             )
         else:
-            return '{n} ARRAY<{t}> {m} OPTIONS(description="{d}")'.format(
+            return '{n} ARRAY<{t}> {m} OPTIONS(description="""{d}""")'.format(
                 n=field.name if named else '',
                 t=type_,
                 m=nullability,
                 d=field.description or '',
             )
     if type_ == 'RECORD' and field.mode != 'REPEATED':
-        return '{n} STRUCT<{t}> {m} OPTIONS(description="{d}"'.format(
+        return '{n} STRUCT<{t}> {m} OPTIONS(description="""{d}"""'.format(
             t=',\n\t'.join(sqlify_bq_field(f) for f in field.fields),
             n=field.name if named else '',
             m=nullability,
@@ -338,7 +338,7 @@ def sqlify_bq_field(field, named=True):
         mode='NULLABLE' if field.is_nullable else 'REQUIRED',
         description=field.description, fields=field.fields,
     )
-    return '{n} ARRAY<{t}> {m} OPTIONS(description="{d}")'.format(
+    return '{n} ARRAY<{t}> {m} OPTIONS(description="""{d}""")'.format(
         t=sqlify_bq_field(field, False).lstrip(' '),
         n=field.name,
         m=nullability,
