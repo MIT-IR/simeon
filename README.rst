@@ -267,7 +267,7 @@ Notes:
 5. Splitting tracking logs is a resource intensive process. The routine
    that splits the logs generates a file for each course ID encountered.
    If you happen to have more course IDs in your logs than the running
-   process can open operation system file descriptors, then ``simeon``
+   process can open operating system file descriptors, then ``simeon``
    will put away records it can’t save to disk for a second pass.
    Putting away the records involves using more memory than normally
    required. The second pass will only require one file descriptor at a
