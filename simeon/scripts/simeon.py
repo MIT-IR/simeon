@@ -102,7 +102,7 @@ def list_files(parsed_args):
         for blob in blobs:
             if parsed_args.latest and seen:
                 break
-            if blob in seen:
+            if blob.name in seen:
                 continue
             fdate = aws.get_file_date(blob.name)
             if parsed_args.begin_date <= fdate <= parsed_args.end_date:
@@ -116,7 +116,7 @@ def list_files(parsed_args):
                         print(blob.name)
                     else:
                         print(blob)
-                seen.add(blob)
+                seen.add(blob.name)
     sys.exit(0 if seen else 1)
 
 
@@ -375,9 +375,12 @@ def download_files(parsed_args):
             )
             break
     downloads = dict()
+    seen = set()
     for blob in blobs:
         if parsed_args.latest and downloads:
             break
+        if blob.name in seen:
+            continue
         fdate = aws.get_file_date(blob.name)
         if parsed_args.begin_date <= fdate <= parsed_args.end_date:
             fullname = os.path.join(
@@ -421,6 +424,7 @@ def download_files(parsed_args):
                         msg = 'Downloaded and decrypted the contents of {f}'
                         parsed_args.logger.info(msg.format(f=fullname))
                 downloads[fullname] += 1
+                seen.add(blob.name)
             except Exception as excp:
                 parsed_args.logger.error(excp)
             cond = all((

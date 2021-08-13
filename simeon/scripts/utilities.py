@@ -168,7 +168,7 @@ NOTES:
     This will help the CLI parser not confuse your positional arguments with table names (in the case of --tables) or course IDs (when --courses is used).
 
 5. Splitting tracking logs is a resource intensive process. The routine that splits the logs generates a file for each course ID encountered. If you
-    happen to have more course IDs in your logs than the running process can open operation system file descriptors, then simeon will put away records
+    happen to have more course IDs in your logs than the running process can open operating system file descriptors, then simeon will put away records
     it cannot save to disk for a second pass. Putting away the records involves using more memory than normally required. The second pass will only
     require one file descriptor at a time, so it should be safe in terms of file descriptor limits. To help simeon not have to do a second pass, you
     may increase the file descriptor limits of processes from your shell by running something like ulimit -n 2000 before calling simeon split on Unix
