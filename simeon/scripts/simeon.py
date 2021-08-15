@@ -94,6 +94,9 @@ def list_files(parsed_args):
             date=parsed_args.begin_date, org=parsed_args.org,
             request=parsed_args.request_id or '',
         )
+        if prefix in seen:
+            break
+        seen.add(prefix)
         blobs = aws.S3Blob.from_prefix(bucket=bucket, prefix=prefix)
         if parsed_args.latest and blobs:
             blobs = sorted(
@@ -359,12 +362,16 @@ def download_files(parsed_args):
         parsed_args.logger.info(
             'Fetching the blobs matching the given criteria'
         )
+    seen = set()
     for year in range_:
         prefix = info['Prefix'].format(
             site=parsed_args.site, year=year,
             date=parsed_args.begin_date, org=parsed_args.org,
             request=parsed_args.request_id or '',
         )
+        if prefix in seen:
+            continue
+        seen.add(prefix)
         blobs += aws.S3Blob.from_prefix(
             bucket=bucket, prefix=prefix
         )
@@ -1493,6 +1500,9 @@ def main():
     # Call the function matching the given command
     try:
         COMMANDS.get(args.command)(args)
+    except KeyboardInterrupt:
+        args.logger.error('Interrupted by the user')
+        sys.exit(1)
     except:
         _, excp, tb = sys.exc_info()
         if isinstance(excp, (EarlyExitError, SystemExit)):

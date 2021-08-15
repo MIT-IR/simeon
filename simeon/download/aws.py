@@ -92,7 +92,7 @@ class S3Blob():
         if not local_name:
             local_name = self._make_local(name)
         self.local_name = local_name
-    
+
     @classmethod
     def from_prefix(cls, bucket, prefix):
         """
@@ -120,7 +120,7 @@ class S3Blob():
             return out
         except Exception as excp:
             raise AWSException('{e}'.format(e=excp)) from None
-    
+
     @classmethod
     def from_info(cls, bucket, type_, date, org='mitx', site='edx'):
         """
@@ -154,14 +154,14 @@ class S3Blob():
             org=org, year=year, site=site, date=date, month=month
         )
         return cls.from_prefix(bucket, prefix)
-    
+
     @staticmethod
     def _make_local(name):
         """
         Convert the given name into a local name for the file system
         """
         return os.path.join(*name.split('/'))
-    
+
     def download_file(self, filename=None):
         """
         Download the S3Blob to the local file system
@@ -179,7 +179,7 @@ class S3Blob():
             os.makedirs(dirname, exist_ok=True)
         self.bucket.download_file(self.name, filename)
         return filename
-    
+
     def __repr__(self):
         return "Name: {n} - Size: {s} - Last Modified: {m}".format(
             n=self.name, s=self.size, m=self.last_modified
