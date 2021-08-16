@@ -86,6 +86,7 @@ def list_files(parsed_args):
     else:
         range_ = range(start_year, end_year + 1)
     seen = set()
+    prefixes = set()
     for year in range_:
         if parsed_args.latest and seen:
             break
@@ -94,9 +95,9 @@ def list_files(parsed_args):
             date=parsed_args.begin_date, org=parsed_args.org,
             request=parsed_args.request_id or '',
         )
-        if prefix in seen:
+        if prefix in prefixes:
             break
-        seen.add(prefix)
+        prefixes.add(prefix)
         blobs = aws.S3Blob.from_prefix(bucket=bucket, prefix=prefix)
         if parsed_args.latest and blobs:
             blobs = sorted(
@@ -372,13 +373,10 @@ def download_files(parsed_args):
         if prefix in seen:
             continue
         seen.add(prefix)
-        blobs += aws.S3Blob.from_prefix(
-            bucket=bucket, prefix=prefix
-        )
+        blobs += aws.S3Blob.from_prefix(bucket=bucket, prefix=prefix)
         if parsed_args.latest and blobs:
             blobs = sorted(
-                blobs, key=lambda b: aws.get_file_date(b.name),
-                reverse=True,
+                blobs, key=lambda b: aws.get_file_date(b.name), reverse=True,
             )
             break
     downloads = dict()
