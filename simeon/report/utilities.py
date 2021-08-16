@@ -228,7 +228,12 @@ def wait_for_bq_job_ids(job_list, client):
                 try:
                     rjob = client.get_job(job)
                     if rjob.state == 'DONE':
-                        out[job] = (rjob.errors or {})
+                        src = ', '.join(getattr(rjob, 'source_uris', []))
+                        err = (rjob.errors or [])
+                        for e in err:
+                            if e:
+                                e['source'] = src
+                        out[job] = err
                 except NotFound:
                     msg = '{id} is not a valid BigQuery job ID'.format(id=job)
                     raise LoadJobException(msg) from None
@@ -1346,7 +1351,8 @@ def make_table_from_sql(
     query, description = extract_table_query(table, query_dir)
     table = '{d}.{t}'.format(d=latest_dataset, t=table)
     if append:
-        config = uputils.make_bq_query_config(append=append)
+        config = uputils.make_bq_query_config(append=True, plain=False, table=table)
+        config.destination = table
     else:
         config = uputils.make_bq_query_config(plain=True)
         query = BQ_DDL.format(

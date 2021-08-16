@@ -266,7 +266,7 @@ def make_bq_load_config(
     return config, desc
 
 
-def make_bq_query_config(append: bool=False, plain=True):
+def make_bq_query_config(append: bool=False, plain=True, table=None):
     """
     Make a bigquery.QueryJobConfig object to tie to a query to be sent
     to BigQuery for secondary table generation
@@ -275,6 +275,8 @@ def make_bq_query_config(append: bool=False, plain=True):
     :param append: Whether to append the loaded to the table
     :type plain: bool
     :param plain: Make an empty QueryJobConfig object
+    :type table: Union[None, str]
+    :param table: Fully qualified name of a destination table
     :rtype: bigquery.QueryJobConfig
     :returns: Make a bigquery.QueryJobConfig object
     """
@@ -285,6 +287,8 @@ def make_bq_query_config(append: bool=False, plain=True):
     else:
         append = bigquery.WriteDisposition.WRITE_TRUNCATE
     config = bigquery.job.QueryJobConfig()
+    if table is not None:
+        config.destination = bigquery.Table.from_string(table)
     config.create_disposition = bigquery.CreateDisposition.CREATE_IF_NEEDED
     config.write_disposition = append
     config.allow_large_results = True

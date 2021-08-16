@@ -179,6 +179,9 @@ class BigqueryClient(bigquery.Client):
             msg = err.get('message', '')
             if not msg:
                 continue
+            src = err.get('source', '')
+            if src:
+                msg = 'Source: {s} - {m}'.format(s=src, m=msg)
             loc = err.get('location', '')
             if loc:
                 msg = '{m} - File: {f}'.format(m=msg, f=loc)
