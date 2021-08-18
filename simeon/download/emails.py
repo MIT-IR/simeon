@@ -6,8 +6,7 @@ import gzip
 import json
 import os
 import zipfile
-
-from dateutil.parser import parse as parse_date
+from datetime import datetime
 
 from simeon.download.utilities import decrypt_files
 
@@ -16,6 +15,20 @@ SCHEMA_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     'upload', 'schemas'
 )
+
+
+def parse_date(datestr):
+    """
+    Convert datestr to an iso formatted date. If not possible, return None
+    """
+    try:
+        # It's been UTC forever, so there is no need to capture the timezone
+        # component of the string
+        datestr = datestr.split('+')[0]
+        dt = datetime.strptime(datestr, '%Y-%m-%d %H:%M:%S')
+        return dt.isoformat()
+    except Exception:
+        return None
 
 
 def process_email_file(
@@ -95,8 +108,8 @@ def compress_email_files(files, ddir, schema_dir=SCHEMA_DIR):
                         '+', '/', 2
                     ).replace('+', '_')
                     row['preference_set_datetime'] = parse_date(
-                        row.get('preference_set_datetime')
-                    ).isoformat()
+                        row.get('preference_set_datetime') or ''
+                    )
                     is_opt = (row.get('is_opted_in_for_email') or '').strip()
                     row['is_opted_in_for_email'] = is_opt.lower() == 'true'
                     fh.write(json.dumps(row) + '\n')
