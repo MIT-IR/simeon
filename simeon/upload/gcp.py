@@ -28,6 +28,18 @@ ON f.{column} = s.{column}
 WHEN NOT MATCHED THEN
 INSERT ROW
 """
+DST_DESC = {
+    'log': 'Dataset to host the tracking log data from edX courses',
+    'sql': (
+        'Dataset to host all the tables that are computed from a combination'
+        ' of tab-delimited files from edX\'s weekly SQL data dump and '
+        'tracking log tables.'
+    ),
+    'email': (
+        'Dataset to host the dimensional details about users\' email'
+        ' adresses and email opt-in preferences'
+    ),
+}
 
 
 class BigqueryClient(bigquery.Client):
@@ -137,7 +149,9 @@ class BigqueryClient(bigquery.Client):
             t=file_type, dt=datetime.now().strftime('%Y%m%d%H%M%S%f')
         )
         dest = uputils.local_to_bq_table(fname, file_type, project)
-        dataset = dest.rsplit('.', 1)[0]
+        # dataset = self.dataset(dest.rsplit('.', 1)[0])
+        dataset = bigquery.Dataset.from_string(dest.rsplit('.', 1)[0])
+        dataset.description = DST_DESC.get(file_type)
         self.create_dataset(dataset, exists_ok=True)
         if use_storage:
             if not fname.startswith('gs://'):
