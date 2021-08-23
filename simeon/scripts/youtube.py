@@ -104,14 +104,34 @@ def _generate_request(ids, token):
     and send a GET request to the global API_URL.
     All the exceptions raised by urllib are propagated downstream
     """
-    joined_ids = ','.join(ids)
-    url = API_URL.format(ids=joined_ids, token=token)
+    if isinstance(ids, (tuple, list, dict)):
+        ids = ','.join(ids)
+    url = API_URL.format(ids=ids, token=token)
     headers = {
         # 'Authorization': 'Bearer {t}'.format(t=token),
         'Accept': 'application/json',
     }
     req = request.Request(url, headers=headers)
     return request.urlopen(req)
+
+
+def _process_one_by_one(ids, token, logger):
+    """
+    This steps through the video IDs and processes them one at a time
+    """
+    data = dict(items=[])
+    for id_ in ids:
+        try:
+            items = json.load(_generate_request(id_, token)).get('items', [])
+            data['items'] += items
+        except Exception as excp:
+            msg = 'Error processing video ID {i}: {e}'
+            fh = getattr(excp, 'file', None)
+            if fh is None:
+                logger.error(msg.format(i=id_, e=excp))
+            else:
+                logger.error(msg.format(i=id_, e=json.load(fh)))
+    return data
 
 
 def _convert_and_time(val, times):
@@ -164,23 +184,16 @@ def extract_video_info(parsed_args):
     os.makedirs(os.path.dirname(parsed_args.output), exist_ok=True)
     outfile = gzip.open(parsed_args.output, 'wt')
     for chunk in _batch_ids(parsed_args.course_axes, parsed_args.batch_size):
+        data = None
         try:
             resp = _generate_request(chunk, parsed_args.youtube_token)
-        except Exception as excp:
-            msg = (
-                'Batch fetching YouTube video details '
-                'for ID(s) {ids} failed: {e}'
+            data = json.load(resp)
+        except Exception:
+            data = _process_one_by_one(
+                chunk, parsed_args.youtube_token, parsed_args.logger
             )
-            if hasattr(excp, 'file'):
-                parsed_args.logger.error(
-                    msg.format(ids=', '.join(chunk), e=json.load(excp.file))
-                )
-            else:
-                parsed_args.logger.error(
-                    msg.format(ids=', '.join(chunk), e=excp)
-                )
+        if data is None:
             continue
-        data = json.load(resp)
         for item in data.get('items', []):
             record = {}
             for col, path in VIDEO_COLS.items():
