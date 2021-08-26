@@ -799,7 +799,13 @@ def make_secondary_tables(parsed_args):
     if errors:
         sys.exit(1)
     if parsed_args.wait_for_loads:
-        msg = '{c} queries run and destination tables have been refreshed'
+        if num_queries > 1:
+            msg = (
+                '{c} queries completed and destination '
+                'tables have been refreshed.'
+            )
+        else:
+            msg = 'The corresponding ran successfully.'
         parsed_args.logger.info(msg.format(c=num_queries))
         sys.exit(0)
     msg = (
@@ -970,6 +976,16 @@ def main():
         '--decryption-timeout', '-t',
         help='Number of seconds to wait for the decryption of files.',
         type=int,
+    )
+    downloader.add_argument(
+        '--unpack-only', '-u',
+        help=(
+            'If --split is used, only unpack the SQL archive and '
+            'decrypt the encrypted files. '
+            'Don\'t make any of the json.gz files for course_axis, '
+            'studentmodule, etc.'
+        ),
+        action='store_true',
     )
     cdgroup = downloader.add_mutually_exclusive_group(required=False)
     cdgroup.add_argument(
