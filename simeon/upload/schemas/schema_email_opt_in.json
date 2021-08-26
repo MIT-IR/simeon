@@ -2,7 +2,7 @@
     "email_opt_in": [
         {
             "name": "user_id",
-            "field_type": "STRING",
+            "field_type": "INTEGER",
             "description": "edX user ID of the learner"
         },
         {

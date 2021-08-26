@@ -94,6 +94,7 @@ def compress_email_files(files, ddir, schema_dir=SCHEMA_DIR):
     """
     schema_dir = schema_dir or SCHEMA_DIR
     outname = os.path.join(ddir, 'email_opt_in.json.gz')
+    os.makedirs(ddir, exist_ok=True)
     with gzip.open(outname, 'wt') as fh:
         for file_ in files:
             with open(file_) as infile:
@@ -103,6 +104,7 @@ def compress_email_files(files, ddir, schema_dir=SCHEMA_DIR):
                     lineterminator='\n', fieldnames=cols
                 )
                 for row in reader:
+                    row['user_id'] = int(row['user_id'])
                     cid = (row.get('course_id') or '').split(':')[-1]
                     row['course_id'] = cid.replace(
                         '+', '/', 2
