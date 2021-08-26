@@ -1431,6 +1431,10 @@ def make_tables_from_sql(
         global report_bq_client
         client = report_bq_client
     out = dict()
+    dataset = '{p}.{c}_latest'.format(
+        p=project, c=course_id.replace('/', '__').replace('.', '_')
+    )
+    client.create_dataset(dataset, exists_ok=True)
     for table in tables:
         out[table] = make_table_from_sql(
             table=table, course_id=course_id, client=client, project=project,
