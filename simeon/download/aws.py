@@ -39,7 +39,7 @@ BEGIN_DATE = '2012-09-01'
 END_DATE = datetime.today().strftime('%Y-%m-%d')
 DATE_PATT = re.compile(r'\d{4}-\d{2}-\d{2}')
 O2B_MAP = dict(
-    key='name', last_modified='last_modified', content_length='size'
+    key='name', last_modified='last_modified', size='size'
 )
 
 
@@ -89,6 +89,7 @@ class S3Blob():
         self.size = size
         self.last_modified = last_modified
         self.bucket = weakref.proxy(bucket)
+        self.bucket = bucket
         if not local_name:
             local_name = self._make_local(name)
         self.local_name = local_name
@@ -108,12 +109,12 @@ class S3Blob():
         :raises: AWSException
         """
         out = []
+        maps = O2B_MAP
         try:
             matches = bucket.objects.filter(Prefix=prefix)
             for obj in matches:
-                obj = obj.Object()
                 details = dict(
-                    (v, getattr(obj, k, None)) for k, v in O2B_MAP.items()
+                    (v, getattr(obj, k, None)) for k, v in maps.items()
                 )
                 details['bucket'] = bucket
                 out.append(cls(**details))
