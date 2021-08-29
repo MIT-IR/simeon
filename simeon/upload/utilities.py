@@ -142,10 +142,13 @@ def local_to_bq_table(fname: str, file_type: str, project: str) -> str:
         suffix = ''
     dataset = os.path.basename(dname).replace('.', '_').replace('-', '_')
     if not table.replace('tracklog_', '') or not dataset:
+        msg = (
+            'A BigQuery table name for file type {t} '
+            'could not be constructed with file name {f}. '
+            'Please make sure that you are using the right file type.'
+        )
         raise BigQueryNameException(
-            'A BigQuery table name could not be constructed with {f}'.format(
-                f=fname
-            )
+            msg.format(f=fname, t=file_type)
         )
     return '{p}.{d}{s}.{t}'.format(
         d=dataset, s=suffix, p=project, t=table

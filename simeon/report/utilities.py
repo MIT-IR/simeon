@@ -951,6 +951,9 @@ def make_forum_table(
                             if isinstance(record[col][k], list):
                                 record[col][k] = json.dumps(record[col][k])
             record['mongoid'] = record['_id']
+            record['course_id'] = downutils.get_sql_course_id(
+                record.get('course_id') or ''
+            )
             drop_extra_keys(record, schema)
             check_record_schema(record, schema, True)
             zh.write(json.dumps(record) + '\n')
