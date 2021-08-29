@@ -1517,6 +1517,11 @@ def main():
     except KeyboardInterrupt:
         args.logger.error('Interrupted by the user')
         sys.exit(1)
+    except BrokenPipeError:
+        # This should be raised by list_files
+        # close the sys.stderr file handle to allow the shell
+        # to cleanly pipe the printed file names
+        sys.stderr.close()
     except:
         _, excp, tb = sys.exc_info()
         if isinstance(excp, (EarlyExitError, SystemExit)):
