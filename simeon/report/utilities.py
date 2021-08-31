@@ -973,8 +973,8 @@ def make_problem_analysis(state, **extras):
     :rtype: dict
     :return: Return a record to be loaded in problem_analysis
     """
-    maps = state.get('correct_map', {})
-    answers = state.get('student_answers', {})
+    maps = state.get('correct_map') or {}
+    answers = state.get('student_answers') or {}
     items = []
     for k, v in maps.items():
         items.append(

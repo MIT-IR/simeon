@@ -340,6 +340,7 @@ def make_config_file(output=None):
     if output is None:
         output = os.path.join(os.path.expanduser('~'), 'simeon.cfg')
     config = configparser.ConfigParser()
+    config.optionxform = lambda s: s.lstrip('-').lower().replace('-', '_')
     config['DEFAULT'] = {
         'site': '',
         'org': '',
@@ -379,6 +380,7 @@ def find_config(fname=None, no_raise=False):
     else:
         files = [os.path.expanduser(fname)]
     config = configparser.ConfigParser()
+    config.optionxform = lambda s: s.lstrip('-').lower().replace('-', '_')
     for config_file in files:
         try:
             config.read(config_file)
