@@ -87,20 +87,20 @@ SETUP and CONFIGURATIONS:
 EXAMPLES:
 List files
     simeon can list files on S3 for your organization based on criteria like file type (sql or log or email), time intervals (begin and end dates), and site (edx or edge or patches).
-        # List SQL files dumped since 2021-01-01
-        simeon list -s edx -o mitx -f sql -b 2021-01-01
-        # List email files dumped since 2021-01-01
-        simeon list -s edx -o mitx -f email -b 2021-01-01
-        # List tracking log files dumped since 2021-01-01
-        simeon list -s edx -o mitx -f log -b 2021-01-01
+        # List the latest SQL data dump
+        simeon list -s edx -o mitx -f sql -L
+        # List the latest email data dump
+        simeon list -s edx -o mitx -f email -L
+        # List the latest tracking log file
+        simeon list -s edx -o mitx -f log -L
 
 Download and split files
     simeon can download, decrypt and split up files into folders belonging to specific courses.
 
     o Example 1: Download, split and push SQL bundles to both GCS and BigQuery
 
-        # Download a SQL bundle with the date 2021-02-01 in its file name
-        simeon download -s edx -o mitx -f sql -b 2021-02-01 -e 2021-02-01 -d data/
+        # Download the latest SQL data dump
+        simeon download -s edx -o mitx -f sql -L -d data/
 
         # Download SQL bundles dumped any time since 2021-01-01 and
         # extract the contents for course ID MITx/12.3x/1T2021.
@@ -118,12 +118,12 @@ Download and split files
 
     o Example 2: Download, split and push tracking logs to both GCS and BigQuery
 
-        # Download a tracking log with the date 2021-02-01 in its file name
-        simeon download -s edx -o mitx -f log -b 2021-02-01 -e 2021-02-01 -d data/
+        # Download the latest tracking log file
+        simeon download -s edx -o mitx -f log -L -d data/
 
         # Download tracking logs dumped any time since 2021-01-01
         # and extract the contents for course ID MITx/12.3x/1T2021
-        # Place the download files in data/ and the output of the split in data/TRACKING_LOGS
+        # Place the downloaded files in data/ and the output of the split in data/TRACKING_LOGS
         simeon download -s edx -o mitx -c "MITx/12.3x/1T2021" -f log -b 2021-01-01 -d data -S -D data/TRACKING_LOGS/
 
         # Push to GCS the split up tracking log files inside
@@ -152,7 +152,9 @@ Make secondary/aggregated tables
 
 NOTES:
 1. Please note that SQL bundles are quite large when split up, so consider using the -c or --courses option when invoking simeon download -S or
-    simeon split to make sure that you limit the splitting to a set of course IDs. Otherwise, simeon may end up failing to complete the split operation
+    simeon split to make sure that you limit the splitting to a set of course IDs. The `--clistings-file` option is an alternative to `--courses`.
+    It expects a text file with one course ID per line.
+    If those options are not used, simeon may end up failing to complete the split operation
     due to exhausted system resources (storage to be specific).
 
 2. simeon download with file types log and email will both download and decrypt the files matching the given criteria. If the latter operations are
@@ -385,7 +387,7 @@ def find_config(fname=None, no_raise=False):
         try:
             config.read(config_file)
         except Exception as excp:
-            if not no_raise:
+            if no_raise:
                 continue
             raise ArgumentTypeError(excp) from None
     return config
