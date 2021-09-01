@@ -2,8 +2,12 @@ simeon
 ~~~~~~
 
 ``simeon`` is a CLI tool to help with the processing of edx Research
-data. It can ``download``, ``decrypt``, ``split`` and ``push`` edX data
-packages to GCS and BigQuery.
+data. It can ``list``, ``download``, and ``split`` edX data packages. It
+can also ``push`` the output of the ``split`` subcommand to both GCS and
+BigQuery. It is heavily inspired by the
+`edx2bigquery <https://github.com/mitodl/edx2bigquery>`__ package. If
+you’ve used that tool, you should be able to navigate the quirks that
+may come with this one.
 
 Installing with pip
 ~~~~~~~~~~~~~~~~~~~
@@ -143,16 +147,17 @@ List files
 like file type (``sql`` or ``log`` or ``email``), time intervals (begin
 and end dates), and site (``edx`` or ``edge`` or ``patches``).
 
--  Examples:
+-  Example: List the latest data packages for file types ``sql``,
+   ``email``, and ``log``
 
    .. code:: sh
 
-      # List SQL files dumped since 2021-01-01
-      simeon list -s edx -o mitx -f sql -b 2021-01-01
-      # List email files dumped since 2021-01-01
-      simeon list -s edx -o mitx -f email -b 2021-01-01
-      # List tracking log files dumped since 2021-01-01
-      simeon list -s edx -o mitx -f log -b 2021-01-01
+      # List the latest SQL bundle
+      simeon list -s edx -o mitx -f sql -L
+      # List the laetst email data dump
+      simeon list -s edx -o mitx -f email -L
+      # List the latest tracking log file
+      simeon list -s edx -o mitx -f log -L
 
 Download and split files
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -165,12 +170,13 @@ belonging to specific courses.
 
    .. code:: sh
 
-      # Download a SQL bundle with the date 2021-02-01 in its file name
-      simeon download -s edx -o mitx -f sql -b 2021-02-01 -e 2021-02-01 -d data/
+      # Download the latest SQL bundle
+      simeon download -s edx -o mitx -f sql -L -d data/
 
       # Download SQL bundles dumped any time since 2021-01-01 and
       # extract the contents for course ID MITx/12.3x/1T2021.
-      # Place the place in data/ and the output of the split in data/SQL
+      # Place the downloaded files in data/ and the output of the split operation
+      # in data/SQL
       simeon download -s edx -o mitx -c "MITx/12.3x/1T2021" -f sql \
           -b 2021-01-01 -d data -S -D data/SQL/
 
@@ -190,12 +196,13 @@ belonging to specific courses.
 
    .. code:: sh
 
-      # Download a tracking log with the date 021-02-01 in its file name
-      simeon download -s edx -o mitx -f log -b 2021-02-01 -e 2021-02-01 -d data/
+      # Download the latest tracking log file
+      simeon download -s edx -o mitx -f log -L -d data/
 
       # Download tracking logs dumped any time since 2021-01-01
       # and extract the contents for course ID MITx/12.3x/1T2021
-      # Place the place in data/ and the output of the split in data/TRACKING_LOGS
+      # Place the downloaded files in data/ and the output of the split operation
+      # in data/TRACKING_LOGS
       simeon download -s edx -o mitx -c "MITx/12.3x/1T2021" -f log \
           -b 2021-01-01 -d data -S -D data/TRACKING_LOGS/
 
@@ -238,9 +245,11 @@ Notes:
 1. Please note that SQL bundles are quite large when split up, so
    consider using the ``-c`` or ``--courses`` option when invoking
    ``simeon download -S`` or ``simeon split`` to make sure that you
-   limit the splitting to a set of course IDs. Otherwise, ``simeon`` may
-   end up failing to complete the split operation due to exhausted
-   system resources (storage to be specific).
+   limit the splitting to a set of course IDs. You may also use the
+   ``--clistings-file`` option, which expects a txt file of course IDs;
+   one ID per line. If the aforementioned options are not used,
+   ``simeon`` may end up failing to complete the split operation due to
+   exhausted system resources (storage to be specific).
 
 2. ``simeon download`` with file types ``log`` and ``email`` will both
    download and decrypt the files matching the given criteria. If the
@@ -249,8 +258,8 @@ Notes:
    storage resources. If you wish to keep those files, you can always
    use the ``--keep-encrypted`` option that comes with
    ``simeon download`` and ``simeon split``. SQL bundles are only
-   downloaded (not decrypted). Their decryption is done during a split
-   operation.
+   downloaded (not decrypted). Their decryption is done during a
+   ``split`` operation.
 
 3. Unless there is an unhandled exception (which should be reported as a
    bug), ``simeon`` should, by default, print to the standard output
