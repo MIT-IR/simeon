@@ -69,7 +69,11 @@ def list_files(parsed_args):
             'Please provide one via the CLI or in your config file.'
         )
         sys.exit(1)
-    if parsed_args.credentials is None:
+    if hasattr(parsed_args, 'aws_cred_file'):
+        parsed_args.credentials = cli_utils.find_config(
+            parsed_args.aws_cred_file, no_raise=True
+        )
+    elif parsed_args.credentials is None:
         parsed_args.credentials = cli_utils.find_config(
             os.path.join('~', '.aws', 'credentials'),
             no_raise=True
@@ -97,7 +101,7 @@ def list_files(parsed_args):
         if parsed_args.latest and seen:
             break
         prefix = info['Prefix'].format(
-            site=parsed_args.site, year=year,
+            site=parsed_args.site or 'edx', year=year,
             date=parsed_args.begin_date, org=parsed_args.org,
             request=parsed_args.request_id or '',
         )
@@ -337,7 +341,11 @@ def download_files(parsed_args):
             'Please provide one via the CLI or in your config file.'
         )
         sys.exit(1)
-    if parsed_args.credentials is None:
+    if hasattr(parsed_args, 'aws_cred_file'):
+        parsed_args.credentials = cli_utils.find_config(
+            parsed_args.aws_cred_file, no_raise=True
+        )
+    elif parsed_args.credentials is None:
         if parsed_args.verbose:
             parsed_args.logger.info(
                 'Looking up S3 credentials'
@@ -378,7 +386,7 @@ def download_files(parsed_args):
     seen = set()
     for year in range_:
         prefix = info['Prefix'].format(
-            site=parsed_args.site, year=year,
+            site=parsed_args.site or 'edx', year=year,
             date=parsed_args.begin_date, org=parsed_args.org,
             request=parsed_args.request_id or '',
         )
@@ -927,7 +935,6 @@ def main():
         '--site', '-s',
         help='The edX site from which to pull data. Default: %(default)s',
         choices=['edge', 'edx', 'patches'],
-        default='edx',
     )
     downloader.add_argument(
         '--aws-cred-file', '-a',
@@ -1097,7 +1104,6 @@ def main():
         '--site', '-s',
         help='The edX site from which to list data. Default: %(default)s',
         choices=['edge', 'edx', 'patches'],
-        default='edx',
     )
     lister.add_argument(
         '--aws-cred-file', '-a',
