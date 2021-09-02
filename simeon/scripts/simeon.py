@@ -496,8 +496,8 @@ def download_files(parsed_args):
         else:
             parsed_args.destination = parsed_args.split_destination
         split_email_files(parsed_args)
-    rc = 0 if all(v == 2 for v in downloads.values()) else 1
-    sys.exit(rc)
+    failed = not downloads or any(v != 2 for v in downloads.values())
+    sys.exit(1 if failed else 0)
 
 
 def push_to_bq(parsed_args):
