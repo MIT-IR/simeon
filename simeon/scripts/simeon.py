@@ -753,6 +753,9 @@ def make_secondary_tables(parsed_args):
             ' value provided.'
         )
         sys.exit(1)
+    parsed_args.extra_args = cli_utils.process_extra_args(
+        parsed_args.extra_args
+    )
     parsed_args.logger.info('Connecting to BigQuery')
     try:
         if parsed_args.service_account_file is not None:
@@ -791,6 +794,7 @@ def make_secondary_tables(parsed_args):
             youtube_table=parsed_args.youtube_table,
             wait=parsed_args.wait_for_loads, fail_fast=parsed_args.fail_fast,
             query_dir=parsed_args.query_dir, schema_dir=parsed_args.schema_dir,
+            **parsed_args.extra_args
         )
     else:
         all_jobs.update(make_tables_from_sql_par(
@@ -802,6 +806,7 @@ def make_secondary_tables(parsed_args):
             wait=parsed_args.wait_for_loads, size=parsed_args.jobs,
             logger=parsed_args.logger, fail_fast=parsed_args.fail_fast,
             query_dir=parsed_args.query_dir, schema_dir=parsed_args.schema_dir,
+            **parsed_args.extra_args
         ))
     errors = 0
     num_queries = 0
@@ -1483,6 +1488,14 @@ def main():
         ),
         default=mp.cpu_count(),
         type=int,
+    )
+    reporter.add_argument(
+        '--extra-args', '-x',
+        help=(
+            'Extra arguments to use as placeholder values for variables '
+            'specified in query files. Expected format is: variable1=value1,'
+            'variable2=value2,...,variablen=valuen'
+        ),
     )
     args = parser.parse_args()
     args.logger = cli_utils.make_logger(

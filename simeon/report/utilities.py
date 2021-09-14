@@ -1306,6 +1306,7 @@ def make_table_from_sql(
     table, course_id, client, project, append=False,
     query_dir=QUERY_DIR, schema_dir=SCHEMA_DIR,
     wait=False, geo_table='geocode.geoip', youtube_table='videos.youtube',
+    **kwargs,
 ):
     """
     Generate a BigQuery table using the given table name,
@@ -1362,17 +1363,18 @@ def make_table_from_sql(
             table=table,
             description=(schema_desc or description.strip()),
             query=query,
-            cols='({c})'.format(c=cols) if cols else ''
+            cols='({c})'.format(c=cols) if cols else '',
         )
     query = Template(query).render(
-        geo_table=geo_table, youtube_table=youtube_table, course_id=course_id,
+        geo_table=geo_table, youtube_table=youtube_table,
+        course_id=course_id, **kwargs
     )
     try:
         job = client.query(
             query.format(
                 latest_dataset=latest_dataset, log_dataset=log_dataset,
                 geo_table=geo_table, youtube_table=youtube_table,
-                course_id=course_id
+                course_id=course_id, **kwargs
             ),
             job_id='{t}_{dt}'.format(
                 t=table.replace('.', '_'),
@@ -1398,7 +1400,7 @@ def make_tables_from_sql(
     query_dir=QUERY_DIR, wait=False,
     geo_table='geocode.geoip', youtube_table='videos.youtube',
     parallel=False, fail_fast=False,
-    schema_dir=SCHEMA_DIR,
+    schema_dir=SCHEMA_DIR, **kwargs
 ):
     """
     This is the plural/multiple tables version of make_table_from_sql
@@ -1443,7 +1445,7 @@ def make_tables_from_sql(
             table=table, course_id=course_id, client=client, project=project,
             append=append, geo_table=geo_table, wait=wait,
             query_dir=query_dir, youtube_table=youtube_table,
-            schema_dir=schema_dir,
+            schema_dir=schema_dir, **kwargs
         )
         if fail_fast and out[table]:
             return out
@@ -1454,7 +1456,7 @@ def make_tables_from_sql_par(
     tables, courses, project, append=False, query_dir=QUERY_DIR,
     wait=False, geo_table='geocode.geoip', youtube_table='videos.youtube',
     safile=None, size=mp.cpu_count(), logger=None, fail_fast=False,
-    schema_dir=SCHEMA_DIR,
+    schema_dir=SCHEMA_DIR, **kwargs,
 ):
     """
     Parallel version of make_tables_from_sql
@@ -1504,13 +1506,15 @@ def make_tables_from_sql_par(
                         cid=course_id
                     )
                 )
+            kwds = dict(
+                tables=tables, course_id=course_id, client=None,
+                project=project, append=append, query_dir=query_dir, wait=wait,
+                geo_table=geo_table, youtube_table=youtube_table,
+                parallel=True, fail_fast=fail_fast, schema_dir=schema_dir,
+            )
+            kwds.update(kwargs)
             async_result = pool.apply_async(
-                func=make_tables_from_sql, kwds=dict(
-                    tables=tables, course_id=course_id, client=None,
-                    project=project, append=append, query_dir=query_dir, wait=wait,
-                    geo_table=geo_table, youtube_table=youtube_table,
-                    parallel=True, fail_fast=fail_fast, schema_dir=schema_dir,
-                )
+                func=make_tables_from_sql, kwds=kwds
             )
             results[course_id] = async_result
         for course_id in results:

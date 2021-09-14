@@ -199,6 +199,7 @@ CONFIGS = {
         ('service_account_file', configparser.ConfigParser.get),
         ('geo_table', configparser.ConfigParser.get),
         ('youtube_table', configparser.ConfigParser.get),
+        ('extra_args', configparser.ConfigParser.get),
     ),
     'GCP': (
         ('project', configparser.ConfigParser.get),
@@ -213,6 +214,7 @@ CONFIGS = {
         ('schema_dir', configparser.ConfigParser.get),
         ('query_dir', configparser.ConfigParser.get),
         ('max_bad_rows', configparser.ConfigParser.getint),
+        ('extra_args', configparser.ConfigParser.get),
     ),
     'AWS': (
         ('aws_cred_file', configparser.ConfigParser.get),
@@ -523,3 +525,46 @@ def is_parallel(args):
         )
         args.is_parallel = len(expand_paths(items)) > 1
     return args.is_parallel
+
+
+def process_extra_args(extras):
+    """
+    Take a string in the form "var1=val1,var2,val2,...,varn=valn" and convert
+    it to a dict
+
+    :type extras: str
+    :param extras: String in the form "var1=val1,var2,val2,...,varn=valn"
+    :rtype: dict
+    :return: Returns a dict from the string: var for key and val for value
+    """
+    if not extras:
+        return {}
+    out = dict()
+    extras = map(lambda p: p.lstrip().split('=')[:2], extras.split(','))
+    while 1:
+        try:
+            k, v = next(extras)
+            if k in out:
+                msg = (
+                    'The variable {k} is duplicated in the provided '
+                    'extra arguments.'
+                )
+                raise TypeError(msg.format(k=k))
+            out[k] = v
+        except StopIteration:
+            break
+        except ValueError:
+            e = Exception(
+                'The provided extra arguments are not properly formatted.'
+            )
+            raise e from None
+    return out
+
+
+__all__ = [
+    'bq_table', 'course_listings', 'course_paths_from_file',
+    'courses_from_file', 'expand_paths', 'filter_generated_items',
+    'find_config', 'gcs_bucket', 'is_parallel', 'items_from_files',
+    'make_config_file', 'make_logger', 'optional_file',
+    'parsed_date', 'process_extra_args',
+]
