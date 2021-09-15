@@ -1337,6 +1337,12 @@ def make_table_from_sql(
     """
     schema_dir = schema_dir or SCHEMA_DIR
     query_dir = query_dir or QUERY_DIR
+    # Don't get extra_args overwrite the given course ID
+    kwargs.pop('course_id', None)
+    kwargs.pop('latest_dataset', None)
+    kwargs.pop('log_dataset', None)
+    if course_id != kwargs.get('course_id'):
+        kwargs.pop('course_id', None)
     latest_dataset = uputils.course_to_bq_dataset(
         course_id, 'sql', project
     )
@@ -1355,7 +1361,9 @@ def make_table_from_sql(
     query, description = extract_table_query(table, query_dir)
     table = '{d}.{t}'.format(d=latest_dataset, t=table)
     if append:
-        config = uputils.make_bq_query_config(append=True, plain=False, table=table)
+        config = uputils.make_bq_query_config(
+            append=True, plain=False, table=table
+        )
         config.destination = table
     else:
         config = uputils.make_bq_query_config(plain=True)
@@ -1367,7 +1375,8 @@ def make_table_from_sql(
         )
     query = Template(query).render(
         geo_table=geo_table, youtube_table=youtube_table,
-        course_id=course_id, **kwargs
+        course_id=course_id, latest_dataset=latest_dataset,
+        log_dataset=log_dataset, **kwargs
     )
     try:
         job = client.query(
@@ -1376,9 +1385,9 @@ def make_table_from_sql(
                 geo_table=geo_table, youtube_table=youtube_table,
                 course_id=course_id, **kwargs
             ),
-            job_id='{t}_{dt}'.format(
+            job_id_prefix='{t}_{dt}'.format(
                 t=table.replace('.', '_'),
-                dt=datetime.now().strftime('%Y%m%d%H%M%S')
+                dt=datetime.now().strftime('%Y%m%d%H%M%S%f')
             ),
             job_config=config,
         )
@@ -1432,6 +1441,8 @@ def make_tables_from_sql(
     """
     query_dir = query_dir or QUERY_DIR
     schema_dir = schema_dir or SCHEMA_DIR
+    # Don't get extra_args overwrite the given course ID
+    kwargs.pop('course_id', None)
     if parallel:
         global report_bq_client
         client = report_bq_client
@@ -1492,6 +1503,8 @@ def make_tables_from_sql_par(
     """
     query_dir = query_dir or QUERY_DIR
     schema_dir = schema_dir or SCHEMA_DIR
+    # Don't get extra_args overwrite the given course ID
+    kwargs.pop('course_id', None)
     if len(courses) < size:
         size = len(courses)
     results = dict()
