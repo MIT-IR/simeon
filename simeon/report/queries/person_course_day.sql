@@ -12,13 +12,13 @@ SELECT
     SUM(bseq_goto) AS nseq_goto,
     SUM(bseek_video) AS nseek_video,
     SUM(bpause_video) AS npause_video,
-    COUNT(DISTINCT video_id) AS nvideos_viewed, # New Video - Unique videos viewed
-	SUM(cast(position as float64)) AS nvideos_watched_sec, # New Video - # sec watched using max video position
-    SUM(read) AS nforum_reads, # New discussion - Forum reads
-    SUM(write) AS nforum_posts, # New discussion - Forum posts
-    COUNT(DISTINCT thread_id ) AS nforum_threads, # New discussion - Unique forum threads interacted with
-    COUNT(DISTINCT case when problem_nid != 0 then problem_nid else null end) AS nproblems_answered, # New Problem - Unique problems attempted
-    SUM(n_attempts) AS nproblems_attempted, # New Problem - Total attempts
+    COUNT(DISTINCT video_id) AS nvideos_viewed, -- New Video - Unique videos viewed
+	SUM(cast(position as float64)) AS nvideos_watched_sec, -- New Video - sec watched using max video position
+    SUM(read) AS nforum_reads, -- New discussion - Forum reads
+    SUM(write) AS nforum_posts, -- New discussion - Forum posts
+    COUNT(DISTINCT thread_id ) AS nforum_threads, -- New discussion - Unique forum threads interacted with
+    COUNT(DISTINCT case when problem_nid != 0 then problem_nid else null end) AS nproblems_answered, -- New Problem - Unique problems attempted
+    SUM(n_attempts) AS nproblems_attempted, -- New Problem - Total attempts
     SUM(ncount_problem_multiplechoice) as nproblems_multiplechoice,
     SUM(ncount_problem_choice) as nproblems_choice,
     SUM(ncount_problem_numerical) as nproblems_numerical,
@@ -87,7 +87,7 @@ FROM (
                     NOT event_type like "%/xblock/%"
                     AND username != "" 
             ) UNION ALL
-            ( # Video events
+            ( -- Video events
                 SELECT 
                     TIMESTAMP(date) as time,
                     '{course_id}' as course_id,
@@ -121,7 +121,7 @@ FROM (
                     0 as ncount_problem_other
                 FROM `{latest_dataset}.video_stats_day`
             )UNION ALL
-            ( # Forum Events
+            ( -- Forum Events
                 SELECT 
                     time,
                     '{course_id}' as course_id,
@@ -165,7 +165,7 @@ FROM (
                     or forum_action = "created_thread" or forum_action = "created_response" or forum_action = "created_comment"
                     or forum_action = "read" or forum_action = "read_inline")
             ) UNION ALL
-			( # Problems
+			( -- Problems
 			    SELECT 
                     pp.time AS time,
 				    '{course_id}' as course_id,
@@ -203,14 +203,14 @@ FROM (
                             PP.problem_nid AS problem_nid,
                             PP.n_attempts as n_attempts,
                             PP.date as time,
-                            IF(CP_CA.data_itype = "multiplechoiceresponse", 1, 0) as ncount_problem_multiplechoice, # Choice
-                            IF(CP_CA.data_itype = "choiceresponse", 1, 0) as ncount_problem_choice,       # Choice
-                            IF(CP_CA.data_itype = "numericalresponse", 1, 0) as ncount_problem_numerical, #input
-                            IF(CP_CA.data_itype = "optionresponse", 1, 0) as ncount_problem_option,       # Choice
-                            IF(CP_CA.data_itype = "customresponse", 1, 0) as ncount_problem_custom,       # Custom
-                            IF(CP_CA.data_itype = "stringresponse", 1, 0) as ncount_problem_string,       # Input
-                            IF(CP_CA.data_itype = "mixed", 1, 0) as ncount_problem_mixed,                 # Mixed
-                            IF(CP_CA.data_itype = "forumula", 1, 0) as ncount_problem_formula,            # Input
+                            IF(CP_CA.data_itype = "multiplechoiceresponse", 1, 0) as ncount_problem_multiplechoice, -- Choice
+                            IF(CP_CA.data_itype = "choiceresponse", 1, 0) as ncount_problem_choice,       -- Choice
+                            IF(CP_CA.data_itype = "numericalresponse", 1, 0) as ncount_problem_numerical, -- input
+                            IF(CP_CA.data_itype = "optionresponse", 1, 0) as ncount_problem_option,       -- Choice
+                            IF(CP_CA.data_itype = "customresponse", 1, 0) as ncount_problem_custom,       -- Custom
+                            IF(CP_CA.data_itype = "stringresponse", 1, 0) as ncount_problem_string,       -- Input
+                            IF(CP_CA.data_itype = "mixed", 1, 0) as ncount_problem_mixed,                 -- Mixed
+                            IF(CP_CA.data_itype = "forumula", 1, 0) as ncount_problem_formula,            -- Input
                             Case 
                                 when CP_CA.data_itype != "multiplechoiceresponse" and
                                     CP_CA.data_itype != "choiceresponse" and
@@ -222,7 +222,7 @@ FROM (
                                     CP_CA.data_itype != "forumula"
                                 then 1 
                                 else 0 
-                            end as ncount_problem_other, # Input
+                            end as ncount_problem_other, -- Input
 					      FROM `{latest_dataset}.person_problem` PP
 					      LEFT JOIN
 					      (

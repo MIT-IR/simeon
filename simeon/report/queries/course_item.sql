@@ -224,7 +224,7 @@ FROM
                                                             assignment_type,
                                                             chapter_number,
                                                             section_number,
-                                                            #  assignment_id = assignment_type + ch_chapter_number + sec_section_number
+                                                            --  assignment_id = assignment_type + ch_chapter_number + sec_section_number
                                                             CONCAT(assignment_type, "_ch", cast(chapter_number as string), "_sec", cast(section_number as string)) as assignment_id,  
                                                             chapter_name,
                                                             section_name,

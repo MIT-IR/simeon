@@ -1,0 +1,35 @@
+{
+    "time_on_asset_daily": [
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "date",
+            "field_type": "DATE",
+            "description": "The date for which the analytics are computed"
+        },
+        {
+            "field_type": "STRING",
+            "name": "username",
+            "description": "The username of the learner on the edX platform"
+        },
+        {
+            "name": "module_id",
+            "field_type": "STRING",
+            "description": "The ID of the module touched by the learner (including video, problem, text, vertical, sequential - see course axis)"
+        },
+        {
+            "name": "time_umid5",
+            "field_type": "FLOAT",
+            "description": "Total time on module (by module_id) in seconds, with a 5-minute timeout"
+        },
+        {
+            "name": "time_umid30",
+            "field_type": "FLOAT",
+            "description": "Total time on module (by module_id) in seconds, with a 30-minute timeout"
+        }
+    ],
+    "description": "Table generated with SQL query file time_on_asset_daily.sql using the simeon CLI tool. It tracks the analytics about how much time is spend on course items/assets by learners, broken down by day."
+}

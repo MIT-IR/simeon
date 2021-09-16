@@ -1,0 +1,85 @@
+{
+    "time_on_task_totals": [
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "username",
+            "field_type": "STRING",
+            "description": "The username of the learner on the edX platform"
+        },
+        {
+            "name": "total_time_5",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on the platform within a 5 minute timeout"
+        },
+        {
+            "name": "total_time_30",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on the platform within a 30 minute timeout"
+        },
+        {
+            "name": "total_video_time_5",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on videos only within a 5 minute timeout"
+        },
+        {
+            "name": "total_video_time_30",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on videos only within a 30 minute timeout"
+        },
+        {
+            "name": "serial_video_time_30",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on videos AND other items like problem, forum, or text within a 5 minute timeout"
+        },
+        {
+            "name": "total_problem_time_5",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on problems only within a 5 minute timeout"
+        },
+        {
+            "name": "total_problem_time_30",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on problems only within a 30 minute timeout"
+        },
+        {
+            "name": "serial_problem_time_30",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on problems AND other items like video, forum, or text within a 30 minute timeout"
+        },
+        {
+            "name": "total_forum_time_5",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on forums only within a 5 minute timeout"
+        },
+        {
+            "name": "total_forum_time_30",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on forums only within a 30 minute timeout"
+        },
+        {
+            "name": "serial_forum_time_30",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on forums AND other items like video, problem, or text within a 30 minute timeout"
+        },
+        {
+            "name": "total_text_time_5",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on textbook/wikis only within a 5 minute timeout"
+        },
+        {
+            "name": "total_text_time_30",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on textbook/wikis only within a 5 minute timeout"
+        },
+        {
+            "name": "serial_text_time_30",
+            "field_type": "FLOAT",
+            "description": "Total amount of time spent on textbook/wikis AND other items like video, problem, or forum within a 30 minute timeout"
+        }
+    ],
+    "description": "Table generated with SQL query file time_on_task.sql using the simeon CLI tool. It tracks the analytics about the amount of time spent on course items that are deemed tasks. This is rolled up to the level of a user. Basically, the total amounts of time spent by a specific user, which is different from the time_on_task table. The latter has a granular level of date and user"
+}

@@ -35,7 +35,7 @@ SELECT
                     'video' AS resource,
                     CASE
                     WHEN module_id IS NOT NULL THEN REGEXP_EXTRACT(module_id, r'.*video/(.*)')                         
-                    ELSE REGEXP_EXTRACT(event_type, r'.*;_video;_(.*)/handler/transcript/translation/.*') END   # Older data
+                    ELSE REGEXP_EXTRACT(event_type, r'.*;_video;_(.*)/handler/transcript/translation/.*') END   -- Older data
                     AS resource_id,
                     CASE
                     WHEN (event_type = 'edx.ui.lms.link_clicked'                                                    

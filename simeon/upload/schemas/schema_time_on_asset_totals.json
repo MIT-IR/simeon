@@ -1,0 +1,85 @@
+{
+    "time_on_asset_totals": [
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "description": "course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "module_id",
+            "field_type": "STRING",
+            "description": "ID for the asset (including video, problem, text, vertical, sequential - see course axis)"
+        },
+        {
+            "name": "n_unique_users",
+            "field_type": "INTEGER",
+            "description": "number of unique users who accessed the asset"
+        },
+        {
+            "name": "n_unique_certified",
+            "field_type": "FLOAT",
+            "description": "number of unique users who accessed the asset and also earned a certificate"
+        },
+        {
+            "name": "mean_tmid5",
+            "field_type": "FLOAT",
+            "description": "mean time spent on asset [sec], for the given module_id, with a 5-minute timeout"
+        },
+        {
+            "name": "cert_mean_tmid5",
+            "field_type": "FLOAT",
+            "description": "mean time spent on asset by certified users [sec], for the given module_id, with a 5-minute timeout"
+        },
+        {
+            "name": "mean_tmid30",
+            "field_type": "FLOAT",
+            "description": "mean time spent on asset [sec], for the given module_id, with a 30-minute timeout"
+        },
+        {
+            "name": "cert_mean_tmid30",
+            "field_type": "FLOAT",
+            "description": "mean time spent on asset by certified users [sec], for the given module_id, with a 30-minute timeout"
+        },
+        {
+            "name": "median_tmid5",
+            "field_type": "FLOAT",
+            "description": "median time spent on asset [sec], for the given module_id, with a 5-minute timeout"
+        },
+        {
+            "name": "cert_median_tmid5",
+            "field_type": "FLOAT",
+            "description": "median time spent on asset by certified users [sec], for the given module_id, with a 5-minute timeout"
+        },
+        {
+            "name": "median_tmid30",
+            "field_type": "FLOAT",
+            "description": "median time spent on asset [sec], for the given module_id, with a 30-minute timeout"
+        },
+        {
+            "name": "cert_median_tmid30",
+            "field_type": "FLOAT",
+            "description": "median time spent on asset by certified users [sec], for the given module_id, with a 30-minute timeout"
+        },
+        {
+            "name": "total_tmid5",
+            "field_type": "FLOAT",
+            "description": "total time spent on given module_id, in seconds, with a 5-minute timeout"
+        },
+        {
+            "name": "cert_total_tmid5",
+            "field_type": "FLOAT",
+            "description": "total time spent on given module_id, in seconds, with a 5-minute timeout, by certified users"
+        },
+        {
+            "name": "total_tmid30",
+            "field_type": "FLOAT",
+            "description": "total time spent on given module_id, in seconds, with a 30-minute timeout"
+        },
+        {
+            "name": "cert_total_tmid30",
+            "field_type": "FLOAT",
+            "description": "total time spent on given module_id, in seconds, with a 30-minute timeout, by certified users"
+        }
+    ],
+    "description": "Table generated with SQL query file time_on_asset_totals.sql using the simeon CLI tool. It tracks the analytics about how much time is spend on course items/assets by learners, broken down by user by module."
+}

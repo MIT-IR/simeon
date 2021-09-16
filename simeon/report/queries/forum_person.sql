@@ -20,7 +20,7 @@ SELECT
     FE.pin as pinned,
     FE.upvote as upvoted,
     FE.unvote as unvoted,
-    # FE.del as deleted,
+    -- FE.del as deleted,
     FE.follow as followed,
     CASE WHEN PP.first_time IS NOT NULL
         AND FE.last_time IS NOT NULL
@@ -54,7 +54,7 @@ FROM (
         responded_to,
         title,
         1 as wrote,
-        # created_at as first_time,
+        -- created_at as first_time,
         first_time
     FROM
         `{latest_dataset}.forum_posts`

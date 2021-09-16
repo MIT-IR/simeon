@@ -1393,7 +1393,7 @@ def make_table_from_sql(
         )
     except Exception as excp:
         errors = getattr(excp, 'errors', [None])
-        if errors:
+        if errors and errors[0]:
             msg = errors[0].get('message')
         else:
             msg = str(excp)
