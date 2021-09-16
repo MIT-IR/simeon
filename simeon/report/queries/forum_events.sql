@@ -54,19 +54,21 @@ SELECT
     REGEXP_EXTRACT(event_type, r'/courses/.*/forum/users/([^/]+)') as target_user_id,
     event_struct.query as search_query,   
     event_struct.GET as event_GET,        
-FROM `{log_dataset}.tracklog_*`
-              WHERE  (REGEXP_CONTAINS(event_type ,r'^edx\.forum\..*')
-                      or event_type like "%/discussion/forum%"
-                      or event_type like "%/discussion/threads%"
-                      or event_type like "%/discussion/comments%"
-                      or event_type like "%list-forum-%"
-                      or event_type like "%list_forum_%"
-                      or event_type like "%add-forum-%"
-                      or event_type like "%add_forum_%"
-                      or event_type like "%remove-forum-%"
-                      or event_type like "%remove_forum_%"
-                      or event_type like "%update_forum_%"
-                     ) 
-                    AND username is not null
-                    AND event is not null
-              order by time
+FROM `{{ log_dataset }}.tracklog_*`
+WHERE {% if suffix_start is defined and suffix_end is defined %} _TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}" AND {% endif %}
+(
+    REGEXP_CONTAINS(event_type ,r'^edx\.forum\..*')
+    OR event_type like "%/discussion/forum%"
+    OR event_type like "%/discussion/threads%"
+    OR event_type like "%/discussion/comments%"
+    OR event_type like "%list-forum-%"
+    OR event_type like "%list_forum_%"
+    OR event_type like "%add-forum-%"
+    OR event_type like "%add_forum_%"
+    OR event_type like "%remove-forum-%"
+    OR event_type like "%remove_forum_%"
+    OR event_type like "%update_forum_%"
+) 
+AND username is not null
+AND event is not null
+ORDER BY time

@@ -29,8 +29,7 @@ SELECT
                 and event_struct.mode = "audit")
             then -1 
             else 0 end as diff_enrollment_audit,
-    FROM `{log_dataset}.tracklog_*`
-    where (event_type = "edx.course.enrollment.activated") or
-            (event_type = "edx.course.enrollment.deactivated") or
-            (event_type = "edx.course.enrollment.mode_changed")
+    FROM `{{ log_dataset }}.tracklog_*`
+    WHERE {% if suffix_start is defined and suffix_end is defined %} _TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}" AND {% endif %}
+    (event_type = "edx.course.enrollment.activated") OR (event_type = "edx.course.enrollment.deactivated") OR (event_type = "edx.course.enrollment.mode_changed")
     order by time;

@@ -45,17 +45,16 @@ SELECT
                     END AS resource_event_type,
                     REGEXP_EXTRACT(event_type, r'.*/handler/transcript/translation/(.*)') AS resource_event_data,
                     event_type
-                FROM `{log_dataset}.tracklog_*`
-                WHERE
-                    time > TIMESTAMP("2010-10-01 01:02:03")
-                    AND username != ""
-                    AND ( (event_type NOT LIKE "%/xblock/%"                                                          
-                    AND event_type = 'edx.ui.lms.link_clicked'                                                  
-                    AND REGEXP_CONTAINS(JSON_EXTRACT(event, '$.target_url'), r'(.*handler/transcript/download)') ) 
-                    OR (REGEXP_CONTAINS(event_type, "/transcript/translation/.*") )                                   
+                FROM `{{ log_dataset }}.tracklog_*`
+				WHERE {% if suffix_start is defined and suffix_end is defined %} _TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}" AND {% endif %}
+                time > TIMESTAMP("2010-10-01 01:02:03")
+                AND username != ""
+                AND (
+						(event_type NOT LIKE "%/xblock/%" AND event_type = 'edx.ui.lms.link_clicked' AND REGEXP_CONTAINS(JSON_EXTRACT(event, '$.target_url'), r'(.*handler/transcript/download)')) 
+                    	OR (REGEXP_CONTAINS(event_type, "/transcript/translation/.*"))
+					)
+		    	ORDER BY time
 			)
-		    ORDER BY
-		      time )
 		  GROUP BY
 		    username,
 		    course_id,
