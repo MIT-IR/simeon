@@ -55,7 +55,7 @@ SELECT
     event_struct.query as search_query,   
     event_struct.GET as event_GET,        
 FROM `{{ log_dataset }}.tracklog_*`
-WHERE {% if suffix_start is defined and suffix_end is defined %} _TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}" AND {% endif %}
+WHERE {% if suffix_start is defined and suffix_end is defined %} (_TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}") AND {% endif %}
 (
     REGEXP_CONTAINS(event_type ,r'^edx\.forum\..*')
     OR event_type like "%/discussion/forum%"

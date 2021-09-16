@@ -83,7 +83,7 @@ FROM (
                     0 as ncount_problem_formula,
                     0 as ncount_problem_other
                 FROM `{{ log_dataset }}.tracklog_*`
-                WHERE {% if suffix_start is defined and suffix_end is defined %} _TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}" AND {% endif %}
+                WHERE {% if suffix_start is defined and suffix_end is defined %} (_TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}") AND {% endif %}
                 NOT event_type like "%/xblock/%"
                 AND username != "" 
             ) UNION ALL

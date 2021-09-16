@@ -9,6 +9,6 @@
     IF(event_type = "edx.course.enrollment.upgrade.succeeded", True, False) as upgraded,
     event_type
 FROM `{{ log_dataset }}.tracklog_*`
-WHERE {% if suffix_start is defined and suffix_end is defined %} _TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}" AND {% endif %}
+WHERE {% if suffix_start is defined and suffix_end is defined %} (_TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}") AND {% endif %}
 event_type like "%edx.course.enrollment%"
 order by time

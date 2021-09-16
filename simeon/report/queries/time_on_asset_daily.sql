@@ -5,8 +5,8 @@ SELECT
     module_id,
     -- time_umid5 = total time on module (by module_id) in seconds
     -- time_mid5 has 5 minute timeout, time_mid30 has 30 min timeout
-    SUM( case when dt_umid < 5*60 then dt_umid end ) as time_umid5,
-    SUM( case when dt_umid < 30*60 then dt_umid end ) as time_umid30,
+    CAST(SUM(case when dt_umid < 5*60 then dt_umid end) AS FLOAT64) as time_umid5,
+    CAST(SUM( case when dt_umid < 30*60 then dt_umid end) AS FLOAT64) as time_umid30,
 FROM (
     SELECT time,
         username,

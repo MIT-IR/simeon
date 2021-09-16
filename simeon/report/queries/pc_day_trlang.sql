@@ -46,7 +46,7 @@ SELECT
                     REGEXP_EXTRACT(event_type, r'.*/handler/transcript/translation/(.*)') AS resource_event_data,
                     event_type
                 FROM `{{ log_dataset }}.tracklog_*`
-				WHERE {% if suffix_start is defined and suffix_end is defined %} _TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}" AND {% endif %}
+				WHERE {% if suffix_start is defined and suffix_end is defined %} (_TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}") AND {% endif %}
                 time > TIMESTAMP("2010-10-01 01:02:03")
                 AND username != ""
                 AND (

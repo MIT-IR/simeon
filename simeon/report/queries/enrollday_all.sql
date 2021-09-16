@@ -30,6 +30,6 @@ SELECT
             then -1 
             else 0 end as diff_enrollment_audit,
     FROM `{{ log_dataset }}.tracklog_*`
-    WHERE {% if suffix_start is defined and suffix_end is defined %} _TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}" AND {% endif %}
+    WHERE {% if suffix_start is defined and suffix_end is defined %} (_TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}") AND {% endif %}
     (event_type = "edx.course.enrollment.activated") OR (event_type = "edx.course.enrollment.deactivated") OR (event_type = "edx.course.enrollment.mode_changed")
     order by time;

@@ -5,36 +5,36 @@ SELECT
     date(time) as date,
     username, 
     -- total time spent on system
-    SUM(case when dt < {{ timeout_short * 60 }} then dt end) as total_time_{{ timeout_short }},
-    SUM(case when dt < {{ timeout_long * 60 }} then dt end) as total_time_{{ timeout_long }},
+    SUM(case when dt < {{ timeout_short * 60.0 }} then dt end) as total_time_{{ timeout_short }},
+    SUM(case when dt < {{ timeout_long * 60.0 }} then dt end) as total_time_{{ timeout_long }},
     -- total time spent watching videos
-    SUM(case when (dt_video is not null) and (dt_video < {{ timeout_short * 60 }}) then dt_video end) as total_video_time_{{ timeout_short }},
-    SUM(case when (dt_video is not null) and (dt_video < {{ timeout_long * 60 }}) then dt_video end) as total_video_time_{{ timeout_long }},
-    SUM(case when (serial_dt_video is not null) and (serial_dt_video < {{ timeout_long * 60 }}) then serial_dt_video end) as serial_video_time_{{ timeout_long }},
+    SUM(case when (dt_video is not null) and (dt_video < {{ timeout_short * 60.0 }}) then dt_video end) as total_video_time_{{ timeout_short }},
+    SUM(case when (dt_video is not null) and (dt_video < {{ timeout_long * 60.0 }}) then dt_video end) as total_video_time_{{ timeout_long }},
+    SUM(case when (serial_dt_video is not null) and (serial_dt_video < {{ timeout_long * 60.0 }}) then serial_dt_video end) as serial_video_time_{{ timeout_long }},
     -- total time spent doing problems
-    SUM(case when (dt_problem is not null) and (dt_problem < {{ timeout_short * 60 }}) then dt_problem end) as total_problem_time_{{ timeout_short }},
-    SUM(case when (dt_problem is not null) and (dt_problem < {{ timeout_long * 60 }}) then dt_problem end) as total_problem_time_{{ timeout_long }},
-    SUM(case when (serial_dt_problem is not null) and (serial_dt_problem < {{ timeout_long * 60 }}) then serial_dt_problem end) as serial_problem_time_{{ timeout_long }},
+    SUM(case when (dt_problem is not null) and (dt_problem < {{ timeout_short * 60.0 }}) then dt_problem end) as total_problem_time_{{ timeout_short }},
+    SUM(case when (dt_problem is not null) and (dt_problem < {{ timeout_long * 60.0 }}) then dt_problem end) as total_problem_time_{{ timeout_long }},
+    SUM(case when (serial_dt_problem is not null) and (serial_dt_problem < {{ timeout_long * 60.0 }}) then serial_dt_problem end) as serial_problem_time_{{ timeout_long }},
     -- total time spent on forum
-    SUM(case when (dt_forum is not null) and (dt_forum < {{ timeout_short * 60 }}) then dt_forum end) as total_forum_time_{{ timeout_short }},
-    SUM(case when (dt_forum is not null) and (dt_forum < {{ timeout_long * 60 }}) then dt_forum end) as total_forum_time_{{ timeout_long }},
-    SUM(case when (serial_dt_forum is not null) and (serial_dt_forum < {{ timeout_long * 60 }}) then serial_dt_forum end) as serial_forum_time_{{ timeout_long }},
+    SUM(case when (dt_forum is not null) and (dt_forum < {{ timeout_short * 60.0 }}) then dt_forum end) as total_forum_time_{{ timeout_short }},
+    SUM(case when (dt_forum is not null) and (dt_forum < {{ timeout_long * 60.0 }}) then dt_forum end) as total_forum_time_{{ timeout_long }},
+    SUM(case when (serial_dt_forum is not null) and (serial_dt_forum < {{ timeout_long * 60.0 }}) then serial_dt_forum end) as serial_forum_time_{{ timeout_long }},
     -- total time spent with textbook or wiki
-    SUM(case when (dt_text is not null) and (dt_text < {{ timeout_short * 60 }}) then dt_text end) as total_text_time_{{ timeout_short }},
-    SUM(case when (dt_text is not null) and (dt_text < {{ timeout_long * 60 }}) then dt_text end) as total_text_time_{{ timeout_long }},
-    SUM(case when (serial_dt_text is not null) and (serial_dt_text < {{ timeout_long * 60 }}) then serial_dt_text end) as serial_text_time_{{ timeout_long }},
+    SUM(case when (dt_text is not null) and (dt_text < {{ timeout_short * 60.0 }}) then dt_text end) as total_text_time_{{ timeout_short }},
+    SUM(case when (dt_text is not null) and (dt_text < {{ timeout_long * 60.0 }}) then dt_text end) as total_text_time_{{ timeout_long }},
+    SUM(case when (serial_dt_text is not null) and (serial_dt_text < {{ timeout_long * 60.0 }}) then serial_dt_text end) as serial_text_time_{{ timeout_long }},
     FROM (
         SELECT time,
             username,
-            TIMESTAMP_DIFF(time, last_time, SECOND) as dt,         -- dt is in seconds
-            case when is_video then TIMESTAMP_DIFF(time, last_time_video, SECOND) end as dt_video,
-            case when is_problem then TIMESTAMP_DIFF(time, last_time_problem, SECOND) end as dt_problem,
-            case when is_forum then TIMESTAMP_DIFF(time, last_time_forum, SECOND) end as dt_forum,
-            case when is_text then TIMESTAMP_DIFF(time, last_time_text, SECOND) end as dt_text,
-            case when is_video then TIMESTAMP_DIFF(time, last_time_xevent, SECOND) end as serial_dt_video,
-            case when is_problem then TIMESTAMP_DIFF(time, last_time_xevent, SECOND) end as serial_dt_problem,
-            case when is_forum then TIMESTAMP_DIFF(time, last_time_xevent, SECOND) end as serial_dt_forum,
-            case when is_text then TIMESTAMP_DIFF(time, last_time_xevent, SECOND) end as serial_dt_text,
+            CAST(TIMESTAMP_DIFF(time, last_time, SECOND) AS FLOAT64) as dt,         -- dt is in seconds
+            case when is_video then CAST(TIMESTAMP_DIFF(time, last_time_video, SECOND) AS FLOAT64) end as dt_video,
+            case when is_problem then CAST(TIMESTAMP_DIFF(time, last_time_problem, SECOND) AS FLOAT64) end as dt_problem,
+            case when is_forum then CAST(TIMESTAMP_DIFF(time, last_time_forum, SECOND) AS FLOAT64) end as dt_forum,
+            case when is_text then CAST(TIMESTAMP_DIFF(time, last_time_text, SECOND) AS FLOAT64) end as dt_text,
+            case when is_video then CAST(TIMESTAMP_DIFF(time, last_time_xevent, SECOND) AS FLOAT64) end as serial_dt_video,
+            case when is_problem then CAST(TIMESTAMP_DIFF(time, last_time_xevent, SECOND) AS FLOAT64) end as serial_dt_problem,
+            case when is_forum then CAST(TIMESTAMP_DIFF(time, last_time_xevent, SECOND) AS FLOAT64) end as serial_dt_forum,
+            case when is_text then CAST(TIMESTAMP_DIFF(time, last_time_xevent, SECOND) AS FLOAT64) end as serial_dt_text,
         FROM (
             SELECT time, 
                 username,
@@ -90,7 +90,7 @@ SELECT
                         ) as is_forum,
                         REGEXP_CONTAINS(event_type, r'^textbook\..*|/wiki/') as is_text
                     FROM `{{log_dataset}}.tracklog_*`
-                    WHERE {% if suffix_start is defined and suffix_end is defined %} _TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}" AND {% endif %}
+                    WHERE {% if suffix_start is defined and suffix_end is defined %} (_TABLE_SUFFIX BETWEEN "{{ suffix_start }}" AND "{{ suffix_end }}") AND {% endif %}
                     NOT REGEXP_CONTAINS(event_type, "/xblock/") AND username is not null AND username != ''
                 )
             )
