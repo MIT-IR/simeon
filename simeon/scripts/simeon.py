@@ -140,6 +140,7 @@ def split_log_files(parsed_args):
     tracking log files and put them in the provider destination directory
     """
     files = parsed_args.downloaded_files
+    parsed_args.courses = cli_utils.course_listings(parsed_args.courses)
     success = 0
     if len(files) == 1 or parsed_args.dynamic_date:
         for fname in files:
@@ -181,6 +182,7 @@ def split_sql_files(parsed_args):
     """
     failed = False
     msg = '{w} file name {f}'
+    parsed_args.courses = cli_utils.course_listings(parsed_args.courses)
     for fname in parsed_args.downloaded_files:
         parsed_args.logger.info(
             msg.format(f=fname, w='Splitting')
