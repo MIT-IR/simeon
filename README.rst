@@ -297,3 +297,31 @@ Notes:
    ``simeon split --file-type log 'data/TRACKING-LOGS/*/*.log.gz'``
    tells ``simeon`` to expand the given glob pattern, instead of relying
    on the shell to do it.
+
+7. The ``report`` subcommand relies on the presence of SQL query files
+   to parse and send to BigQuery to execute. Any errors arising from
+   executing the parsed queries will be shown to the end user through
+   the given log stream. While the ``simeon`` tool ships with query
+   files for most secondary/reporting tables that are based on the
+   ``edx2bigquery`` tool, an end user should be able to point ``simeon``
+   to a different location with SQL query files by using the
+   ``--query-dir`` option that comes with ``simeon report``.
+   Additionally, these query files can contain
+   ```jinja2 templated`` <https://jinja.palletsprojects.com/en/latest/>`__
+   SQL code. Any mentioned variables within these templated queries can
+   be passed to ``simeon report`` by using the ``--extra-args`` option
+   and passing key-value pair items in the format
+   ``var1=value1,var2=value2,var3=value3,...,varn=valuen``. Further,
+   these key-value pair items can also be typed by using the format
+   ``var1:i=value1,var2:s=value2,var3:f=value3,...,varn:s=valuen``. In
+   this format, the type is append to the key, separated by a colon. The
+   only supported scalar types, so far, are ``s`` for ``str``, ``i`` for
+   ``int``, and ``f`` for ``float``. If any conversion errors occur
+   during value parsing, then those are shown to the end user, and the
+   query won’t get executed. Finally, if you wish to pass an ``array``
+   or ``list`` to the template, you will need to repeat a key multiple
+   times. For instance, if you want to pass a list named ``mylist``
+   containing the integers, you could write something like
+   ``--extra-args mylist:i=1,mylist:i=2,mylist:i=3``. This means that
+   you’ll have a python ``list`` named ``mylist`` within your template,
+   and it should contain ``[1, 2, 3]``.
