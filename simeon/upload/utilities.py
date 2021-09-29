@@ -187,33 +187,30 @@ def get_bq_schema(table: str, schema_dir: str=SCHEMA_DIR):
     :rtype: Tuple[List[bigquery.SchemaField], str]
     :return: A 2-tuple with list of bigquery.SchemaField objects and
         a description text for the target table
+    :raises: MissingSchemaException
     """
     bname = table.split('.')[-1]
     if all(k in bname for k in ('track', 'log')):
         bname = 'tracking_log'
-    targets = glob.iglob(os.path.join(
-        schema_dir,
-        '*{t}.json'.format(t=bname)
-    ))
-    schema_file = next(targets, None)
-    if schema_file is None or not os.path.exists(schema_file):
-        raise MissingSchemaException(
-            'No JSON schema file found for {t} in directory {d}'.format(
-                t=table, d=schema_dir
+    targets = ('{t}.json', 'schema_{t}.json')
+    for target in targets:
+        sfile = os.path.join(schema_dir, target.format(t=bname))
+        if not os.path.exists(sfile):
+            continue
+        out = []
+        with open(sfile) as fh:
+            schema = json.load(fh)
+            for field in schema.get(bname, []):
+                out.append(dict_to_schema_field(field))
+        if not out:
+            msg = (
+                'The schema file {f!r} does not contain an object '
+                'with a name matching the given table {t}'
             )
-        )
-    out = []
-    with open(schema_file) as jf:
-        schema = json.load(jf)
-        for field in schema.get(bname, []):
-            out.append(dict_to_schema_field(field))
-    if not out:
-        msg = (
-            'The schema file {f!r} does not contain an object '
-            'with a name matching the given table {t}'
-        )
-        raise MissingSchemaException(msg.format(f=schema_file, t=table))
-    return out, schema.get('description')
+            raise MissingSchemaException(msg.format(f=sfile, t=table))
+        return out, schema.get('description')
+    msg = 'No JSON schema file found for {t} in directory {d}'
+    raise MissingSchemaException(msg.format(t=table, d=schema_dir))
 
 
 def make_bq_load_config(
