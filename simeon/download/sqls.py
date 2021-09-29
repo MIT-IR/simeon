@@ -151,9 +151,6 @@ def unpacker(fname, names, ddir, courses=None, tables_only=False):
             cfolder = os.path.basename(target_dir)
         if courses and cfolder not in courses:
             continue
-        if tables_only:
-            targets.append(target_name)
-            continue
         if 'ccx' in cfolder:
             dir_segments = cfolder.replace('-', '__', 1).split('-')
             clean = '{f}__{s}'.format(
@@ -167,6 +164,9 @@ def unpacker(fname, names, ddir, courses=None, tables_only=False):
         clean = clean.replace('.', '_')
         target_dir = target_dir.replace(cfolder, clean)
         target_name = target_name.replace(cfolder, clean)
+        if tables_only:
+            targets.append(target_name)
+            continue
         os.makedirs(target_dir, exist_ok=True)
         with proc_zfile.open(name) as zh, open(target_name, 'wb') as fh:
             for line in zh:
