@@ -1,6 +1,7 @@
 """
 Utility functions and classes associated with uploading data to GCP, so far.
 """
+import glob
 import json
 import os
 import re
@@ -190,8 +191,12 @@ def get_bq_schema(table: str, schema_dir: str=SCHEMA_DIR):
     bname = table.split('.')[-1]
     if all(k in bname for k in ('track', 'log')):
         bname = 'tracking_log'
-    schema_file = os.path.join(schema_dir, 'schema_{t}.json'.format(t=bname))
-    if not os.path.exists(schema_file):
+    targets = glob.iglob(os.path.join(
+        schema_dir,
+        '*{t}.json'.format(t=bname)
+    ))
+    schema_file = next(targets, None)
+    if schema_file is None or not os.path.exists(schema_file):
         raise MissingSchemaException(
             'No JSON schema file found for {t} in directory {d}'.format(
                 t=table, d=schema_dir

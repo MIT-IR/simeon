@@ -2,6 +2,7 @@
 Module to process tracking log files from edX
 """
 import errno
+import glob
 import gzip
 import json
 import os
@@ -175,10 +176,16 @@ def split_tracking_log(
     :return: True if files have been generated. False, otherwise
     """
     schema_dir = schema_dir or SCHEMA_DIR
-    schema_file = os.path.join(
-        schema_dir, 'schema_tracking_log.json'
-    )
-    if not os.path.exists(schema_file):
+    targets = glob.iglob(os.path.join(
+        schema_dir, '*tracking_log.json'
+    ))
+    schema_file = next(targets, None)
+    if schema_file is None or not os.path.exists(schema_file):
+        msg = (
+            'No valid schema file tracking_log.json was found '
+            'in the schema directory {d}. Please provide a valid '
+            'schema directory.'
+        )
         raise MissingSchemaException(
             'The schema file {f} does not exist. '
             'Please provide a valid schema directory'.format(f=schema_file)

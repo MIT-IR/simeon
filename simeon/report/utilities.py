@@ -186,6 +186,24 @@ def _report_pool_init(proj, safile=None):
         )
 
 
+def _get_schema_dict(sdir, table):
+    """
+    Find a matching JSON schema file in the directory sdir
+    for the given table
+    """
+    targets = ('schema_{t}.json', '{t}.json')
+    for target in targets:
+        schema_file = os.path.join(sdir, target.format(t=table))
+        if os.path.exists(schema_file):
+            with open(schema_file) as fh:
+                return json.load(fh)
+    msg = (
+        'A schema file for table {t} could not be found in the given '
+        'directory {d}'
+    )
+    raise MissingSchemaException(msg.format(t=table, d=sdir))
+
+
 def wait_for_bq_jobs(job_list):
     """
     Given a list of BigQuery load or query jobs,
@@ -361,16 +379,8 @@ def make_user_info_combo(
             raise OSError(
                 '{f} does not exist in the SQL bundle.'.format(f=file_)
             )
-    schema_file = os.path.join(
-        schema_dir, 'schema_user_info_combo.json'
-    )
-    if not os.path.exists(schema_file):
-        raise MissingSchemaException(
-            'The schema file {f} does not exist. '
-            'Please provide a valid schema directory.'.format(f=schema_file)
-        )
-    with open(schema_file) as sfh:
-        schema = json.load(sfh).get('user_info_combo')
+    tbl = 'user_info_combo'
+    schema = _get_schema_dict(schema_dir, tbl)[tbl]
     users = dict()
     user_file = 'auth_user-analytics.sql'
     user_cols = USER_INFO_COLS.get((user_file, None))
@@ -742,30 +752,21 @@ def make_grades_persistent(
     infiles = dict([
         (
             'grades_persistentcoursegrade-analytics.sql',
-            (first_outname, 'schema_grades_persistent.json'),
+            (first_outname, 'grades_persistent'),
         ),
         (
             'grades_persistentsubsectiongrade-analytics.sql',
-            (second_outname, 'schema_grades_persistent_subsection.json'),
+            (second_outname, 'grades_persistent_subsection'),
         )
     ])
-    for file_, (outname, schema_file) in infiles.items():
+    for file_, (outname, tbl) in infiles.items():
         file_ = os.path.join(dirname, file_)
         outname = os.path.join(dirname, outname)
         if not os.path.exists(file_):
             raise OSError(
                 '{f} does not exist in the SQL bundle.'.format(f=file_)
             )
-        fschema_file = os.path.join(schema_dir, schema_file)
-        if not os.path.exists(fschema_file):
-            raise MissingSchemaException(
-                'The given schema file {f} does not exist. '
-                'Please provide a valid schema directory.'.format(f=fschema_file)
-            )
-        with open(fschema_file) as sfh:
-            sname, _ = os.path.splitext(schema_file)
-            sname = sname.replace('schema_', '')
-            schema = json.load(sfh).get(sname)
+        schema = _get_schema_dict(schema_dir, tbl).get(tbl)
         with open(file_) as gh, gzip.open(outname, 'wt') as zh:
             header = [c.strip() for c in gh.readline().split('\t')]
             reader = csv.DictReader(
@@ -911,16 +912,7 @@ def make_forum_table(
             'sk', 'thread_type', 'title', 'visible', 'votes'
         ),
     }
-    schema_file = os.path.join(
-        schema_dir, 'schema_forum.json'
-    )
-    if not os.path.exists(schema_file):
-        raise MissingSchemaException(
-            'The schema file {f} does not exist. '
-            'Please provide a valid schema directory.'.format(f=schema_file)
-        )
-    with open(schema_file) as sfh:
-        schema = json.load(sfh).get('forum')
+    schema = _get_schema_dict(schema_dir, 'forum')['forum']
     with open(file_) as fh, gzip.open(outname, 'wt') as zh:
         for line in fh:
             record = json.loads(line)
@@ -1024,10 +1016,10 @@ def make_student_module(
         raise OSError(
             '{f} does not exist in the SQL bundle.'.format(f=file_)
         )
-    with open(pjoin(schema_dir, 'schema_studentmodule.json')) as sfh:
-        module_schema = json.load(sfh).get('studentmodule')
-    with open(pjoin(schema_dir, 'schema_problem_analysis.json')) as sfh:
-        problem_schema = json.load(sfh).get('problem_analysis')
+    tbl = 'studentmodule'
+    module_schema = _get_schema_dict(schema_dir, tbl).get(tbl)
+    tbl = 'problem_analysis'
+    problem_schema = _get_schema_dict(schema_dir, tbl).get(tbl)
     prob_cols = ('correct_map', 'student_answers')
     with open(file_, encoding='UTF8', errors='ignore') as fh:
         header = [c.strip() for c in fh.readline().split('\t')]
