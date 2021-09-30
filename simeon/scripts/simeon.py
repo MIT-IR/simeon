@@ -1522,7 +1522,7 @@ def main():
                         config_arg = cli_utils.course_paths_from_file(
                             config_arg
                         )
-                    else:
+                    elif args.command not in ('list',):
                         config_arg = cli_utils.courses_from_file(config_arg)
                 except Exception as excp:
                     args.logger.error(str(excp).replace('\n', ' '))
