@@ -1,0 +1,2 @@
+include simeon/report/queries/*.sql
+include simeon/upload/schemas/*.json

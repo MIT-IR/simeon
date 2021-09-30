@@ -19,7 +19,7 @@ setup(
     python_requires='>=3.6',
     description='A CLI tool to help process research data from edX',
     long_description=open('README.rst').read(),
-    include_package_data=True,
+    # include_package_data=True,
     entry_points={
         'console_scripts': [
             'simeon=simeon.scripts.simeon:main',
