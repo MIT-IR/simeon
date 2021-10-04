@@ -187,8 +187,7 @@ def split_tracking_log(
             'schema directory.'
         )
         raise MissingSchemaException(
-            'The schema file {f} does not exist. '
-            'Please provide a valid schema directory'.format(f=schema_file)
+            msg.format(d=os.path.abspath(schema_dir))
         )
     with open(schema_file) as sfh:
         schema = json.load(sfh).get('tracking_log')
