@@ -100,8 +100,8 @@ def compress_email_files(files, ddir, schema_dir=SCHEMA_DIR):
             with open(file_) as infile:
                 cols = [c.strip() for c in next(infile).split(',')]
                 reader = csv.DictReader(
-                    infile, delimiter=',',
-                    lineterminator='\n', fieldnames=cols
+                    (l.replace('\0', '') for l in infile),
+                    delimiter=',', lineterminator='\n', fieldnames=cols,
                 )
                 for row in reader:
                     row['user_id'] = int(row['user_id'])
