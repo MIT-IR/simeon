@@ -12,7 +12,7 @@ from datetime import datetime
 import boto3 as boto
 
 from simeon.exceptions import (
-    AWSException, DecryptionError
+    AWSException, BlobDownloadError
 )
 from simeon.download.utilities import decrypt_files
 
@@ -178,7 +178,11 @@ class S3Blob():
         dirname, _ = os.path.split(filename)
         if dirname:
             os.makedirs(dirname, exist_ok=True)
-        self.bucket.download_file(self.name, filename)
+        try:
+            self.bucket.download_file(self.name, filename)
+        except Exception as excp:
+            msg = 'Failed to download blob {n}: {e}'
+            raise BlobDownloadError(msg.format(n=self.name, e=excp))
         return filename
 
     def __repr__(self):

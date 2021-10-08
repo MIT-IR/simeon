@@ -8,6 +8,14 @@ class AWSException(Exception):
     pass
 
 
+class BlobDownloadError(AWSException):
+    """
+    Raised when a Blob fails to download. This could be an upstream issue.
+    However, it can also be due to local file system access issues, or due
+    to exhausted system resources
+    """
+
+
 class DecryptionError(Exception):
     """
     Raised when the GPG decryption process fails.
