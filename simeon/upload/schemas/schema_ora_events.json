@@ -1,0 +1,85 @@
+{
+    "ora_events": [
+        {
+            "name": "problem_id",
+            "field_type": "STRING",
+            "description": "The ID of the problem whose open assessment is reported"
+        },
+        {
+            "name": "time",
+            "field_type": "TIMESTAMP",
+            "description": "Timestamp associated with the open assessment event on the edX platform"
+        },
+        {
+            "name": "username",
+            "field_type": "STRING",
+            "description": null
+        },
+        {
+            "name": "course_id",
+            "field_type": "STRING",
+            "description": "Course ID in the standard format as org/number/semester"
+        },
+        {
+            "name": "action",
+            "field_type": "STRING",
+            "description": "The open assessment action taken by the user"
+        },
+        {
+            "name": "submission_uuid",
+            "field_type": "STRING",
+            "description": "The UUID associated with the open assessment action/event"
+        },
+        {
+            "name": "part1_points",
+            "field_type": "STRING",
+            "description": "The points given in part 1 of the open assessment"
+        },
+        {
+            "name": "part1_feedback",
+            "field_type": "STRING",
+            "description": "The feedback given in part 1 of the open assessment"
+        },
+        {
+            "name": "attempt_num",
+            "field_type": "STRING",
+            "description": "Number of times an attempt was made to create/submit the open assessment"
+        },
+        {
+            "name": "module_id_sometimes",
+            "field_type": "STRING",
+            "description": "An unreliable version of the module associated with the submitted item"
+        },
+        {
+            "name": "event_type",
+            "field_type": "STRING",
+            "description": "The type of event triggered. Values depend on event_source."
+        },
+        {
+            "name": "event",
+            "field_type": "STRING",
+            "description": "A stringified/dumped JSON object that contains the ID and current time associated with the tracked event"
+        },
+        {
+            "name": "event_source",
+            "field_type": "STRING",
+            "description": "The source of the event (server, browser, mobile, etc.)"
+        },
+        {
+            "name": "answer_text",
+            "field_type": "STRING",
+            "description": "The answer text provided"
+        },
+        {
+            "name": "last_module_id",
+            "field_type": "STRING",
+            "description": "The latest module ID associated with the item being assessed"
+        },
+        {
+            "name": "module_id",
+            "field_type": "STRING",
+            "description": "The supposed module ID associated with the item being assessed"
+        }
+    ],
+    "description": "Table generated with SQL query file ora_events.sql using the simeon CLI tool. It holds all the openassessment events extracted from the tracking logs for a course."
+}
