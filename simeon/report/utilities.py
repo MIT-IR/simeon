@@ -22,8 +22,9 @@ from multiprocessing.pool import (
 from xml.etree import ElementTree
 
 from dateutil.parser import parse as parse_date
-from jinja2 import Template
+from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
+from jinja2 import Template
 
 from simeon.download import utilities as downutils
 from simeon.exceptions import (
@@ -1329,12 +1330,6 @@ def make_table_from_sql(
     """
     schema_dir = schema_dir or SCHEMA_DIR
     query_dir = query_dir or QUERY_DIR
-    # Don't get extra_args overwrite the given course ID
-    kwargs.pop('course_id', None)
-    kwargs.pop('latest_dataset', None)
-    kwargs.pop('log_dataset', None)
-    if course_id != kwargs.get('course_id'):
-        kwargs.pop('course_id', None)
     latest_dataset = uputils.course_to_bq_dataset(
         course_id, 'sql', project
     )
@@ -1433,8 +1428,6 @@ def make_tables_from_sql(
     """
     query_dir = query_dir or QUERY_DIR
     schema_dir = schema_dir or SCHEMA_DIR
-    # Don't get extra_args overwrite the given course ID
-    kwargs.pop('course_id', None)
     if parallel:
         global report_bq_client
         client = report_bq_client
@@ -1442,6 +1435,8 @@ def make_tables_from_sql(
     dataset = '{p}.{c}_latest'.format(
         p=project, c=course_id.replace('/', '__').replace('.', '_')
     )
+    dataset = bigquery.Dataset.from_string(dataset)
+    dataset.description = gcp.DST_DESC.get('sql', '')
     client.create_dataset(dataset, exists_ok=True)
     for table in tables:
         out[table] = make_table_from_sql(
@@ -1450,7 +1445,7 @@ def make_tables_from_sql(
             query_dir=query_dir, youtube_table=youtube_table,
             schema_dir=schema_dir, **kwargs
         )
-        if fail_fast and out[table]:
+        if fail_fast and not out[table]:
             return out
     return out
 
@@ -1495,8 +1490,6 @@ def make_tables_from_sql_par(
     """
     query_dir = query_dir or QUERY_DIR
     schema_dir = schema_dir or SCHEMA_DIR
-    # Don't get extra_args overwrite the given course ID
-    kwargs.pop('course_id', None)
     if len(courses) < size:
         size = len(courses)
     results = dict()
