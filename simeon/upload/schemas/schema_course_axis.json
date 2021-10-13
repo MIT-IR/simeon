@@ -94,6 +94,11 @@
                     "field_type": "BOOLEAN",
                     "name": "has_image",
                     "description": "Boolean as to whether the problem contains an image."
+                },
+                {
+                    "field_type": "FLOAT",
+                    "name": "duration",
+                    "description": "Duration in seconds of video items"
                 }
             ]
         },

@@ -277,6 +277,8 @@ def check_record_schema(record, schema, coerce=True, nullify=False):
     :returns: Modifies the record if needed
     :raises: SchemaMismatchException
     """
+    # Make a local copy
+    bq2py_types = BQ2PY_TYPES.copy()
     for field in schema:
         if field.get('field_type') != 'RECORD':
             if field.get('name') not in record and nullify:
@@ -289,7 +291,7 @@ def check_record_schema(record, schema, coerce=True, nullify=False):
                 record[field.get('name')] = None
             elif field.get('name') in record and coerce:
                 val = record[field.get('name')]
-                func = BQ2PY_TYPES.get(field.get('field_type'))
+                func = bq2py_types.get(field.get('field_type'))
                 if func and val is not None:
                     try:
                         record[field.get('name')] = func(val)
@@ -451,7 +453,6 @@ def make_user_info_combo(
             drop_extra_keys(outcols, schema)
             check_record_schema(outrow, schema)
             zh.write(json.dumps(outrow) + '\n')
-        zh.flush()
 
 
 def course_from_block(block):
@@ -592,6 +593,36 @@ def _get_first_axis_meta(block, name, struct, mapping):
     return out
 
 
+def _get_video_durations(tarball):
+    """
+    Go through the .xml.tar.gz file, extract the video items in it, and make a
+    mapping between url names and the video durations in seconds
+
+    :type tarball: str
+    :param tarball: The .xml.tar.gz file from a course's SQL export
+    :rtype: dict
+    :return: Returns a mapping between video url names (hashes) and durations
+    """
+    tf = tarfile.open(tarball)
+    durations = {}
+    vids = [m for m in tf.getmembers() if not m.isdir() and 'video' in m.name]
+    for m in vids:
+        root = ElementTree.fromstring(tf.extractfile(m).read())
+        url = root.attrib.get('url_name')
+        if not url:
+            continue
+        durations[url] = None
+        for elm in root:
+            if elm.tag == 'video_asset':
+                duration = (elm.attrib or {}).get('duration', None)
+                try:
+                    durations[url] = float(duration)
+                except (ValueError, TypeError):
+                    durations[url] = None
+                break
+    return durations
+
+
 def process_course_structure(data, start, mapping, parent=None):
     """
     The course structure data dictionary and starting point,
@@ -684,6 +715,7 @@ def make_course_axis(
                 '{f} does not exist in the SQL bundle.'.format(f=file_)
             )
     itypes = _get_itypes(bundle)
+    durations = _get_video_durations(tarball=bundle)
     with open(fname) as fh:
         structure: dict = json.load(fh)
     # Find the course object (i.e. root object)
@@ -723,13 +755,13 @@ def make_course_axis(
             record['data']['itype'] = itypes.get(
                 record.get('module_id', '').split('/')[-1]
             )
+            record['data']['duration'] = durations.get(record['url_name'])
             if record['gformat']:
                 if not record.get('due'):
                     record['due'] = root_val.get('end')
                 if not record.get('start'):
                     record['start'] = root_val.get('start')
             zh.write(json.dumps(record) + '\n')
-        zh.flush()
 
 
 def make_grades_persistent(
@@ -782,7 +814,6 @@ def make_grades_persistent(
                         record[k] = None
                 check_record_schema(record, schema)
                 zh.write(json.dumps(record) + '\n')
-            zh.flush()
 
 
 def make_grading_policy(
@@ -849,7 +880,6 @@ def make_grading_policy(
                 zh.write(
                     json.dumps(dict((k, grader.get(k)) for k in cols)) + '\n'
                 )
-            zh.flush()
 
 
 def _extract_mongo_values(record, key, subkey):
@@ -950,7 +980,6 @@ def make_forum_table(
             drop_extra_keys(record, schema)
             check_record_schema(record, schema, True)
             zh.write(json.dumps(record) + '\n')
-        zh.flush()
 
 
 def make_problem_analysis(state, **extras):
@@ -1038,7 +1067,7 @@ def make_student_module(
                         record[k] = module_from_block(v or '')
                     if (v or '').lower() == 'null':
                         record[k] = None
-                check_record_schema(record, module_schema)
+                # check_record_schema(record, module_schema)
                 zh.write(json.dumps(record) + '\n')
                 try:
                     state = json.loads(
@@ -1059,8 +1088,6 @@ def make_student_module(
                 )
                 check_record_schema(panalysis, problem_schema)
                 ph.write(json.dumps(panalysis) + '\n')
-            zh.flush()
-            ph.flush()
 
 
 def _default_roles():
@@ -1149,7 +1176,6 @@ def make_roles_table(
             if any(record.get(k) for k in staff):
                 record['roles'] = 'Staff'
             zh.write(json.dumps(record) + '\n')
-        zh.flush()
 
 
 def make_sql_tables_seq(
