@@ -41,7 +41,7 @@
             "description": "Chapter Name"
         },
         {
-            "field_type": "INTEGER",
+            "field_type": "FLOAT",
             "name": "video_length",
             "description": "Video Length in seconds"
         }

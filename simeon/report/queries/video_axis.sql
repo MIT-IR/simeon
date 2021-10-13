@@ -7,15 +7,16 @@ videos.name as name,
 videos.vid_id as video_id,
 videos.yt_id as youtube_id,
 chapters.name as chapter_name,
-videos.video_length
+case when videos.video_length is null then videos.bundle_duration else videos.video_length end as video_length
 FROM (
     SELECT index, category, course_id, name, chapter_mid,
     REGEXP_EXTRACT(REGEXP_REPLACE(module_id, '[.]', '_'), r'(?:.*\/)(.*)') as vid_id,
     ARRAY_REVERSE(SPLIT(data.ytid, ':'))[SAFE_ORDINAL(1)] as yt_id,
+    data.duration as bundle_duration,
     {% if youtube_table is defined and youtube_table %}
     youtubes.duration as video_length
     {% else %}
-    0 as video_length
+    data.duration as video_length
     {% endif %}
     FROM `{latest_dataset}.course_axis`
     {% if youtube_table is defined and youtube_table %}
