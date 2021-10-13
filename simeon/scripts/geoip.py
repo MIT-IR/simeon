@@ -169,6 +169,11 @@ def main():
         formatter_class=RawDescriptionHelpFormatter,
     )
     parser.add_argument(
+        '--debug', '-B',
+        help='Show some stacktrace if simeon stops because of a fatal error',
+        action='store_true',
+    )
+    parser.add_argument(
         '--log-file', '-L',
         help='Log file to use when simeon prints messages. Default: stdout',
         type=FileType('a'),
@@ -331,7 +336,13 @@ def main():
             else:
                 print(msg.format(e=e), file=sys.stderr)
             un_denoms = {}
-        locs = GeoReader(args.db)
+        try:
+            locs = GeoReader(args.db)
+        except Exception as excp:
+            args.logger.error(
+                'Failed to open the MaxMind database: {e}'.format(e=excp)
+            )
+            sys.exit(1)
         make_geo_data(
             db=locs, ip_files=args.ip_files,
             outfile=args.output, un_data=un_denoms,
@@ -371,11 +382,11 @@ def main():
                     project=args.project
                 )
         except Exception as excp:
-            errmsg = 'Failed to connect to BigQuery: {e}'
-            args.logger.error(errmsg.format(e=excp))
-            args.logger.error(
-                'The error may be from an invalid service account file'
+            errmsg = (
+                'Failed to connect to BigQuery: {e}. '
+                'The error may be from an invalid service account file.'
             )
+            args.logger.error(errmsg.format(e=excp))
             sys.exit(1)
         args.logger.info('Connection established')
         try:
