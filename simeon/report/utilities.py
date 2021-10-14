@@ -607,7 +607,10 @@ def _get_video_durations(tarball):
     durations = {}
     vids = [m for m in tf.getmembers() if not m.isdir() and 'video' in m.name]
     for m in vids:
-        root = ElementTree.fromstring(tf.extractfile(m).read())
+        try:
+            root = ElementTree.fromstring(tf.extractfile(m).read())
+        except ElementTree.ParseError:
+            continue
         url = root.attrib.get('url_name')
         if not url:
             continue
