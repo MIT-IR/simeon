@@ -1462,7 +1462,8 @@ def make_tables_from_sql(
         client = report_bq_client
     out = dict()
     dataset = '{p}.{c}_latest'.format(
-        p=project, c=course_id.replace('/', '__').replace('.', '_')
+        p=project,
+        c=course_id.replace('/', '__').replace('.', '_').replace('-', '_')
     )
     dataset = bigquery.Dataset.from_string(dataset)
     dataset.description = gcp.DST_DESC.get('sql', '')
