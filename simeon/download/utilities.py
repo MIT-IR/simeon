@@ -7,6 +7,7 @@ import json
 import math
 import os
 import re
+import shlex
 import subprocess as sb
 import urllib.parse as urlparser
 from datetime import datetime
@@ -81,7 +82,7 @@ def decrypt_files(
     )
     if verbose and logger is not None:
         logger.info('{m}...'.format(m=cmd[:200]))
-    proc =  sb.Popen(cmd.split(), stdout=sb.PIPE, stderr=sb.PIPE)
+    proc =  sb.Popen(shlex.split(cmd), stdout=sb.PIPE, stderr=sb.PIPE)
     if proc.wait(timeout=timeout) != 0:
         err = proc.stderr.read().decode('utf8', 'ignore').strip()
         msg = 'Failed to decrypt file names {f} with return code {rc}: {e}'

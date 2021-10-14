@@ -3,6 +3,7 @@ Integration tests for the simeon CLI tool.
 These can be quite expensive since they read from and write to files.
 """
 import os
+import shlex
 import subprocess as sb
 import unittest
 
@@ -11,7 +12,7 @@ def _run_command(cmd):
     """
     Run the given command and return the generated Popen object
     """
-    proc = sb.Popen(cmd.split(), stderr=sb.PIPE, stdout=sb.PIPE)
+    proc = sb.Popen(shlex.split(cmd), stderr=sb.PIPE, stdout=sb.PIPE)
     proc.wait()
     return proc
 
