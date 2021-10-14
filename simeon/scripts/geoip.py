@@ -46,6 +46,10 @@ SCHEMA_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     'upload', 'schemas'
 )
+UN_DATA_FILE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), 'data',
+    'geographic_regions_by_country.csv'
+)
 
 
 def import_un_denominations(fname=None):
@@ -60,7 +64,7 @@ def import_un_denominations(fname=None):
         'continent', 'un_economic_group', 'un_developing_nation',
         'un_special_region'
     ]
-    if fname:
+    if fname and os.path.exists(fname):
         fp = open(fname)
         next(fp)
     else:
@@ -226,12 +230,13 @@ def main():
     extracter.add_argument(
         '--un-data', '-u',
         help=(
-            'Path to a file with UN denominations. If no file is provided, '
-            'one is downloaded from Github at '
+            'Path to a file with UN denominations. If no valid file is '
+            'provided, one is downloaded from Github at '
             'https://raw.githubusercontent.com/mitodl/'
             'world_geographic_regions/master/'
             'geographic_regions_by_country.csv'
         ),
+        default=UN_DATA_FILE,
     )
     extracter.add_argument(
         '--output', '-o',

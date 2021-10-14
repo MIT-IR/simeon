@@ -1,2 +1,3 @@
 include simeon/report/queries/*.sql
 include simeon/upload/schemas/*.json
+include simeon/scripts/data/*.csv
