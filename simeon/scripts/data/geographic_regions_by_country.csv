@@ -1,0 +1,240 @@
+cc,code,name,un_region,continent,econ_group,developing_nation,special_region1
+BM,060,Bermuda,Northern America,Americas,Developed regions,,
+CA,124,Canada,Northern America,Americas,Developed regions,,
+GL,304,Greenland,Northern America,Americas,Developed regions,,
+PM,666,Saint Pierre and Miquelon,Northern America,Americas,Developed regions,,
+US,840,United States,Northern America,Americas,Developed regions,,
+AR,032,Argentina,South America,Americas,Developing_Nations,,Latin America and the Caribbean
+BO,068,Bolivia,South America,Americas,Developing_Nations,,Latin America and the Caribbean
+BR,076,Brazil,South America,Americas,Developing_Nations,,Latin America and the Caribbean
+CL,152,Chile,South America,Americas,Developing_Nations,,Latin America and the Caribbean
+CO,170,Colombia,South America,Americas,Developing_Nations,,Latin America and the Caribbean
+EC,218,Ecuador,South America,Americas,Developing_Nations,,Latin America and the Caribbean
+FK,238,Falkland Islands (Malvinas),South America,Americas,Developing_Nations,,Latin America and the Caribbean
+GF,254,French Guiana,South America,Americas,Developing_Nations,,Latin America and the Caribbean
+GY,328,Guyana,South America,Americas,Developing_Nations,,Latin America and the Caribbean
+PY,600,Paraguay,South America,Americas,Developing_Nations,,Latin America and the Caribbean
+PE,604,Peru,South America,Americas,Developing_Nations,,Latin America and the Caribbean
+SR,740,Suriname,South America,Americas,Developing_Nations,,Latin America and the Caribbean
+UY,858,Uruguay,South America,Americas,Developing_Nations,,Latin America and the Caribbean
+VE,862,Venezuela,South America,Americas,Developing_Nations,,Latin America and the Caribbean
+BZ,084,Belize,Central America,Americas,Developing_Nations,,Latin America and the Caribbean
+CR,188,Costa Rica,Central America,Americas,Developing_Nations,,Latin America and the Caribbean
+SV,222,El Salvador,Central America,Americas,Developing_Nations,,Latin America and the Caribbean
+GT,320,Guatemala,Central America,Americas,Developing_Nations,,Latin America and the Caribbean
+HN,340,Honduras,Central America,Americas,Developing_Nations,,Latin America and the Caribbean
+MX,484,Mexico,Central America,Americas,Developing_Nations,,Latin America and the Caribbean
+NI,558,Nicaragua,Central America,Americas,Developing_Nations,,Latin America and the Caribbean
+PA,591,Panama,Central America,Americas,Developing_Nations,,Latin America and the Caribbean
+AX,248,Åland Islands,Northern Europe,Europe,Developed regions,,
+DK,208,Denmark,Northern Europe,Europe,Developed regions,,
+EE,233,Estonia,Northern Europe,Europe,Developed regions,,
+FO,234,Faroe Islands,Northern Europe,Europe,Developed regions,,
+FI,246,Finland,Northern Europe,Europe,Developed regions,,
+GG,831,Guernsey,Northern Europe,Europe,Developed regions,,
+IS,352,Iceland,Northern Europe,Europe,Developed regions,,
+IE,372,Ireland,Northern Europe,Europe,Developed regions,,
+IM,833,Isle of Man,Northern Europe,Europe,Developed regions,,
+JE,832,Jersey,Northern Europe,Europe,Developed regions,,
+LV,428,Latvia,Northern Europe,Europe,Developed regions,,
+LT,440,Lithuania,Northern Europe,Europe,Developed regions,,
+NO,578,Norway,Northern Europe,Europe,Developed regions,,
+SJ,744,Svalbard and Jan Mayen,Northern Europe,Europe,Developed regions,,
+SE,752,Sweden,Northern Europe,Europe,Developed regions,,
+GB,826,United Kingdom,Northern Europe,Europe,Developed regions,,
+AT,040,Austria,Western Europe,Europe,Developed regions,,
+BE,056,Belgium,Western Europe,Europe,Developed regions,,
+FR,250,France,Western Europe,Europe,Developed regions,,
+DE,276,Germany,Western Europe,Europe,Developed regions,,
+LI,438,Liechtenstein,Western Europe,Europe,Developed regions,,
+LU,442,Luxembourg,Western Europe,Europe,Developed regions,,
+MC,492,Monaco,Western Europe,Europe,Developed regions,,
+NL,528,Netherlands,Western Europe,Europe,Developed regions,,
+CH,756,Switzerland,Western Europe,Europe,Developed regions,,
+BY,112,Belarus,Eastern Europe,Europe,Developed regions,,
+BG,100,Bulgaria,Eastern Europe,Europe,Developed regions,,
+CZ,203,Czech Republic,Eastern Europe,Europe,Developed regions,,
+HU,348,Hungary,Eastern Europe,Europe,Developed regions,,
+PL,616,Poland,Eastern Europe,Europe,Developed regions,,
+MD,498,Moldova,Eastern Europe,Europe,Developed regions,,
+RO,642,Romania,Eastern Europe,Europe,Developed regions,,
+RU,643,Russian Federation,Eastern Europe,Europe,Developed regions,,
+SK,703,Slovakia,Eastern Europe,Europe,Developed regions,,
+UA,804,Ukraine,Eastern Europe,Europe,Developed regions,,
+AL,008,Albania,Southern Europe,Europe,Developed regions,,
+AD,020,Andorra,Southern Europe,Europe,Developed regions,,
+BA,070,Bosnia and Herzegovina,Southern Europe,Europe,Developed regions,,
+HR,191,Croatia,Southern Europe,Europe,Developed regions,,
+GI,292,Gibraltar,Southern Europe,Europe,Developed regions,,
+GR,300,Greece,Southern Europe,Europe,Developed regions,,
+VA,336,Holy See (Vatican City State),Southern Europe,Europe,Developed regions,,
+IT,380,Italy,Southern Europe,Europe,Developed regions,,
+MT,470,Malta,Southern Europe,Europe,Developed regions,,
+ME,499,Montenegro,Southern Europe,Europe,Developed regions,,
+PT,620,Portugal,Southern Europe,Europe,Developed regions,,
+SM,674,San Marino,Southern Europe,Europe,Developed regions,,
+RS,688,Serbia,Southern Europe,Europe,Developed regions,,
+SI,705,Slovenia,Southern Europe,Europe,Developed regions,,
+ES,724,Spain,Southern Europe,Europe,Developed regions,,
+MK,807,Macedonia,Southern Europe,Europe,Developed regions,,
+BN,096,Brunei Darussalam,South-Eastern Asia,Asia,Developing_Nations,,
+KH,116,Cambodia,South-Eastern Asia,Asia,Developing_Nations,Least developed countries,
+ID,360,Indonesia,South-Eastern Asia,Asia,Developing_Nations,,
+LA,418,Lao People's Democratic Republic,South-Eastern Asia,Asia,Developing_Nations,Least developed countries,
+MY,458,Malaysia,South-Eastern Asia,Asia,Developing_Nations,,
+MM,104,Myanmar,South-Eastern Asia,Asia,Developing_Nations,Least developed countries,
+PH,608,Philippines,South-Eastern Asia,Asia,Developing_Nations,,
+SG,702,Singapore,South-Eastern Asia,Asia,Developing_Nations,,
+TH,764,Thailand,South-Eastern Asia,Asia,Developing_Nations,,
+TL,626,Timor-Leste,South-Eastern Asia,Asia,Developing_Nations,Least developed countries,
+VN,704,Viet Nam,South-Eastern Asia,Asia,Developing_Nations,,
+KZ,398,Kazakhstan,Central Asia,Asia,Developing_Nations,,
+KG,417,Kyrgyzstan,Central Asia,Asia,Developing_Nations,,
+TJ,762,Tajikistan,Central Asia,Asia,Developing_Nations,,
+TM,795,Turkmenistan,Central Asia,Asia,Developing_Nations,,
+UZ,860,Uzbekistan,Central Asia,Asia,Developing_Nations,,
+BI,108,Burundi,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+KM,174,Comoros,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+DJ,262,Djibouti,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+ER,232,Eritrea,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+ET,231,Ethiopia,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+KE,404,Kenya,Eastern Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+MG,450,Madagascar,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+MW,454,Malawi,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+MU,480,Mauritius,Eastern Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+YT,175,Mayotte,Eastern Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+MZ,508,Mozambique,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+RE,638,Réunion,Eastern Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+RW,646,Rwanda,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+SC,690,Seychelles,Eastern Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+SO,706,Somalia,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+SS,728,South Sudan,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+UG,800,Uganda,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+TZ,834,Tanzania,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+ZM,894,Zambia,Eastern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+ZW,716,Zimbabwe,Eastern Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+CN,156,China,Eastern Asia,Asia,Developing_Nations,,
+HK,344,Hong Kong,Eastern Asia,Asia,Developing_Nations,,
+MO,446,Macao,Eastern Asia,Asia,Developing_Nations,,
+KP,408,Korea,Eastern Asia,Asia,Developing_Nations,,
+JP,392,Japan,Eastern Asia,Asia,Developed regions,,
+MN,496,Mongolia,Eastern Asia,Asia,Developing_Nations,,
+KR,410,Korea,Eastern Asia,Asia,Developing_Nations,,
+AF,004,Afghanistan,Southern Asia,Asia,Developing_Nations,Least developed countries,
+BD,050,Bangladesh,Southern Asia,Asia,Developing_Nations,Least developed countries,
+BT,064,Bhutan,Southern Asia,Asia,Developing_Nations,Least developed countries,
+IN,356,India,Southern Asia,Asia,Developing_Nations,,
+IR,364,Iran,Southern Asia,Asia,Developing_Nations,,
+MV,462,Maldives,Southern Asia,Asia,Developing_Nations,,
+NP,524,Nepal,Southern Asia,Asia,Developing_Nations,Least developed countries,
+PK,586,Pakistan,Southern Asia,Asia,Developing_Nations,,
+LK,144,Sri Lanka,Southern Asia,Asia,Developing_Nations,,
+AM,051,Armenia,Western Asia,Asia,Developing_Nations,,
+AZ,031,Azerbaijan,Western Asia,Asia,Developing_Nations,,
+BH,048,Bahrain,Western Asia,Asia,Developing_Nations,,
+CY,196,Cyprus,Western Asia,Asia,Developing_Nations,,
+GE,268,Georgia,Western Asia,Asia,Developing_Nations,,
+IQ,368,Iraq,Western Asia,Asia,Developing_Nations,,
+IL,376,Israel,Western Asia,Asia,Developing_Nations,,
+JO,400,Jordan,Western Asia,Asia,Developing_Nations,,
+KW,414,Kuwait,Western Asia,Asia,Developing_Nations,,
+LB,422,Lebanon,Western Asia,Asia,Developing_Nations,,
+OM,512,Oman,Western Asia,Asia,Developing_Nations,,
+QA,634,Qatar,Western Asia,Asia,Developing_Nations,,
+SA,682,Saudi Arabia,Western Asia,Asia,Developing_Nations,,
+PS,275,Palestine,Western Asia,Asia,Developing_Nations,,
+SY,760,Syrian Arab Republic,Western Asia,Asia,Developing_Nations,,
+TR,792,Turkey,Western Asia,Asia,Developing_Nations,,
+AE,784,United Arab Emirates,Western Asia,Asia,Developing_Nations,,
+YE,887,Yemen,Western Asia,Asia,Developing_Nations,Least developed countries,
+DZ,012,Algeria,Northern Africa,Africa,Developing_Nations,,
+EG,818,Egypt,Northern Africa,Africa,Developing_Nations,,
+LY,434,Libya,Northern Africa,Africa,Developing_Nations,,
+MA,504,Morocco,Northern Africa,Africa,Developing_Nations,,
+SD,729,Sudan,Northern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+TN,788,Tunisia,Northern Africa,Africa,Developing_Nations,,
+EH,732,Western Sahara,Northern Africa,Africa,Developing_Nations,,
+AO,024,Angola,Middle Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+CM,120,Cameroon,Middle Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+CF,140,Central African Republic,Middle Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+TD,148,Chad,Middle Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+CG,178,Congo,Middle Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+CD,180,Congo,Middle Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+GQ,226,Equatorial Guinea,Middle Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+GA,266,Gabon,Middle Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+ST,678,Sao Tome and Principe,Middle Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+BW,072,Botswana,Southern Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+LS,426,Lesotho,Southern Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+NA,516,Namibia,Southern Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+ZA,710,South Africa,Southern Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+SZ,748,Swaziland,Southern Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+BJ,204,Benin,Western Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+BF,854,Burkina Faso,Western Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+CV,132,Cape Verde,Western Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+CI,384,Côte d'Ivoire,Western Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+GM,270,Gambia,Western Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+GH,288,Ghana,Western Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+GN,324,Guinea,Western Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+GW,624,Guinea-Bissau,Western Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+LR,430,Liberia,Western Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+ML,466,Mali,Western Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+MR,478,Mauritania,Western Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+NE,562,Niger,Western Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+NG,566,Nigeria,Western Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+SH,654,Saint Helena,Western Africa,Africa,Developing_Nations,,Sub-Saharan-Africa
+SN,686,Senegal,Western Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+SL,694,Sierra Leone,Western Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+TG,768,Togo,Western Africa,Africa,Developing_Nations,Least developed countries,Sub-Saharan-Africa
+FJ,242,Fiji,Melanesia,Oceania,Developing_Nations,,
+NC,540,New Caledonia,Melanesia,Oceania,Developing_Nations,,
+PG,598,Papua New Guinea,Melanesia,Oceania,Developing_Nations,,
+SB,090,Solomon Islands,Melanesia,Oceania,Developing_Nations,Least developed countries,
+VU,548,Vanuatu,Melanesia,Oceania,Developing_Nations,Least developed countries,
+GU,316,Guam,Micronesia,Oceania,Developing_Nations,,
+KI,296,Kiribati,Micronesia,Oceania,Developing_Nations,Least developed countries,
+MH,584,Marshall Islands,Micronesia,Oceania,Developing_Nations,,
+FM,583,Micronesia,Micronesia,Oceania,Developing_Nations,,
+NR,520,Nauru,Micronesia,Oceania,Developing_Nations,,
+MP,580,Northern Mariana Islands,Micronesia,Oceania,Developing_Nations,,
+PW,585,Palau,Micronesia,Oceania,Developing_Nations,,
+AS,016,American Samoa,Polynesia,Oceania,Developing_Nations,,
+CK,184,Cook Islands,Polynesia,Oceania,Developing_Nations,,
+PF,258,French Polynesia,Polynesia,Oceania,Developing_Nations,,
+NU,570,Niue,Polynesia,Oceania,Developing_Nations,,
+PN,612,Pitcairn,Polynesia,Oceania,Developing_Nations,,
+WS,882,Samoa,Polynesia,Oceania,Developing_Nations,Least developed countries,
+TK,772,Tokelau,Polynesia,Oceania,Developing_Nations,,
+TO,776,Tonga,Polynesia,Oceania,Developing_Nations,,
+TV,798,Tuvalu,Polynesia,Oceania,Developing_Nations,Least developed countries,
+WF,876,Wallis and Futuna,Polynesia,Oceania,Developing_Nations,,
+AI,660,Anguilla,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+AG,028,Antigua and Barbuda,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+AW,533,Aruba,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+BS,044,Bahamas,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+BB,052,Barbados,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+BQ,535,Bonaire,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+VG,092,Virgin Islands,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+KY,136,Cayman Islands,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+CU,192,Cuba,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+CW,531,Curaçao,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+DM,212,Dominica,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+DO,214,Dominican Republic,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+GD,308,Grenada,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+GP,312,Guadeloupe,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+HT,332,Haiti,Caribbean,Americas,Developing_Nations,Least developed countries,Latin America and the Caribbean
+JM,388,Jamaica,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+MQ,474,Martinique,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+MS,500,Montserrat,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+PR,630,Puerto Rico,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+BL,652,Saint Barthélemy,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+KN,659,Saint Kitts and Nevis,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+LC,662,Saint Lucia,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+MF,663,Saint Martin (French part),Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+VC,670,Saint Vincent and the Grenadines,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+SX,534,Sint Maarten (Dutch part),Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+TT,780,Trinidad and Tobago,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+TC,796,Turks and Caicos Islands,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+VI,850,Virgin Islands,Caribbean,Americas,Developing_Nations,,Latin America and the Caribbean
+AU,036,Australia,Australia and New Zealand,Oceania,Developed regions,,
+NZ,554,New Zealand,Australia and New Zealand,Oceania,Developed regions,,
+NF,574,Norfolk Island,Australia and New Zealand,Oceania,Developing_Nations,,
