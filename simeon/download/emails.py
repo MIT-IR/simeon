@@ -65,14 +65,9 @@ def process_email_file(
                         break
                     fh.write(chunk)
             decrypt_files(
-                fnames=out, verbose=verbose,
-                logger=logger, timeout=timeout
+                fnames=out, verbose=verbose, logger=logger,
+                timeout=timeout, keepfiles=keepfiles
             )
-    if not keepfiles:
-        try:
-            os.remove(out)
-        except OSError:
-            pass
     return os.path.splitext(out)[0]
 
 

@@ -51,7 +51,9 @@ def _extract_values(record, paths):
         yield subrec.get(end, '')
 
 
-def decrypt_files(fnames, verbose=True, logger=None, timeout=None):
+def decrypt_files(
+    fnames, verbose=True, logger=None, timeout=None, keepfiles=False
+):
     """
     Decrypt the given file with gpg.
     This assumes that the gpg command
@@ -65,6 +67,8 @@ def decrypt_files(fnames, verbose=True, logger=None, timeout=None):
     :param logger: A logging.Logger object to print the command with
     :type timeout: Union[int, None]
     :param timeout: Number of seconds to wait for the decryption to finish
+    :type keepfiles: bool
+    :param keepfiles: Whether or not to keep the encrypted files after decryption
     :rtype: bool
     :return: Returns True if the decryption does not fail
     :raises: DecryptionError
@@ -87,6 +91,12 @@ def decrypt_files(fnames, verbose=True, logger=None, timeout=None):
     if verbose and logger is not None:
         for line in proc.stdout:
             logger.info(line.decode('utf8', 'ignore').strip())
+    if not keepfiles:
+        for file_ in fnames:
+            try:
+                os.remove(file_)
+            except:
+                continue
     return True
 
 

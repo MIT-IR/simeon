@@ -74,17 +74,6 @@ def _batch_archive_names(names, size, include_edge=False):
         yield bucket
 
 
-def _delete_all(items):
-    """
-    Delete the given items from the local file system
-    """
-    for item in items:
-        try:
-            os.remove(item)
-        except:
-            continue
-
-
 def batch_decrypt_files(
     all_files, size=100, verbose=False, logger=None,
     timeout=None, keepfiles=False,
@@ -112,8 +101,8 @@ def batch_decrypt_files(
         for batch in _batch_them(all_files, size):
             async_result = pool.apply_async(
                     func=decrypt_files, kwds=dict(
-                        fnames=batch, verbose=verbose,
-                        logger=logger, timeout=timeout
+                        fnames=batch, verbose=verbose, logger=logger,
+                        timeout=timeout, keepfiles=keepfiles,
                     )
             )
             results[async_result] = batch
@@ -129,8 +118,6 @@ def batch_decrypt_files(
         raise DecryptionError(
             'Multiple files failed to decrypt. Please consult the logs.'
         )
-    if not keepfiles:
-        _delete_all(all_files)
 
 
 def unpacker(fname, names, ddir, courses=None, tables_only=False):
