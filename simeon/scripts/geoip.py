@@ -348,13 +348,19 @@ def main():
                 'Failed to open the MaxMind database: {e}'.format(e=excp)
             )
             sys.exit(1)
-        make_geo_data(
-            db=locs, ip_files=args.ip_files,
-            outfile=args.output, un_data=un_denoms,
-            tracking_logs=args.tracking_logs,
-            logger=args.logger,
-        )
-        args.logger.info('Done processing the given IP files')
+        try:
+            make_geo_data(
+                db=locs, ip_files=args.ip_files,
+                outfile=args.output, un_data=un_denoms,
+                tracking_logs=args.tracking_logs,
+                logger=args.logger,
+            )
+            args.logger.info('Done processing the given IP files')
+        except Exception as excp:
+            args.logger.error(
+                'Failed to make geolocation data: {e}'.format(e=excp)
+            )
+            sys.exit(1)
     else:
         try:
             configs = cli_utils.find_config(args.config_file)
