@@ -147,6 +147,8 @@ logs/
 *.mmdb
 !requirements.txt
 !requirements_dev.txt
+!simeon/scripts/data
+!simeon/scripts/data/*.csv
 
 # Simeon configs
 *.cfg
