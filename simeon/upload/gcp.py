@@ -15,7 +15,7 @@ from simeon.upload import utilities as uputils
 from simeon.report import utilities as rutils
 from simeon.exceptions import LoadJobException
 from simeon.upload.utilities import (
-    SCHEMA_DIR
+    SCHEMA_DIR, course_to_bq_dataset
 )
 
 
@@ -46,6 +46,33 @@ class BigqueryClient(bigquery.Client):
     """
     Subclass bigquery.Client and add convenience methods
     """
+    def get_course_tables(self, course_id):
+        """
+        Get all the tables related to the given course ID
+
+        :type course_id: str
+        :param course_id: edX course ID in format ORG/NUMBER/TERM
+        :rtype: Dict[str, set]
+        :return: A dict with keys as log and sql, and values as table names
+        """
+        out = {'log': set(), 'sql': set()}
+        log_dset = course_to_bq_dataset(course_id, 'log', self.project)
+        latest_dset = course_to_bq_dataset(course_id, 'sql', self.project)
+        query = """select table_schema, table_name
+        from `region-us`.INFORMATION_SCHEMA.TABLES
+        where table_schema in ('{f}', '{s}')"""
+        query = query.format(
+            f=log_dset.split('.')[-1], s=latest_dset.split('.')[-1]
+        )
+        job = self.query(query)
+        for row in job.result():
+            ds = row.get('table_schema')
+            if ds.endswith('_logs'):
+                out['log'].add(row.get('table_name'))
+            else:
+                out['sql'].add(row.get('table_name'))
+        return out
+
     def load_tables_from_dir(
         self, dirname: str, file_type: str, project: str,
         create: bool, append: bool, use_storage: bool=False,
