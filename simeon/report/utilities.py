@@ -1474,7 +1474,9 @@ def make_tables_from_sql(
             query_dir=query_dir, youtube_table=youtube_table,
             schema_dir=schema_dir, **kwargs
         )
-        if fail_fast and not out[table]:
+        # If fail_fast is requested, and making the table
+        # returns a dictionary of errors, then return
+        if fail_fast and out[table]:
             return out
     return out
 
