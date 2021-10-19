@@ -122,14 +122,14 @@ def list_files(parsed_args):
             if parsed_args.begin_date <= fdate <= parsed_args.end_date:
                 if parsed_args.json:
                     if parsed_args.names_only:
-                        print(blob.name)
+                        print(blob.name, flush=True)
                     else:
-                        print(blob.to_json())
+                        print(blob.to_json(), flush=True)
                 else:
                     if parsed_args.names_only:
-                        print(blob.name)
+                        print(blob.name, flush=True)
                     else:
-                        print(blob)
+                        print(blob, flush=True)
                 seen.add(blob.name)
     sys.exit(0 if seen else 1)
 
@@ -1567,10 +1567,16 @@ def main():
         args.logger.error('Interrupted by the user')
         sys.exit(1)
     except BrokenPipeError:
-        # This should be raised by list_files
-        # close the sys.stderr file handle to allow the shell
-        # to cleanly pipe the printed file names
-        sys.stderr.close()
+        # This should be raised by list_files.
+        # Redirect sys.stdout and sys.stderr streams to devnull
+        # Return exit code 0, since the cause of this exception
+        # may be because some program from the shell decided to
+        # close its end of the shell PIPE. Therefore, that's not
+        # an issue to simeon 
+        devnull = os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull, sys.stdout.fileno())
+        os.dup2(devnull, sys.stderr.fileno())
+        sys.exit(0)
     except:
         _, excp, tb = sys.exc_info()
         if isinstance(excp, (EarlyExitError, SystemExit)):
