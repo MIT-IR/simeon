@@ -247,7 +247,7 @@ def wait_for_bq_job_ids(job_list, client):
                 try:
                     rjob = client.get_job(job)
                     if rjob.state == 'DONE':
-                        src = ', '.join(getattr(rjob, 'source_uris', []))
+                        src = ', '.join(getattr(rjob, 'source_uris', []) or [])
                         err = (rjob.errors or [])
                         for e in err:
                             if e:
