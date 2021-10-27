@@ -1013,7 +1013,7 @@ def main():
     )
     downloader.add_argument(
         '--request-id', '-r',
-        help='Request ID when listing RDX files',
+        help='Request ID when downloading RDX files',
     )
     downloader.add_argument(
         '--decryption-timeout', '-t',
@@ -1572,7 +1572,7 @@ def main():
         # Return exit code 0, since the cause of this exception
         # may be because some program from the shell decided to
         # close its end of the shell PIPE. Therefore, that's not
-        # an issue to simeon 
+        # an issue to simeon
         devnull = os.open(os.devnull, os.O_WRONLY)
         os.dup2(devnull, sys.stdout.fileno())
         os.dup2(devnull, sys.stderr.fileno())
