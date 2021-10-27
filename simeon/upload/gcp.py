@@ -263,7 +263,7 @@ class BigqueryClient(bigquery.Client):
         temp_table_name = '{t}_{d}_{u}_temp'.format(
             t=table,
             d=datetime.now().strftime('%Y%m%d%H%M%S%f'),
-            u=uuid.uuid4().replace('-', '').replace('.', '')
+            u=uuid.uuid4().hex.replace('-', '').replace('.', '')
         )
         temp_table = bigquery.Table.from_string(temp_table_name)
         schema, desc = uputils.get_bq_schema(table, schema_dir=schema_dir)
