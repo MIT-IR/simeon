@@ -4,6 +4,7 @@ Utilities functions and classes to help with loading data to Google Cloud
 import glob
 import gzip
 import os
+import uuid
 from datetime import datetime
 from typing import List
 
@@ -259,7 +260,12 @@ class BigqueryClient(bigquery.Client):
             table = '{p}.{t}'.format(p=self.project, t=table)
         dataset = table.rsplit('.', 1)[0]
         bqtable = bigquery.Table.from_string(table)
-        temp_table = bigquery.Table.from_string(table + '_temp')
+        temp_table_name = '{t}_{d}_{u}_temp'.format(
+            t=table,
+            d=datetime.now().strftime('%Y%m%d%H%M%S%f'),
+            u=uuid.uuid4().replace('-', '').replace('.', '')
+        )
+        temp_table = bigquery.Table.from_string(temp_table_name)
         schema, desc = uputils.get_bq_schema(table, schema_dir=schema_dir)
         bqtable.schema = schema
         bqtable.description = desc
@@ -299,7 +305,7 @@ class BigqueryClient(bigquery.Client):
                 e='\n'.join(self.extract_error_messages(job.errors))
             ))
         query = MERGE_DDL.format(
-            first=table, second=table + '_temp', column=col,
+            first=table, second=temp_table_name, column=col,
         )
         qjob = self.query(query)
         rutils.wait_for_bq_job_ids([qjob.job_id], self)
