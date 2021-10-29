@@ -86,9 +86,7 @@ def process_line(
     line = line.strip()
     if isinstance(line, bytes):
         line = line.decode('utf8', 'ignore')
-    if not line.startswith('{'):
-        if 'localhost {' in line[:27]:
-            line = line.split('localhost ')[-1]
+    line = line[line.index('{'):]
     try:
         record = json.loads(line)
     except (JSONDecodeError, TypeError):

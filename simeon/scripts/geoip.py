@@ -33,7 +33,6 @@ from argparse import (
 from datetime import datetime
 
 import simeon
-import simeon.download.logs as logs
 import simeon.scripts.utilities as cli_utils
 import simeon.upload.gcp as gcp
 
@@ -66,15 +65,8 @@ def get_log_record(line, lcnt, logger):
     """
     errmsg = 'Line number {l} not processed: {e}'
     try:
-        rec = logs.process_line(line=line, lcount=lcnt)
-        rec = rec.get('data') or {}
-        if not isinstance(rec, dict):
-            if logger:
-                logger.warning(
-                    errmsg.format(l=lcnt, e='Not a valid JSON record')
-                )
-            return {}
-        return rec
+        line = line[line.index('{'):]
+        return json.loads(line)
     except Exception as excp:
         if logger:
             logger.warning(errmsg.format(l=lcnt, e=excp))
@@ -346,6 +338,10 @@ def main():
         )
         sys.exit(1)
     if args.command == 'extract':
+        if args.logger:
+            args.logger.info(
+                'Generating geolocation data from the IPs in the given files'
+            )
         files = []
         for file_ in args.ip_files:
             if '*' in file_:
