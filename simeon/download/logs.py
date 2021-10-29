@@ -86,7 +86,7 @@ def process_line(
     line = line.strip()
     if isinstance(line, bytes):
         line = line.decode('utf8', 'ignore')
-    line = line[line.index('{'):]
+    line = line[line.find('{'):]
     try:
         record = json.loads(line)
     except (JSONDecodeError, TypeError):

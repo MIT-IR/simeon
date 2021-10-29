@@ -52,7 +52,7 @@ UN_DATA_FILE = os.path.join(
 )
 
 
-def get_log_record(line, lcnt, logger):
+def get_log_record(line, lcnt, fname, logger):
     """
     Extract a record from a tracklog using the given string and line count
 
@@ -60,16 +60,20 @@ def get_log_record(line, lcnt, logger):
     :param line: A line from a tracking log file
     :type lcnt: int
     :param lcnt: Line count of the given line in the tracking log file
+    :type fname: str
+    :param fname: Name of file being processed
+    :type logger: logging.Logger
+    :param logger: Logger object through which to output messages
     :rtype: dict
     :return: Deserialized data
     """
-    errmsg = 'Line number {l} not processed: {e}'
+    errmsg = 'Line number {l} from file {f} not processed: {e}'
     try:
-        line = line[line.index('{'):]
+        line = line[line.find('{'):]
         return json.loads(line)
     except Exception as excp:
         if logger:
-            logger.warning(errmsg.format(l=lcnt, e=excp))
+            logger.warning(errmsg.format(l=lcnt, f=fname, e=excp))
         return {}
 
 
@@ -133,8 +137,9 @@ def make_geo_data(
         for ip_file in ip_files:
             if tracking_logs:
                 fh = gzip.open(ip_file, 'rt')
-                reader = (
-                    get_log_record(l, i, logger) for i, l in enumerate(fh, 1)
+                reader = map(
+                    lambda t: get_log_record(t[1], t[0], ip_file, logger),
+                    enumerate(fh, 1)
                 )
             else:
                 fh = open(ip_file)
