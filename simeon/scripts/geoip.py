@@ -33,6 +33,7 @@ from argparse import (
 from datetime import datetime
 
 import simeon
+import simeon.download.logs as logs
 import simeon.scripts.utilities as cli_utils
 import simeon.upload.gcp as gcp
 
@@ -50,6 +51,34 @@ UN_DATA_FILE = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), 'data',
     'geographic_regions_by_country.csv'
 )
+
+
+def get_log_record(line, lcnt, logger):
+    """
+    Extract a record from a tracklog using the given string and line count
+
+    :type line: Union[str, bytes]
+    :param line: A line from a tracking log file
+    :type lcnt: int
+    :param lcnt: Line count of the given line in the tracking log file
+    :rtype: dict
+    :return: Deserialized data
+    """
+    errmsg = 'Line number {l} not processed: {e}'
+    try:
+        rec = logs.process_line(line=line, lcount=lcnt)
+        rec = rec.get('data') or {}
+        if not isinstance(rec, dict):
+            if logger:
+                logger.warning(
+                    errmsg.format(l=lcnt, e='Not a valid JSON record')
+                )
+            return {}
+        return rec
+    except Exception as excp:
+        if logger:
+            logger.warning(errmsg.format(l=lcnt, e=excp))
+        return {}
 
 
 def import_un_denominations(fname=None):
@@ -112,7 +141,9 @@ def make_geo_data(
         for ip_file in ip_files:
             if tracking_logs:
                 fh = gzip.open(ip_file, 'rt')
-                reader = map(json.loads, fh)
+                reader = (
+                    get_log_record(l, i, logger) for i, l in enumerate(fh, 1)
+                )
             else:
                 fh = open(ip_file)
                 reader = csv.DictReader(fh, fieldnames=['ip'])
