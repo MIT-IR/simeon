@@ -217,7 +217,7 @@ def split_sql_files(parsed_args):
                     msg.format(f=fname, w='Decrypting the contents in')
                 )
                 sqls.batch_decrypt_files(
-                    all_files=to_decrypt, size=100,
+                    all_files=to_decrypt, size=parsed_args.decryption_batch,
                     verbose=parsed_args.verbose, logger=parsed_args.logger,
                     timeout=parsed_args.decryption_timeout,
                     keepfiles=parsed_args.keep_encrypted
@@ -1030,6 +1030,12 @@ def main():
         ),
         action='store_true',
     )
+    downloader.add_argument(
+        '--decryption-batch', '-g',
+        help='Number of files to batch decrypt using gpg',
+        type=int,
+        default=50,
+    )
     cdgroup = downloader.add_mutually_exclusive_group(required=False)
     cdgroup.add_argument(
         '--courses', '-c',
@@ -1263,6 +1269,12 @@ def main():
             'Otherwise, simeon reports the error and moves on to the next thing.'
         ),
         action='store_true',
+    )
+    splitter.add_argument(
+        '--decryption-batch', '-g',
+        help='Number of files to batch decrypt using gpg',
+        type=int,
+        default=50,
     )
     pusher = subparsers.add_parser(
         'push',
