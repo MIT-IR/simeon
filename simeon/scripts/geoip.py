@@ -144,7 +144,7 @@ def make_geo_data(
             else:
                 fh = open(ip_file)
                 reader = csv.DictReader(fh, fieldnames=['ip'])
-            seen = set()
+            # seen = set()
             line = 0
             while True:
                 line += 1
@@ -163,9 +163,11 @@ def make_geo_data(
                         print(msg, file=sys.stderr)
                     continue
                 ip_address = rec.get('ip')
-                if not ip_address or ip_address in seen:
+                if not ip_address:
                     continue
-                seen.add(ip_address)
+                # if not ip_address or ip_address in seen:
+                #     continue
+                # seen.add(ip_address)
                 try:
                     info = db.city(ip_address)
                     un_info = un_data.get(info.country.iso_code, {})
