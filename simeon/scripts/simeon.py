@@ -1032,7 +1032,10 @@ def main():
     )
     downloader.add_argument(
         '--decryption-batch', '-g',
-        help='Number of files to batch decrypt using gpg',
+        help=(
+            'Number of files to batch decrypt using gpg. '
+            'Default: %(default)s'
+        ),
         type=int,
         default=50,
     )
@@ -1272,7 +1275,10 @@ def main():
     )
     splitter.add_argument(
         '--decryption-batch', '-g',
-        help='Number of files to batch decrypt using gpg',
+        help=(
+            'Number of files to batch decrypt using gpg. '
+            'Default: %(default)s'
+        ),
         type=int,
         default=50,
     )
