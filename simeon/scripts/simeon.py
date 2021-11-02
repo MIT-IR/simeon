@@ -220,7 +220,8 @@ def split_sql_files(parsed_args):
                     all_files=to_decrypt, size=parsed_args.decryption_batch,
                     verbose=parsed_args.verbose, logger=parsed_args.logger,
                     timeout=parsed_args.decryption_timeout,
-                    keepfiles=parsed_args.keep_encrypted
+                    keepfiles=parsed_args.keep_encrypted,
+                    njobs=parsed_args.jobs,
                 )
                 parsed_args.logger.info(
                     msg.format(f=fname, w='Done decrypting the contents in')
