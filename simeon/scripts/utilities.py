@@ -4,6 +4,7 @@ Utility functions for the simeon CLI tool
 import glob
 import logging
 import os
+import socket
 import sys
 import configparser
 from argparse import ArgumentTypeError
@@ -334,16 +335,20 @@ def make_logger(user='SIMEON', verbose=True, stream=None):
         stream = open(stream, 'a')
     level = logging.INFO if verbose else logging.WARN
     formatter = logging.Formatter(
-        '%(asctime)s:%(levelname)s:%(name)s:%(message)s',
+        '%(asctime)s:%(hostname)s:%(levelname)s:%(name)s:%(message)s',
         '%Y-%m-%d %H:%M:%S%z'
     )
+    # formatter = logging.Formatter(
+    #     '%(asctime)s:%(levelname)s:%(name)s:%(message)s',
+    #     '%Y-%m-%d %H:%M:%S%z'
+    # )
     handler = logging.StreamHandler(stream=stream)
     handler.setLevel(level)
     handler.set_name(user)
     handler.setFormatter(formatter)
     logger = logging.Logger(user, level)
     logger.addHandler(handler)
-    return logger
+    return logging.LoggerAdapter(logger, {'hostname': socket.gethostname()})
 
 
 def make_config_file(output=None):
@@ -470,6 +475,7 @@ def course_paths_from_file(fname):
     out = set()
     with open(fname) as fh:
         for line in fh:
+            line = line.split(':')[-1]
             c = line.strip().replace('/', '__').replace('+', '__')
             out.add(c.replace('.', '_').replace('-', '_').lower())
         return out
