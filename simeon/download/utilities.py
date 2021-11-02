@@ -77,7 +77,7 @@ def decrypt_files(
     if isinstance(fnames, str):
         fnames = [fnames]
     verbosity = '--verbose' if verbose else ''
-    cmd = 'gpg {v} --batch --yes --decrypt-files {f}'.format(
+    cmd = 'gpg {v} --status-fd 2 --batch --yes --decrypt-files {f}'.format(
         f=' '.join(fnames), v=verbosity
     )
     if verbose and logger is not None:

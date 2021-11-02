@@ -6,8 +6,9 @@ import signal
 import sys
 import traceback
 import zipfile
+import multiprocessing as mp
 from multiprocessing.pool import (
-    Pool as ProcessPool, ThreadPool, TimeoutError
+    Pool as ProcessPool, ThreadPool, TimeoutError,
 )
 
 from simeon.download.utilities import (
@@ -42,16 +43,32 @@ def _pool_initializer(fname):
         signal.signal(sig, signal.SIG_DFL)
 
 
+def _sum_batch_sizes(batch):
+    """
+    Get the sum of the file sizes in the given batch of file names
+    """
+    try:
+        return sum(map(lambda f: os.stat(f).st_size, batch))
+    except OSError:
+        return 0
+
+
 def _batch_them(items, size):
     """
-    Batch the given items by size
+    Batch the given items by size.
+    If the sum of the file sizes in a batch is greater than
+    500 megabytes, then yield the batch even if it does not
+    have as many as items as the given size parameter.
     """
     bucket = []
+    size_sum = 0
     for item in items:
         bucket.append(item)
-        if len(bucket) == size:
+        size_sum += os.stat(item).st_size
+        if len(bucket) == size or size_sum > 500 * 10**6:
             yield bucket[:]
             bucket = []
+            size_sum = 0
     if bucket:
         yield bucket
 
@@ -76,7 +93,7 @@ def _batch_archive_names(names, size, include_edge=False):
 
 def batch_decrypt_files(
     all_files, size=100, verbose=False, logger=None,
-    timeout=None, keepfiles=False,
+    timeout=None, keepfiles=False, njobs=5,
 ):
     """
     Batch the files by the given size and pass each batch to gpg to decrypt.
@@ -93,10 +110,14 @@ def batch_decrypt_files(
     :param timeout: Number of seconds to wait for the decryption to finish
     :type keepfiles: bool
     :param keepfiles: Keep the encrypted files after decrypting them.
+    :type njobs: int
+    :param njobs: Number of threads to use to call gpg in parallel
     :rtype: None
     :return: Nothing, but decrypts the .sql files from the given archive
     """
-    with ThreadPool(5) as pool:
+    nprocs = mp.cpu_count() - 1
+    njobs = nprocs if njobs > nprocs else njobs
+    with ThreadPool(njobs) as pool:
         results = dict()
         for batch in _batch_them(all_files, size):
             async_result = pool.apply_async(
