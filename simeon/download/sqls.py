@@ -117,20 +117,32 @@ def batch_decrypt_files(
     """
     nprocs = mp.cpu_count() - 1
     njobs = nprocs if njobs > nprocs else njobs
-    with ThreadPool(njobs) as pool:
-        results = dict()
+    failures = 0
+    if njobs > 2:
+        with ThreadPool(njobs) as pool:
+            results = dict()
+            for batch in _batch_them(all_files, size):
+                async_result = pool.apply_async(
+                        func=decrypt_files, kwds=dict(
+                            fnames=batch, verbose=verbose, logger=logger,
+                            timeout=timeout, keepfiles=keepfiles,
+                        )
+                )
+                results[async_result] = batch
+            for result in results:
+                try:
+                    result.get()
+                except DecryptionError as excp:
+                    failures += 1
+                    if logger:
+                        logger.error(excp)
+    else:
         for batch in _batch_them(all_files, size):
-            async_result = pool.apply_async(
-                    func=decrypt_files, kwds=dict(
-                        fnames=batch, verbose=verbose, logger=logger,
-                        timeout=timeout, keepfiles=keepfiles,
-                    )
-            )
-            results[async_result] = batch
-        failures = 0
-        for result in results:
             try:
-                result.get()
+                decrypt_files(
+                    fnames=batch, verbose=verbose, logger=logger,
+                    timeout=timeout, keepfiles=keepfiles
+                )
             except DecryptionError as excp:
                 failures += 1
                 if logger:
