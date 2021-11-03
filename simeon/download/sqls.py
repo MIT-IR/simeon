@@ -61,14 +61,15 @@ def _batch_them(items, size):
     have as many as items as the given size parameter.
     """
     bucket = []
-    size_sum = 0
+    # size_sum = 0
     for item in items:
         bucket.append(item)
-        size_sum += os.stat(item).st_size
-        if len(bucket) == size or size_sum > 500 * 10**6:
+        # size_sum += os.stat(item).st_size
+        if len(bucket) == size:
+        # if len(bucket) == size or size_sum > 500 * 10**6:
             yield bucket[:]
             bucket = []
-            size_sum = 0
+            # size_sum = 0
     if bucket:
         yield bucket
 
@@ -216,15 +217,15 @@ def process_sql_archive(
     :param tables_only: Whether to extract file names only (no unarchiving)
     :type debug: bool
     :param debug: Show the stacktrace when an error occurs
-    :rtype: Iterable[str]
-    :return: List of file names
+    :rtype: Set[str]
+    :return: A set of file names
     """
     cpaths = set()
     for c in (courses or []):
         cpaths.add(c.replace('/', '-'))
     if ddir is None:
         ddir, _ = os.path.split(archive)
-    out = []
+    out = set()
     with zipfile.ZipFile(archive) as zf:
         names = zf.namelist()
     batches = _batch_archive_names(names, len(names) // size, include_edge)
@@ -243,7 +244,7 @@ def process_sql_archive(
                 try:
                     targets = result.get(timeout=60)
                     processed += 1
-                    out.extend(targets or [])
+                    out.update(targets or [])
                 except TimeoutError:
                     continue
                 except KeyboardInterrupt:
