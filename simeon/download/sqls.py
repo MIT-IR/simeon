@@ -61,15 +61,11 @@ def _batch_them(items, size):
     have as many as items as the given size parameter.
     """
     bucket = []
-    # size_sum = 0
     for item in items:
         bucket.append(item)
-        # size_sum += os.stat(item).st_size
         if len(bucket) == size:
-        # if len(bucket) == size or size_sum > 500 * 10**6:
             yield bucket[:]
             bucket = []
-            # size_sum = 0
     if bucket:
         yield bucket
 
@@ -119,18 +115,18 @@ def batch_decrypt_files(
     nprocs = mp.cpu_count() - 1
     njobs = nprocs if njobs > nprocs else njobs
     failures = 0
-    if njobs > 2:
+    if njobs > 1:
         with ThreadPool(njobs) as pool:
             results = dict()
             for batch in _batch_them(all_files, size):
                 async_result = pool.apply_async(
                         func=decrypt_files, kwds=dict(
                             fnames=batch, verbose=verbose, logger=logger,
-                            timeout=timeout, keepfiles=keepfiles,
+                            timeout=timeout, keepfiles=False,
                         )
                 )
                 results[async_result] = batch
-            for result in results:
+            for result, batch in results.items():
                 try:
                     result.get()
                 except DecryptionError as excp:
@@ -142,7 +138,7 @@ def batch_decrypt_files(
             try:
                 decrypt_files(
                     fnames=batch, verbose=verbose, logger=logger,
-                    timeout=timeout, keepfiles=keepfiles
+                    timeout=timeout, keepfiles=False
                 )
             except DecryptionError as excp:
                 failures += 1
@@ -154,7 +150,7 @@ def batch_decrypt_files(
         )
 
 
-def unpacker(fname, names, ddir, courses=None, tables_only=False):
+def unpacker(fname, names, ddir, cpaths=None, tables_only=False):
     """
     A worker callable to pass a Thread or Process pool
     """
@@ -170,7 +166,7 @@ def unpacker(fname, names, ddir, courses=None, tables_only=False):
             cfolder = os.path.basename(os.path.dirname(target_dir))
         else:
             cfolder = os.path.basename(target_dir)
-        if courses and cfolder not in courses:
+        if cpaths and cfolder not in cpaths:
             continue
         if 'ccx' in cfolder:
             dir_segments = cfolder.replace('-', '__', 1).split('-')
@@ -194,6 +190,22 @@ def unpacker(fname, names, ddir, courses=None, tables_only=False):
                 fh.write(line)
         targets.append(target_name)
     return targets
+
+
+def force_delete_files(files):
+    """
+    Delete the given files without regard for whatever or not they exist
+
+    :type files: Iterable[str]
+    :param files: Iterable of file names
+    :rtype: None
+    :return: Returns nothing, but deletes the given files from the local FS
+    """
+    for file_ in files:
+        try:
+            os.unlink(file_)
+        except:
+            continue
 
 
 def process_sql_archive(

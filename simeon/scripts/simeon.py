@@ -223,6 +223,8 @@ def split_sql_files(parsed_args):
                     keepfiles=parsed_args.keep_encrypted,
                     njobs=parsed_args.jobs,
                 )
+                if not parsed_args.keep_encrypted:
+                    sqls.force_delete_files(to_decrypt)
                 parsed_args.logger.info(
                     msg.format(f=fname, w='Done decrypting the contents in')
                 )
