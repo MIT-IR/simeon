@@ -1,6 +1,7 @@
 """
 Module to process SQL files from edX
 """
+import glob
 import os
 import signal
 import sys
@@ -8,7 +9,7 @@ import traceback
 import zipfile
 import multiprocessing as mp
 from multiprocessing.pool import (
-    Pool as ProcessPool, ThreadPool, TimeoutError,
+    Pool as ProcessPool, TimeoutError,
 )
 
 from simeon.download.utilities import (
@@ -53,6 +54,21 @@ def _sum_batch_sizes(batch):
         return 0
 
 
+def _batch_by_dirs(dirnames, size):
+    """
+    Batch the .gpg files using the directories
+    """
+    bucket = []
+    for dname in dirnames:
+        bucket += glob.iglob(os.path.join(dname, '*.gpg'))
+        bucket += glob.glob(os.path.join(dname, '*', '*.gpg'))
+        if len(bucket) >= size:
+            yield bucket[:]
+            bucket = []
+    if bucket:
+        yield bucket
+
+        
 def _batch_them(items, size):
     """
     Batch the given items by size.
@@ -63,7 +79,7 @@ def _batch_them(items, size):
     bucket = []
     for item in items:
         bucket.append(item)
-        if len(bucket) == size:
+        if len(bucket) >= size:
             yield bucket[:]
             bucket = []
     if bucket:
@@ -133,7 +149,7 @@ def batch_decrypt_files(
     :return: Nothing, but decrypts the .sql files from the given archive
     """
     failures = 0
-    for batch in _batch_them(all_files, size):
+    for batch in _batch_by_dirs(map(os.path.dirname, all_files), size):
         try:
             decrypt_files(
                 fnames=batch, verbose=verbose, logger=logger,
@@ -143,12 +159,12 @@ def batch_decrypt_files(
             failures += len(batch)
             if logger:
                 logger.error(excp)
+        if not keepfiles:
+            force_delete_files(batch, logger=logger)
     if failures:
         raise DecryptionError(
             'Multiple files failed to decrypt. Please consult the logs.'
         )
-    if not keepfiles:
-        force_delete_files(all_files, logger=logger)
 
 
 def unpacker(fname, names, ddir, cpaths=None, tables_only=False):
