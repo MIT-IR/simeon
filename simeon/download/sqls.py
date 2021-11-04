@@ -88,6 +88,26 @@ def _batch_archive_names(names, size, include_edge=False):
         yield bucket
 
 
+def force_delete_files(files, logger=None):
+    """
+    Delete the given files without regard for whatever or not they exist
+
+    :type files: Iterable[str]
+    :param files: Iterable of file names
+    :type logger: Union[None, logging.Logger]
+    :param logger: A logger object to log messages
+    :rtype: None
+    :return: Returns nothing, but deletes the given files from the local FS
+    """
+    for file_ in files:
+        try:
+            os.unlink(file_)
+        except OSError as excp:
+            if logger is not None:
+                logger.warning(excp)
+            continue
+
+
 def batch_decrypt_files(
     all_files, size=100, verbose=False, logger=None,
     timeout=None, keepfiles=False, njobs=5,
@@ -112,42 +132,23 @@ def batch_decrypt_files(
     :rtype: None
     :return: Nothing, but decrypts the .sql files from the given archive
     """
-    nprocs = mp.cpu_count() - 1
-    njobs = nprocs if njobs > nprocs else njobs
     failures = 0
-    if njobs > 1:
-        with ThreadPool(njobs) as pool:
-            results = dict()
-            for batch in _batch_them(all_files, size):
-                async_result = pool.apply_async(
-                        func=decrypt_files, kwds=dict(
-                            fnames=batch, verbose=verbose, logger=logger,
-                            timeout=timeout, keepfiles=False,
-                        )
-                )
-                results[async_result] = batch
-            for result, batch in results.items():
-                try:
-                    result.get()
-                except DecryptionError as excp:
-                    failures += 1
-                    if logger:
-                        logger.error(excp)
-    else:
-        for batch in _batch_them(all_files, size):
-            try:
-                decrypt_files(
-                    fnames=batch, verbose=verbose, logger=logger,
-                    timeout=timeout, keepfiles=False
-                )
-            except DecryptionError as excp:
-                failures += 1
-                if logger:
-                    logger.error(excp)
+    for batch in _batch_them(all_files, size):
+        try:
+            decrypt_files(
+                fnames=batch, verbose=verbose, logger=logger,
+                timeout=timeout, keepfiles=True
+            )
+        except DecryptionError as excp:
+            failures += len(batch)
+            if logger:
+                logger.error(excp)
     if failures:
         raise DecryptionError(
             'Multiple files failed to decrypt. Please consult the logs.'
         )
+    if not keepfiles:
+        force_delete_files(all_files, logger=logger)
 
 
 def unpacker(fname, names, ddir, cpaths=None, tables_only=False):
@@ -190,22 +191,6 @@ def unpacker(fname, names, ddir, cpaths=None, tables_only=False):
                 fh.write(line)
         targets.append(target_name)
     return targets
-
-
-def force_delete_files(files):
-    """
-    Delete the given files without regard for whatever or not they exist
-
-    :type files: Iterable[str]
-    :param files: Iterable of file names
-    :rtype: None
-    :return: Returns nothing, but deletes the given files from the local FS
-    """
-    for file_ in files:
-        try:
-            os.unlink(file_)
-        except:
-            continue
 
 
 def process_sql_archive(

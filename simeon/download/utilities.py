@@ -95,9 +95,11 @@ def decrypt_files(
     if not keepfiles:
         for file_ in fnames:
             try:
-                os.remove(file_)
-            except:
-                continue
+                os.unlink(file_)
+            except OSError as excp:
+                if logger:
+                    msg = 'Failed to delete encrypted file {f}: {e}'
+                    logger.warning(msg.format(f=file_, e=excp))
     return True
 
 
@@ -183,15 +185,7 @@ def format_sql_filename(fname: str) -> (str, str):
     out = '{o}-{e}.gpg'.format(o=out, e=ending) if ending else out
     if 'ora/' in fname:
         out = os.path.join('ora', out)
-    return (
-        fname,
-        os.path.join(
-            site, dirname,
-            cid,
-            # cid.replace('-', '__', 2).replace('-', '_').replace('.', '_'),
-            out,
-        )
-    )
+    return fname, os.path.join(site, dirname, cid, out)
 
 
 def get_course_id(record: dict, paths=COURSE_PATHS) -> str:
