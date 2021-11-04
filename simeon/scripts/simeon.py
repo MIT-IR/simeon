@@ -1035,10 +1035,11 @@ def main():
         '--decryption-batch', '-g',
         help=(
             'Number of files to batch decrypt using gpg. '
+            'Expected values are between 1 and 50. '
             'Default: %(default)s'
         ),
-        type=int,
-        default=50,
+        type=cli_utils.NumberRange(int),
+        default=25,
     )
     cdgroup = downloader.add_mutually_exclusive_group(required=False)
     cdgroup.add_argument(
@@ -1278,10 +1279,11 @@ def main():
         '--decryption-batch', '-g',
         help=(
             'Number of files to batch decrypt using gpg. '
+            'Expected values are between 1 and 50. '
             'Default: %(default)s'
         ),
-        type=int,
-        default=50,
+        type=cli_utils.NumberRange(int),
+        default=25,
     )
     pusher = subparsers.add_parser(
         'push',

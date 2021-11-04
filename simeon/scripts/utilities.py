@@ -593,6 +593,31 @@ def process_extra_args(extras):
     return out
 
 
+class NumberRange(object):
+    """
+    Check if a number is within a range. Otherwise, raise ArgumentTypeError
+    """
+    def __init__(self, type_=int, lower=1, upper=50):
+        self.type_ = type_
+        self.lower = lower
+        self.upper = upper
+
+    def __call__(self, value):
+        try:
+            v = self.type_(value)
+        except Exception as excp:
+            msg = (
+                'The given value {v} could not be converted to a number. '
+                'Please provide a valid value: {e}.'
+            )
+            raise ArgumentTypeError(msg.format(v=value, e=excp)) from None
+        if not (self.lower <= v <= self.upper):
+            msg = '{v} is not in the range [{l}, {u}]'
+            raise ArgumentTypeError(
+                msg.format(v=value, l=self.lower, u=self.upper)
+            )
+
+
 __all__ = [
     'bq_table', 'course_listings', 'course_paths_from_file',
     'courses_from_file', 'expand_paths', 'filter_generated_items',
