@@ -76,10 +76,11 @@ def decrypt_files(
     """
     if isinstance(fnames, str):
         fnames = [fnames]
-    verbosity = '--verbose' if verbose else ''
-    cmd = 'gpg {v} --status-fd 2 --batch --yes --decrypt-files {f}'.format(
-        f=' '.join(fnames), v=verbosity
+    cmd = (
+        'gpg --status-fd 2 --batch --yes --pinentry error '
+        '--decrypt-files {f}'
     )
+    cmd = cmd.format(f=' '.join(fnames))
     if verbose and logger is not None:
         logger.info('{m}...'.format(m=cmd[:200]))
     proc =  sb.Popen(shlex.split(cmd), stdout=sb.PIPE, stderr=sb.PIPE)
@@ -89,9 +90,9 @@ def decrypt_files(
         raise DecryptionError(
             msg.format(f=' '.join(fnames), e=err, rc=proc.returncode)
         )
-    if verbose and logger is not None:
-        for line in proc.stdout:
-            logger.info(line.decode('utf8', 'ignore').strip())
+    # if verbose and logger is not None:
+    #     for line in proc.stdout:
+    #         logger.info(line.decode('utf8', 'ignore').strip())
     if not keepfiles:
         for file_ in fnames:
             try:
@@ -156,7 +157,7 @@ def get_sql_course_id(course_str: str) -> str:
     return course_str.split(':')[-1].replace('+', '/')
 
 
-def format_sql_filename(fname: str) -> (str, str):
+def format_sql_filename(fname: str):
     """
     Reformat the given edX SQL encrypted file name into a name indicative
     of where the file should end up after the SQL archive is unpacked.

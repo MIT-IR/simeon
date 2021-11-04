@@ -61,7 +61,6 @@ def _batch_by_dirs(dirnames, size):
     bucket = []
     for dname in dirnames:
         bucket += glob.iglob(os.path.join(dname, '*.gpg'))
-        bucket += glob.glob(os.path.join(dname, '*', '*.gpg'))
         if len(bucket) >= size:
             yield bucket[:]
             bucket = []
@@ -149,7 +148,7 @@ def batch_decrypt_files(
     :return: Nothing, but decrypts the .sql files from the given archive
     """
     failures = 0
-    for batch in _batch_by_dirs(map(os.path.dirname, all_files), size):
+    for batch in _batch_them(all_files, size):
         try:
             decrypt_files(
                 fnames=batch, verbose=verbose, logger=logger,
