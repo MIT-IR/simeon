@@ -52,6 +52,21 @@ def _extract_values(record, paths):
         yield subrec.get(end, '')
 
 
+def _is_gpg_legacy():
+    """
+    Check if gpg is of a version below 2.1
+    """
+    p = sb.Popen(shlex.split('gpg --version'), stdout=sb.PIPE, stderr=sb.PIPE)
+    if p.wait() != 0:
+        raise DecryptionError(
+            'The gpg command does not exist, '
+            'or it is not properly configured.'
+        )
+    line = p.stdout.readline().decode('utf8', 'ignore').strip()
+    version = line.split()[-1]
+    return version < '2.1.0'
+
+
 def decrypt_files(
     fnames, verbose=True, logger=None, timeout=None, keepfiles=False
 ):
@@ -77,11 +92,12 @@ def decrypt_files(
     if isinstance(fnames, str):
         fnames = [fnames]
     cmd = (
-        'gpg {v}--status-fd 2 --batch --yes --pinentry error '
+        'gpg {v}--status-fd 2 --batch --yes {p}'
         '--decrypt-files {f}'
     )
     verbosity = '--verbose ' if verbose else ''
-    cmd = cmd.format(f=' '.join(fnames), v=verbosity)
+    pinentry = '' if _is_gpg_legacy() else '--pinentry error '
+    cmd = cmd.format(f=' '.join(fnames), v=verbosity, p=pinentry)
     if verbose and logger is not None:
         logger.info('{m}...'.format(m=cmd[:200]))
     proc =  sb.Popen(shlex.split(cmd), stdout=sb.PIPE, stderr=sb.PIPE)
