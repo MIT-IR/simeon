@@ -163,12 +163,12 @@ def batch_decrypt_files(
                 fnames=batch, verbose=verbose, logger=logger,
                 timeout=timeout, keepfiles=True
             )
+            if not keepfiles:
+                force_delete_files(batch, logger=logger)
         except DecryptionError as excp:
             failures += len(batch)
             if logger:
                 logger.error(excp)
-        if not keepfiles:
-            force_delete_files(batch, logger=logger)
     if failures:
         raise DecryptionError(
             'Multiple files failed to decrypt. Please consult the logs.'
@@ -211,8 +211,11 @@ def unpacker(fname, names, ddir, cpaths=None, tables_only=False):
             continue
         os.makedirs(target_dir, exist_ok=True)
         with proc_zfile.open(name) as zh, open(target_name, 'wb') as fh:
-            for line in zh:
-                fh.write(line)
+            while True:
+                chunk = zh.read(1048576)
+                if not chunk:
+                    break
+                fh.write(chunk)
         targets.append(target_name)
     return targets
 

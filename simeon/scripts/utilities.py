@@ -616,10 +616,11 @@ class NumberRange(object):
             raise ArgumentTypeError(
                 msg.format(v=value, l=self.lower, u=self.upper)
             )
+        return v
 
 
 __all__ = [
-    'bq_table', 'course_listings', 'course_paths_from_file',
+    'NumberRange', 'bq_table', 'course_listings', 'course_paths_from_file',
     'courses_from_file', 'expand_paths', 'filter_generated_items',
     'find_config', 'gcs_bucket', 'is_parallel', 'items_from_files',
     'make_config_file', 'make_logger', 'optional_file',

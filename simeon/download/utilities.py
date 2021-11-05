@@ -77,22 +77,22 @@ def decrypt_files(
     if isinstance(fnames, str):
         fnames = [fnames]
     cmd = (
-        'gpg --status-fd 2 --batch --yes --pinentry error '
+        'gpg {v}--status-fd 2 --batch --yes --pinentry error '
         '--decrypt-files {f}'
     )
-    cmd = cmd.format(f=' '.join(fnames))
+    verbosity = '--verbose ' if verbose else ''
+    cmd = cmd.format(f=' '.join(fnames), v=verbosity)
     if verbose and logger is not None:
         logger.info('{m}...'.format(m=cmd[:200]))
     proc =  sb.Popen(shlex.split(cmd), stdout=sb.PIPE, stderr=sb.PIPE)
     if proc.wait(timeout=timeout) != 0:
-        err = proc.stderr.read().decode('utf8', 'ignore').strip()
-        msg = 'Failed to decrypt file names {f} with return code {rc}: {e}'
-        raise DecryptionError(
-            msg.format(f=' '.join(fnames), e=err, rc=proc.returncode)
-        )
-    # if verbose and logger is not None:
-    #     for line in proc.stdout:
-    #         logger.info(line.decode('utf8', 'ignore').strip())
+        errs = []
+        for line in proc.stderr:
+            errs.append(line.decode('utf8', 'ignore').strip())
+        msg = 'Failed to decrypt file names {f} with return code {rc}:\n{e}'
+        raise DecryptionError(msg.format(f=' '.join(
+            fnames), e='\n'.join(errs), rc=proc.returncode
+        ))
     if not keepfiles:
         for file_ in fnames:
             try:
@@ -101,6 +101,15 @@ def decrypt_files(
                 if logger:
                     msg = 'Failed to delete encrypted file {f}: {e}'
                     logger.warning(msg.format(f=file_, e=excp))
+    if verbose:
+        msgs = []
+        for line in proc.stdout:
+            line = line.decode('utf8', 'ignore').strip()
+            lower = line.lower()
+            if any(k in lower for k in ('error', 'warn', 'pending')):
+                msgs.append(line)
+        if msgs:
+            logger.warning('\n'.join(msgs))
     return True
 
 
