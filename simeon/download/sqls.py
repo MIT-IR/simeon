@@ -61,6 +61,7 @@ def _batch_by_dirs(dirnames, size):
     bucket = []
     for dname in dirnames:
         bucket += glob.iglob(os.path.join(dname, '*.gpg'))
+        bucket += glob.iglob(os.path.join(dname, 'ora', '*.gpg'))
         if len(bucket) >= size:
             yield bucket[:]
             bucket = []
