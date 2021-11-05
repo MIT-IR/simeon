@@ -104,10 +104,7 @@ def decrypt_files(
     if verbose:
         msgs = []
         for line in proc.stdout:
-            line = line.decode('utf8', 'ignore').strip()
-            lower = line.lower()
-            if any(k in lower for k in ('error', 'warn', 'pending')):
-                msgs.append(line)
+            msgs.append(line.decode('utf8', 'ignore').strip())
         if msgs:
             logger.warning('\n'.join(msgs))
     return True

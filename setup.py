@@ -6,7 +6,7 @@ exec(open(os.path.join('simeon', '__init__.py')).read())
 
 setup(
     name='simeon',
-    version=globals().get('__version__', '0.0.14'),
+    version=globals().get('__version__', '0.0.15'),
     author='MIT Institutional Research',
     author_email='irx@mit.edu',
     packages=find_packages(exclude=('docs',)),
