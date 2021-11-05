@@ -148,7 +148,15 @@ def batch_decrypt_files(
     :return: Nothing, but decrypts the .sql files from the given archive
     """
     failures = 0
-    for batch in _batch_them(all_files, size):
+    folders = set()
+    orapth = os.path.join('', 'ora', '')
+    for file_ in all_files:
+        if orapth in file_:
+            folders.add(os.path.dirname(os.path.dirname(file_)))
+        else:
+            folders.add(os.path.dirname(file_))
+
+    for batch in _batch_by_dirs(folders, size):
         try:
             decrypt_files(
                 fnames=batch, verbose=verbose, logger=logger,
