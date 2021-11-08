@@ -291,6 +291,8 @@ def split_files(parsed_args):
     """
     Split log or SQL files
     """
+    if parsed_args.no_courses:
+        parsed_args.courses = None
     items = []
     for item in parsed_args.downloaded_files:
         if '*' in item:
@@ -732,12 +734,12 @@ def push_generated_files(parsed_args):
             )
             sys.exit(1)
     # If file type in log or sql, filter by course ID
-    if parsed_args.file_type in ('log', 'sql',):
+    if parsed_args.file_type in ('log', 'sql',) and not parsed_args.no_create:
         parsed_args.items = cli_utils.filter_generated_items(
             parsed_args.items, parsed_args.courses
         )
     try:
-        # Not sure if this is going to give memory back to the OS,
+        # Not sure if this is going to reduce memory usage by this process,
         # but worth the try
         delattr(parsed_args, 'courses')
     except AttributeError:
@@ -1043,6 +1045,14 @@ def main():
     )
     cdgroup = downloader.add_mutually_exclusive_group(required=False)
     cdgroup.add_argument(
+        '--no-courses', '-V',
+        help=(
+            'DO NOT try to limit the generated files to only some course IDs. '
+            'Therefore, simeon will split everything.'
+        ),
+        action='store_true',
+    )
+    cdgroup.add_argument(
         '--courses', '-c',
         help=(
             'A list of white space separated course IDs whose data files '
@@ -1226,6 +1236,14 @@ def main():
     )
     csgroup = splitter.add_mutually_exclusive_group(required=False)
     csgroup.add_argument(
+        '--no-courses', '-V',
+        help=(
+            'DO NOT try to limit the generated files to only some course IDs. '
+            'Therefore, simeon will split everything.'
+        ),
+        action='store_true',
+    )
+    csgroup.add_argument(
         '--courses', '-c',
         help=(
             'A list of white space separated course IDs whose data files '
@@ -1406,6 +1424,14 @@ def main():
         action='store_true',
     )
     cpgroup = pusher.add_mutually_exclusive_group(required=False)
+    cpgroup.add_argument(
+        '--no-courses', '-V',
+        help=(
+            'DO NOT try to limit the loaded files to only some course IDs. '
+            'Therefore, simeon will push everything.'
+        ),
+        action='store_true',
+    )
     cpgroup.add_argument(
         '--courses', '-c',
         help=(
