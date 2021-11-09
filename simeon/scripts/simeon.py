@@ -1,7 +1,6 @@
 """
 simeon is a command line tool that helps with processing edx data
 """
-import functools
 import glob
 import multiprocessing as mp
 import os
@@ -16,9 +15,7 @@ import simeon
 from simeon.download import (
     aws, emails, logs, sqls, utilities as downutils
 )
-from simeon.exceptions import (
-    AWSException, EarlyExitError
-)
+from simeon.exceptions import EarlyExitError
 from simeon.report import (
     QUERY_DIR, SCHEMA_DIR,
     make_sql_tables_par, make_sql_tables_seq,
@@ -27,7 +24,7 @@ from simeon.report import (
 from simeon.scripts import utilities as cli_utils
 from simeon.upload import gcp
 
-
+# Global logger variable for signal handlers
 logger = None
 
 
@@ -734,7 +731,7 @@ def push_generated_files(parsed_args):
             )
             sys.exit(1)
     # If file type in log or sql, filter by course ID
-    if parsed_args.file_type in ('log', 'sql',) and not parsed_args.no_create:
+    if parsed_args.file_type in ('log', 'sql',) and not parsed_args.no_courses:
         parsed_args.items = cli_utils.filter_generated_items(
             parsed_args.items, parsed_args.courses
         )
@@ -910,7 +907,8 @@ def main():
     )
     subparsers = parser.add_subparsers(
         description='Choose a subcommand to carry out a task with simeon',
-        dest='command'
+        dest='command',
+        metavar='subcommand',
     )
     subparsers.required = True
     downloader = subparsers.add_parser(
