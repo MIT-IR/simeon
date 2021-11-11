@@ -1,6 +1,7 @@
 """
 Utility functions for the simeon CLI tool
 """
+import argparse
 import glob
 import logging
 import os
@@ -619,10 +620,33 @@ class NumberRange(object):
         return v
 
 
+class TableOrderAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string):
+        if any(k in sys.argv for k in ('--no-reorder', '-O')):
+            print(values)
+            setattr(namespace, 'tables', values)
+            return
+        tables = []
+        for table in REPORT_TABLES:
+            if table in values:
+                tables.append(table)
+        if not tables:
+            if not values:
+                raise ArgumentTypeError(
+                    'Table names required when --tables is given'
+                )
+            setattr(namespace, 'tables', values)
+            return
+        for table in values:
+            if table not in tables:
+                tables.append(table)
+        setattr(namespace, 'tables', tables)
+
+
 __all__ = [
-    'NumberRange', 'bq_table', 'course_listings', 'course_paths_from_file',
-    'courses_from_file', 'expand_paths', 'filter_generated_items',
-    'find_config', 'gcs_bucket', 'is_parallel', 'items_from_files',
-    'make_config_file', 'make_logger', 'optional_file',
+    'NumberRange', 'TableOrderAction', 'bq_table', 'course_listings',
+    'course_paths_from_file', 'courses_from_file', 'expand_paths',
+    'filter_generated_items', 'find_config', 'gcs_bucket', 'is_parallel',
+    'items_from_files', 'make_config_file', 'make_logger', 'optional_file',
     'parsed_date', 'process_extra_args',
 ]

@@ -201,6 +201,7 @@ def main():
     parser = ArgumentParser(
         description=__doc__,
         formatter_class=RawDescriptionHelpFormatter,
+        allow_abbrev=False,
     )
     parser.add_argument(
         '--debug', '-B',

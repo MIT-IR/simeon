@@ -566,23 +566,31 @@ def push_to_bq(parsed_args):
         # Use .job_id here, so we don't lug LoadJob objects in memory.
         # We would still need to make network calls
         # to check on their statuses when wait_for_loads is True.
-        job = loader(
-            item, file_type=parsed_args.file_type,
-            project=parsed_args.project, create=parsed_args.create,
-            append=parsed_args.append, use_storage=parsed_args.use_storage,
-            bucket=parsed_args.bucket, max_bad_rows=parsed_args.max_bad_rows,
-            schema_dir=parsed_args.schema_dir,
-            format_=parsed_args.file_format,
-            patch=parsed_args.update_description,
-        )
-        if parsed_args.wait_for_loads:
-            if isinstance(job, (list, tuple)):
-                appender(map(lambda j: j.job_id, job))
-            else:
-                appender(job.job_id)
-        parsed_args.logger.info(
-            'Created BigQuery load job(s) for item(s) in {f!r}'.format(f=item)
-        )
+        try:
+            job = loader(
+                item, file_type=parsed_args.file_type,
+                project=parsed_args.project, create=parsed_args.create,
+                append=parsed_args.append, use_storage=parsed_args.use_storage,
+                bucket=parsed_args.bucket,
+                max_bad_rows=parsed_args.max_bad_rows,
+                schema_dir=parsed_args.schema_dir,
+                format_=parsed_args.file_format,
+                patch=parsed_args.update_description,
+            )
+            if parsed_args.wait_for_loads:
+                if isinstance(job, (list, tuple)):
+                    appender(map(lambda j: j.job_id, job))
+                else:
+                    appender(job.job_id)
+            parsed_args.logger.info(
+                'Created BigQuery load job(s) for item(s) in {f!r}'.format(f=item)
+            )
+        except Exception as excp:
+            msg = (
+                'Failed to create BigQuery load job(s) for item(s) '
+                'in {f!r}: {e}'
+            )
+            parsed_args.logger.error(msg.format(f=item, e=excp))
     if not all_jobs and parsed_args.wait_for_loads:
         errmsg = (
             'No items processed. Perhaps, the given directory is empty?'
@@ -762,16 +770,6 @@ def make_secondary_tables(parsed_args):
     if not parsed_args.course_ids:
         parsed_args.logger.info('No items to process')
         sys.exit(0)
-    cond = all((
-        'person_course' in parsed_args.tables,
-        parsed_args.geo_table is None,
-    ))
-    if cond:
-        parsed_args.logger.error(
-            'person_course cannot be generated without a valid --geo-table'
-            ' value provided.'
-        )
-        sys.exit(1)
     parsed_args.extra_args = cli_utils.process_extra_args(
         parsed_args.extra_args
     )
@@ -787,11 +785,11 @@ def make_secondary_tables(parsed_args):
                 project=parsed_args.project
             )
     except Exception as excp:
-        errmsg = 'Failed to connect to BigQuery: {e}'
-        parsed_args.logger.error(errmsg.format(e=excp))
-        parsed_args.logger.error(
+        errmsg = (
+            'Failed to connect to BigQuery: {e}\n'
             'The error may be from an invalid service account file'
         )
+        parsed_args.logger.error(errmsg.format(e=excp))
         sys.exit(1)
     parsed_args.logger.info('Connection established')
     if parsed_args.in_files:
@@ -875,6 +873,7 @@ def main():
     parser = ArgumentParser(
         description=__doc__,
         formatter_class=RawDescriptionHelpFormatter,
+        allow_abbrev=False,
         epilog=cli_utils.CLI_MAIN_EPILOG,
     )
     parser.add_argument(
@@ -1495,6 +1494,14 @@ def main():
         action='store_true',
     )
     reporter.add_argument(
+        '--no-reorder', '-O',
+        help=(
+            'DO NOT reorder the given table names. Generate them in the '
+            'order provided.'
+        ),
+        action='store_true',
+    )
+    reporter.add_argument(
         '--tables', '-t',
         help=(
             'Table or tables to be computed using corresponding query files. '
@@ -1502,6 +1509,7 @@ def main():
         ),
         nargs='*',
         default=cli_utils.REPORT_TABLES,
+        action=cli_utils.TableOrderAction,
     )
     reporter.add_argument(
         '--geo-table', '-g',
