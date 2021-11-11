@@ -1468,12 +1468,15 @@ def make_tables_from_sql(
     dataset.description = gcp.DST_DESC.get('sql', '')
     client.create_dataset(dataset, exists_ok=True)
     for table in tables:
-        out[table] = make_table_from_sql(
-            table=table, course_id=course_id, client=client, project=project,
-            append=append, geo_table=geo_table, wait=wait,
-            query_dir=query_dir, youtube_table=youtube_table,
-            schema_dir=schema_dir, **kwargs
-        )
+        try:
+            out[table] = make_table_from_sql(
+                table=table, course_id=course_id, client=client,
+                project=project, append=append, geo_table=geo_table,
+                wait=wait, query_dir=query_dir, youtube_table=youtube_table,
+                schema_dir=schema_dir, **kwargs
+            )
+        except Exception as excp:
+            out[table] = [{'message': str(excp)}]
         # If fail_fast is requested, and making the table
         # returns a dictionary of errors, then return
         if fail_fast and out[table]:
