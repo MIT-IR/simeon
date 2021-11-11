@@ -1,13 +1,11 @@
 """
 Utility functions and classes associated with uploading data to GCP, so far.
 """
-import glob
 import json
 import os
 import re
 
 from google.cloud import bigquery
-from google.cloud import storage
 
 from simeon.exceptions import (
     BigQueryNameException, MissingSchemaException
@@ -148,9 +146,7 @@ def local_to_bq_table(fname: str, file_type: str, project: str) -> str:
             'could not be constructed with file name {f}. '
             'Please make sure that you are using the right file type.'
         )
-        raise BigQueryNameException(
-            msg.format(f=fname, t=file_type)
-        )
+        raise BigQueryNameException(msg.format(f=fname, t=file_type))
     return '{p}.{d}{s}.{t}'.format(
         d=dataset, s=suffix, p=project, t=table
     )
