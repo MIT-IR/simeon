@@ -915,7 +915,8 @@ def main():
         help='Download edX research data with the given criteria',
         description=(
             'Download edX research data with the given criteria below'
-        )
+        ),
+        allow_abbrev=False,
     )
     downloader.set_defaults(command='download')
     downloader.add_argument(
@@ -1102,7 +1103,8 @@ def main():
         help='List edX research data with the given criteria',
         description=(
             'List edX research data with the given criteria below'
-        )
+        ),
+        allow_abbrev=False,
     )
     lister.set_defaults(command='list')
     lister.add_argument(
@@ -1173,7 +1175,8 @@ def main():
     splitter = subparsers.add_parser(
         'split',
         help='Split downloaded tracking log or SQL files',
-        description='Split downloaded tracking log or SQL files'
+        description='Split downloaded tracking log or SQL files',
+        allow_abbrev=False,
     )
     splitter.set_defaults(command='split')
     splitter.add_argument(
@@ -1306,6 +1309,7 @@ def main():
         description=(
             'Push to the given items to Google Cloud Storage or BigQuery'
         ),
+        allow_abbrev=False,
     )
     pusher.set_defaults(command='push')
     pusher.add_argument(
@@ -1452,6 +1456,7 @@ def main():
         description=(
             'Make course reports using the datasets and tables in BigQuery'
         ),
+        allow_abbrev=False,
     )
     reporter.set_defaults(command='report')
     reporter.add_argument(

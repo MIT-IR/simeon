@@ -346,7 +346,8 @@ def main():
         description=(
             'Extract YouTube video details using the given API token and '
             'course axis json.gz files'
-        )
+        ),
+        allow_abbrev=False,
     )
     extracter.add_argument(
         '--output', '-o',
@@ -389,7 +390,8 @@ def main():
         description=(
             'Merge the data file generated from simeon-youtube extract '
             'to the given target BigQuery table.'
-        )
+        ),
+        allow_abbrev=False,
     )
     merger.add_argument(
         'youtube_file',

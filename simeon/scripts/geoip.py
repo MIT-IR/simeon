@@ -242,7 +242,8 @@ def main():
         description=(
             'Extract geolocation information for the IP addresses '
             'in the given IP files from the MaxMind version2 database'
-        )
+        ),
+        allow_abbrev=False,
     )
     extracter.add_argument(
         'db',
@@ -289,7 +290,8 @@ def main():
         help='Merge the given file to a target BigQuery table name',
         description=(
             'Merge the given file to a target BigQuery table name'
-        )
+        ),
+        allow_abbrev=False,
     )
     merger.add_argument(
         'geofile',
