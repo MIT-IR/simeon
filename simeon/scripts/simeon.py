@@ -213,13 +213,18 @@ def split_sql_files(parsed_args):
                 parsed_args.logger.info(
                     msg.format(f=fname, w='Decrypting the contents in')
                 )
-                sqls.batch_decrypt_files(
-                    all_files=to_decrypt, size=parsed_args.decryption_batch,
-                    verbose=parsed_args.verbose, logger=parsed_args.logger,
-                    timeout=parsed_args.decryption_timeout,
-                    keepfiles=parsed_args.keep_encrypted,
-                    njobs=parsed_args.jobs,
-                )
+                try:
+                    sqls.batch_decrypt_files(
+                        all_files=to_decrypt, size=parsed_args.decryption_batch,
+                        verbose=parsed_args.verbose, logger=parsed_args.logger,
+                        timeout=parsed_args.decryption_timeout,
+                        keepfiles=parsed_args.keep_encrypted,
+                        njobs=parsed_args.jobs,
+                    )
+                except Exception as excp:
+                    if parsed_args.fail_fast:
+                        raise excp
+                    # parsed_args.logger.error(excp)
                 parsed_args.logger.info(
                     msg.format(f=fname, w='Done decrypting the contents in')
                 )
