@@ -173,7 +173,7 @@ class BigqueryClient(bigquery.Client):
             loader = self.load_table_from_uri
         else:
             loader = self.load_table_from_file
-        job_prefix = '{t}_data_load_{dt}-'.format(
+        job_prefix = 'simeon_{t}_data_load_{dt}-'.format(
             t=file_type, dt=datetime.now().strftime('%Y%m%d%H%M%S%f')
         )
         dest = uputils.local_to_bq_table(fname, file_type, project)
@@ -279,7 +279,7 @@ class BigqueryClient(bigquery.Client):
             except gcp_exceptions.NotFound:
                 pass
         temp_table.description = desc
-        job_prefix = '{t}_data_load_{dt}-'.format(
+        job_prefix = 'simeon_{t}_data_load_{dt}-'.format(
             t=bqtable.table_id,
             dt=datetime.now().strftime('%Y%m%d%H%M%S%f')
         )

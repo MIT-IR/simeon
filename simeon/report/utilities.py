@@ -1401,7 +1401,7 @@ def make_table_from_sql(
                 geo_table=geo_table, youtube_table=youtube_table,
                 course_id=course_id, **kwargs
             ),
-            job_id_prefix='{t}_{dt}'.format(
+            job_id_prefix='simeon_query_{t}_{dt}'.format(
                 t=table.replace('.', '_'),
                 dt=datetime.now().strftime('%Y%m%d%H%M%S%f')
             ),
