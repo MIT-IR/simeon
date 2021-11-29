@@ -150,7 +150,7 @@ def make_file_handle(fname: str, mode: str='wt', is_gzip: bool=False):
     :type fname: str
     :param fname: A file name whose handle needs to be created.
     :type mode: str
-    :param mode: "a[b]?" for append or "w[b]?" for write
+    :param mode: "a[bt]?" for append or "w[bt]?" for write
     :type is_gzip: bool
     :param is_gzip: Whether or not to open it as a gzip file handle
     :rtype: Union[TextIOWrapper, BufferedReader]

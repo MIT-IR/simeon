@@ -2,6 +2,7 @@
 Module to process SQL files from edX
 """
 import glob
+import itertools
 import os
 import signal
 import sys
@@ -56,15 +57,19 @@ def _sum_batch_sizes(batch):
 
 def _batch_by_dirs(dirnames, size):
     """
-    Batch the .gpg files using the directories
+    Batch the .gpg files using the main course directories
     """
     bucket = []
     for dname in dirnames:
-        bucket += glob.iglob(os.path.join(dname, '*.gpg'))
-        bucket += glob.iglob(os.path.join(dname, 'ora', '*.gpg'))
-        if len(bucket) >= size:
-            yield bucket[:]
-            bucket = []
+        files = glob.iglob(os.path.join(dname, '*.gpg'))
+        files = itertools.chain(
+            files, glob.iglob(os.path.join(dname, 'ora', '*.gpg'))
+        )
+        for file_ in files:
+            bucket.append(file_)
+            if len(bucket) >= size:
+                yield bucket[:]
+                bucket = []
     if bucket:
         yield bucket
 
@@ -166,13 +171,15 @@ def batch_decrypt_files(
             if not keepfiles:
                 force_delete_files(batch, logger=logger)
         except DecryptionError as excp:
-            failures += len(batch)
+            failures += 1
             if logger:
                 logger.error(excp)
     if failures:
-        raise DecryptionError(
-            'Multiple files failed to decrypt. Please consult the logs.'
+        msg = (
+            '{c} batches of {s} files each failed ti decrypt. '
+            'Please consult the logs'
         )
+        raise DecryptionError(msg.format(c=failures, s=size))
 
 
 def unpacker(fname, names, ddir, cpaths=None, tables_only=False):

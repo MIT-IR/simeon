@@ -224,14 +224,15 @@ def split_sql_files(parsed_args):
                 except Exception as excp:
                     if parsed_args.fail_fast:
                         raise excp
-                    # parsed_args.logger.error(excp)
+                    parsed_args.logger.error(excp)
                 parsed_args.logger.info(
                     msg.format(f=fname, w='Done decrypting the contents in')
                 )
             if parsed_args.unpack_only:
                 continue
+            orapth = os.path.join('', 'ora', '')
             dirnames = set(
-                os.path.dirname(f) for f in to_decrypt if 'ora/' not in f
+                os.path.dirname(f) for f in to_decrypt if orapth not in f
             )
             parsed_args.logger.info('Making reports from course SQL files')
             if len(dirnames) == 1:
