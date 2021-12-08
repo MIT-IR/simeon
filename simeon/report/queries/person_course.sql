@@ -40,6 +40,9 @@ select
     null latitude,
     null longitude,
     {% endif %}
+    modal_agent.modal_agent,
+    modal_agent.mobile as ever_mobile,
+    modal_agent.desktop as ever_desktop,
     uic.profile_level_of_education as LoE,
     uic.profile_year_of_birth as YoB,
     uic.profile_gender as gender,
@@ -120,3 +123,4 @@ left join `{latest_dataset}.roles` roles using(user_id)
 left join `{latest_dataset}.course_modal_language` lang using(username)
 left join `{latest_dataset}.pc_video_watched` video using(user_id)
 left join `{latest_dataset}.person_enrollment_verified` enroll_verified using(user_id)
+left join `{latest_dataset}.course_modal_agent` modal_agent using(username)
