@@ -112,6 +112,21 @@
         },
         {
             "field_type": "STRING",
+            "name": "modal_agent",
+            "description": "Most frequently used method of accessing course materials, mobile or desktop"
+        },
+        {
+            "field_type": "INTEGER",
+            "name": "ever_mobile",
+            "description": "Has ever accessed course materials using a mobile browser or app 0/1"
+        },
+        {
+            "field_type": "INTEGER",
+            "name": "ever_desktop",
+            "description": "Has ever accessed course materials using a desktop browser"
+        },
+        {
+            "field_type": "STRING",
             "name": "LoE",
             "description": "Level of education"
         },
