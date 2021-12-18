@@ -161,19 +161,23 @@ def batch_decrypt_files(
             folders.add(os.path.dirname(os.path.dirname(file_)))
         else:
             folders.add(os.path.dirname(file_))
-
-    for batch in _batch_by_dirs(folders, size):
-        try:
-            decrypt_files(
-                fnames=batch, verbose=verbose, logger=logger,
-                timeout=timeout, keepfiles=True
-            )
-            if not keepfiles:
-                force_delete_files(batch, logger=logger)
-        except DecryptionError as excp:
-            failures += 1
-            if logger:
-                logger.error(excp)
+    while True:
+        decryptions = 0
+        for batch in _batch_by_dirs(folders, size):
+            try:
+                decrypt_files(
+                    fnames=batch, verbose=verbose, logger=logger,
+                    timeout=timeout, keepfiles=True
+                )
+                if not keepfiles:
+                    force_delete_files(batch, logger=logger)
+            except DecryptionError as excp:
+                failures += 1
+                if logger:
+                    logger.error(excp)
+            decryptions += len(batch)
+        if decryptions == 0 or failures or keepfiles:
+            break
     if failures:
         msg = (
             '{c} batches of {s} files each failed ti decrypt. '

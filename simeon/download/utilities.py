@@ -119,9 +119,13 @@ def decrypt_files(
                     logger.warning(msg.format(f=file_, e=excp))
     if verbose:
         msgs = []
-        for line in proc.stdout:
-            msgs.append(line.decode('utf8', 'ignore').strip())
-        if msgs:
+        # If stderr is needed, then add it to the tuple below
+        for stream in (proc.stdout,):
+            for line in stream:
+                line = line.decode('utf8', 'ignore').strip()
+                if line:
+                    msgs.append(line)
+        if msgs and logger:
             logger.warning('\n'.join(msgs))
     return True
 
