@@ -180,7 +180,7 @@ def batch_decrypt_files(
             break
     if failures:
         msg = (
-            '{c} batches of {s} files each failed ti decrypt. '
+            '{c} batches of {s} files each failed to decrypt. '
             'Please consult the logs'
         )
         raise DecryptionError(msg.format(c=failures, s=size))
