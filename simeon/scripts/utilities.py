@@ -2,12 +2,16 @@
 Utility functions for the simeon CLI tool
 """
 import argparse
+import configparser
 import glob
 import logging
 import os
+import shlex
 import socket
+import stat
+import subprocess as sb
 import sys
-import configparser
+import tempfile
 from argparse import ArgumentTypeError
 
 from dateutil.parser import parse as dateparse
@@ -644,10 +648,55 @@ class TableOrderAction(argparse.Action):
         setattr(namespace, 'tables', tables)
 
 
+def get_pager():
+    """
+    Get path to less or more
+    """
+    pagers = (os.getenv('PAGER'), 'less', 'more',)
+    for path in (os.getenv('PATH') or '').split(os.path.pathsep):
+        for pager in pagers:
+            if pager is None:
+                continue
+            pager = iter(pager.split(' ', 1))
+            prog = os.path.join(path, next(pager))
+            args = next(pager, None) or ''
+            try:
+                md = os.stat(prog).st_mode
+                if md & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH):
+                    return '{p} {a}'.format(p=prog, a=args)
+            except OSError:
+                continue
+
+
+class CustomArgParser(argparse.ArgumentParser):
+    """
+    A custom ArgumentParser class that prints help messages
+    using either less or more, if available. Otherwise, it does
+    what ArgumentParser does.
+    """
+    def print_help(self, file=None):
+        text = self.format_help()
+        pager = get_pager()
+        if pager is None:
+            return super().print_help(file)
+        fd, fname = tempfile.mkstemp(prefix='simeon_help_', suffix='.txt')
+        with open(fd, 'w') as fh:
+            super().print_help(fh)
+        cmd = shlex.split('{p} {f}'.format(p=pager, f=fname))
+        with sb.Popen(cmd) as proc:
+            rc = proc.wait()
+            try:
+                os.unlink(fname)
+            except:
+                pass
+            if rc != 0:
+                return super().print_help(file)
+
+
 __all__ = [
-    'NumberRange', 'TableOrderAction', 'bq_table', 'course_listings',
-    'course_paths_from_file', 'courses_from_file', 'expand_paths',
-    'filter_generated_items', 'find_config', 'gcs_bucket', 'is_parallel',
-    'items_from_files', 'make_config_file', 'make_logger', 'optional_file',
-    'parsed_date', 'process_extra_args',
+    'CustomArgParser', 'NumberRange', 'TableOrderAction', 'bq_table',
+    'course_listings', 'course_paths_from_file', 'courses_from_file',
+    'expand_paths', 'filter_generated_items', 'find_config', 'gcs_bucket',
+    'get_pager', 'is_parallel', 'items_from_files', 'make_config_file',
+    'make_logger', 'optional_file', 'parsed_date', 'process_extra_args',
 ]

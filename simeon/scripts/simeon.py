@@ -876,7 +876,7 @@ def main():
         'push': push_generated_files,
         'report': make_secondary_tables,
     }
-    parser = ArgumentParser(
+    parser = cli_utils.CustomArgParser(
         description=__doc__,
         formatter_class=RawDescriptionHelpFormatter,
         allow_abbrev=False,

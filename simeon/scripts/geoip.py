@@ -28,7 +28,7 @@ import os
 import sys
 import urllib.request as requests
 from argparse import (
-    ArgumentParser, FileType, RawDescriptionHelpFormatter
+    FileType, RawDescriptionHelpFormatter
 )
 from datetime import datetime
 
@@ -198,7 +198,7 @@ def main():
     """
     geoip entry point
     """
-    parser = ArgumentParser(
+    parser = cli_utils.CustomArgParser(
         description=__doc__,
         formatter_class=RawDescriptionHelpFormatter,
         allow_abbrev=False,

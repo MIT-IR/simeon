@@ -12,8 +12,7 @@ import sys
 import traceback
 import urllib.request as request
 from argparse import (
-    ArgumentParser, ArgumentTypeError,
-    FileType, RawDescriptionHelpFormatter
+    ArgumentTypeError, FileType, RawDescriptionHelpFormatter
 )
 
 import simeon
@@ -299,7 +298,7 @@ def main():
     """
     simeon-youtube entry point
     """
-    parser = ArgumentParser(
+    parser = cli_utils.CustomArgParser(
         description=__doc__,
         formatter_class=RawDescriptionHelpFormatter,
         allow_abbrev=False,
