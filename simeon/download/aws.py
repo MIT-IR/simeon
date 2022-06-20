@@ -19,19 +19,19 @@ from simeon.download.utilities import decrypt_files
 
 BUCKETS = {
     'email': {
-        'Bucket': 'course-data',
+        'Bucket': '{bucket}',
         'Prefix': 'email-opt-in/email-opt-in-{org}-',
     },
     'sql': {
-        'Bucket': 'course-data',
+        'Bucket': '{bucket}',
         'Prefix': '{org}-',
     },
     'log': {
-        'Bucket': 'edx-course-data',
+        'Bucket': '{bucket}',
         'Prefix': '{org}/{site}/events/{year}/{org}-{site}-events-',
     },
     'rdx': {
-        'Bucket': 'edx-course-data',
+        'Bucket': '{bucket}',
         'Prefix': '{org}/rdx/{request}',
     },
 }
@@ -43,15 +43,19 @@ O2B_MAP = dict(
 )
 
 
-def make_s3_bucket(bucket, client_id=None, client_secret=None):
+def make_s3_bucket(
+    bucket, client_id=None, client_secret=None, session_token=None,
+    profile_name=None,
+):
     """
     Make a simple boto3 Bucket object pointing to S3
     """
     try:
-        resource = boto.resource(
-            's3', aws_access_key_id=client_id,
-            aws_secret_access_key=client_secret
+        session = boto.Session(
+            aws_access_key_id=client_id, aws_secret_access_key=client_secret,
+            aws_session_token=session_token, profile_name=profile_name,
         )
+        resource = session.resource('s3')
         return resource.Bucket(bucket)
     except Exception as excp:
         raise AWSException(excp)

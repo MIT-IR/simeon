@@ -220,6 +220,10 @@ CONFIGS = {
         ('geo_table', configparser.ConfigParser.get),
         ('youtube_table', configparser.ConfigParser.get),
         ('extra_args', configparser.ConfigParser.get),
+        ('email_bucket', configparser.ConfigParser.get),
+        ('sql_bucket', configparser.ConfigParser.get),
+        ('log_bucket', configparser.ConfigParser.get),
+        ('rdx_bucket', configparser.ConfigParser.get),
     ),
     'GCP': (
         ('project', configparser.ConfigParser.get),
@@ -239,6 +243,10 @@ CONFIGS = {
     'AWS': (
         ('aws_cred_file', configparser.ConfigParser.get),
         ('profile_name', configparser.ConfigParser.get),
+        ('email_bucket', configparser.ConfigParser.get),
+        ('sql_bucket', configparser.ConfigParser.get),
+        ('log_bucket', configparser.ConfigParser.get),
+        ('rdx_bucket', configparser.ConfigParser.get),
     ),
 }
 REPORT_TABLES = [
