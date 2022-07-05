@@ -165,11 +165,12 @@ def make_geo_data(
                 ip_address = rec.get('ip')
                 if not ip_address:
                     continue
-                # if not ip_address or ip_address in seen:
-                #     continue
-                # seen.add(ip_address)
                 try:
                     info = db.city(ip_address)
+                    # If there is no country information, then we don't bother
+                    # with this IP
+                    if not info.country.iso_code or not info.country.names.get('en'):
+                        continue
                     un_info = un_data.get(info.country.iso_code, {})
                     subdiv = info.subdivisions.most_specific
                     row = {
@@ -441,8 +442,7 @@ def main():
             client.merge_to_table(
                 fname=args.geofile, table=args.geo_table, col=args.column,
                 use_storage=args.geofile.startswith('gs://'),
-                schema_dir=args.schema_dir, patch=args.update_description,
-                geoip=True,
+                schema_dir=args.schema_dir, patch=args.update_description
             )
         except Exception as excp:
             msg = 'Merging {f} to {t} failed with the following: {e}'

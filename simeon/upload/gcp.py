@@ -4,6 +4,7 @@ Utilities functions and classes to help with loading data to Google Cloud
 import glob
 import gzip
 import os
+from jinja2 import Template
 import uuid
 from datetime import datetime
 from typing import List
@@ -24,50 +25,16 @@ FILE_FORMATS = {
     'log': ['json'],
     'sql': ['csv', 'txt', 'sql', 'json']
 }
-MERGE_DDL = """MERGE {first} f USING {second} s
-ON f.{column} = s.{column}
+MERGE_DDL = """MERGE {{ first }} f USING {{ second }} s
+ON f.{{ column }} = s.{{ column }}
 WHEN NOT MATCHED THEN
 INSERT ROW
-"""
-MERGE_DDL_GEOIP = """MERGE {first} f using
-(select 
-ip,
-city,
-countryLabel,
-country,
-postalCode,
-continent,
-subdivision,
-region, 
-cc_by_ip,
-un_major_region,
-un_economic_group,
-un_developing_nation,
-un_special_region,
-latitude,
-longitude from
-(select *, ROW_NUMBER() over (partition by ip) rn
-from {second}) t
-where rn = 1) s
-on f.{column} = s.{column}
+{%- if update_cols is defined and update_cols %}
 WHEN MATCHED THEN
-UPDATE SET
-city = s.city,
-countryLabel = s.countryLabel,
-country = s.country,
-postalCode = s.postalCode,
-continent = s.continent,
-subdivision = s.subdivision,
-region = s.region,
-cc_by_ip = s.cc_by_ip,
-un_major_region = s.un_major_region,
-un_economic_group = s.un_economic_group,
-un_developing_nation = s.un_developing_nation,
-un_special_region = s.un_special_region,
-latitude = s.latitude,
-longitude = s.longitude
-WHEN NOT MATCHED THEN
-INSERT ROW
+UPDATE SET {% for col in update_cols -%}
+    f.{{ col }} = s.{{ col }}{% if not loop.last %}, {% endif %}
+{%- endfor %}
+{% endif %}
 """
 DST_DESC = {
     'log': 'Dataset to host the tracking log data from edX courses',
@@ -273,7 +240,6 @@ class BigqueryClient(bigquery.Client):
     def merge_to_table(
         self, fname, table, col,
         schema_dir=SCHEMA_DIR, use_storage=False, patch=False,
-        geoip=False,
     ):
         """
         Merge the given file to the target table name.
@@ -347,14 +313,12 @@ class BigqueryClient(bigquery.Client):
             raise LoadJobException(msg.format(
                 e='\n'.join(self.extract_error_messages(job.errors))
             ))
-        if not geoip:
-            query = MERGE_DDL.format(
-                first=table, second=temp_table_name, column=col,
-            )
-        else:
-            query = MERGE_DDL_GEOIP.format(
-                first=table, second=temp_table_name, column=col,
-            )
+        query_template = Template(MERGE_DDL)
+        update_cols = [f.name for f in bqtable.schema if f.name.lower() != col.lower()]
+        query = query_template.render(
+            first=table, second=temp_table_name,
+            column=col, update_cols=update_cols,
+        )
         qjob = self.query(query)
         rutils.wait_for_bq_job_ids([qjob.job_id], self)
         if qjob.errors:
