@@ -29,6 +29,46 @@ ON f.{column} = s.{column}
 WHEN NOT MATCHED THEN
 INSERT ROW
 """
+MERGE_DDL_GEOIP = """MERGE {first} f using
+(select 
+ip,
+city,
+countryLabel,
+country,
+postalCode,
+continent,
+subdivision,
+region, 
+cc_by_ip,
+un_major_region,
+un_economic_group,
+un_developing_nation,
+un_special_region,
+latitude,
+longitude from
+(select *, ROW_NUMBER() over (partition by ip) rn
+from {second}) t
+where rn = 1) s
+on f.{column} = s.{column}
+WHEN MATCHED THEN
+UPDATE SET
+city = s.city,
+countryLabel = s.countryLabel,
+country = s.country,
+postalCode = s.postalCode,
+continent = s.continent,
+subdivision = s.subdivision,
+region = s.region,
+cc_by_ip = s.cc_by_ip,
+un_major_region = s.un_major_region,
+un_economic_group = s.un_economic_group,
+un_developing_nation = s.un_developing_nation,
+un_special_region = s.un_special_region,
+latitude = s.latitude,
+longitude = s.longitude
+WHEN NOT MATCHED THEN
+INSERT ROW
+"""
 DST_DESC = {
     'log': 'Dataset to host the tracking log data from edX courses',
     'sql': (
@@ -233,6 +273,7 @@ class BigqueryClient(bigquery.Client):
     def merge_to_table(
         self, fname, table, col,
         schema_dir=SCHEMA_DIR, use_storage=False, patch=False,
+        geoip=False,
     ):
         """
         Merge the given file to the target table name.
@@ -251,6 +292,8 @@ class BigqueryClient(bigquery.Client):
         :param use_storage: Whether or not the given path is a GCS URI
         :type patch: bool
         :param patch: Whether or not to patch the description of the table
+        :type geoip: bool
+        :param geoip: Whether or not to use the custom GEOIP MERGE DDL
         :rtype: bigquery.QueryJob
         :returns: The QueryJob object associated with the merge carried out
         :raises: Propagates everything from the underlying package
@@ -304,9 +347,14 @@ class BigqueryClient(bigquery.Client):
             raise LoadJobException(msg.format(
                 e='\n'.join(self.extract_error_messages(job.errors))
             ))
-        query = MERGE_DDL.format(
-            first=table, second=temp_table_name, column=col,
-        )
+        if not geoip:
+            query = MERGE_DDL.format(
+                first=table, second=temp_table_name, column=col,
+            )
+        else:
+            query = MERGE_DDL_GEOIP.format(
+                first=table, second=temp_table_name, column=col,
+            )
         qjob = self.query(query)
         rutils.wait_for_bq_job_ids([qjob.job_id], self)
         if qjob.errors:

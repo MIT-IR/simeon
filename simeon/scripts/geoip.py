@@ -442,6 +442,7 @@ def main():
                 fname=args.geofile, table=args.geo_table, col=args.column,
                 use_storage=args.geofile.startswith('gs://'),
                 schema_dir=args.schema_dir, patch=args.update_description,
+                geoip=True,
             )
         except Exception as excp:
             msg = 'Merging {f} to {t} failed with the following: {e}'
