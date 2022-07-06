@@ -30,8 +30,17 @@ ON f.{{ column }} = s.{{ column }}
 WHEN NOT MATCHED THEN
 INSERT ROW
 {%- if update_cols is defined and update_cols %}
-WHEN MATCHED THEN
-UPDATE SET {% for col in update_cols -%}
+WHEN MATCHED {% if match_equal_columns is defined and match_equal_columns -%}
+AND {% for col in match_equal_columns %}
+s.{{ col }} = f.{{ col }} {% if not loop.last %} AND {% endif %}
+{% endfor %}
+{% endif %}
+{% if match_unequal_columns is defined and match_unequal_columns -%}
+AND {% for col in match_unequal_columns %}
+s.{{ col }} <> f.{{ col }} {% if not loop.last %} AND {% endif %}
+{% endfor -%}
+{% endif -%}
+THEN UPDATE SET {% for col in update_cols -%}
     f.{{ col }} = s.{{ col }}{% if not loop.last %}, {% endif %}
 {%- endfor %}
 {% endif %}
@@ -240,6 +249,7 @@ class BigqueryClient(bigquery.Client):
     def merge_to_table(
         self, fname, table, col,
         schema_dir=SCHEMA_DIR, use_storage=False, patch=False,
+        match_equal_columns=None, match_unequal_columns=None,
     ):
         """
         Merge the given file to the target table name.
@@ -258,8 +268,12 @@ class BigqueryClient(bigquery.Client):
         :param use_storage: Whether or not the given path is a GCS URI
         :type patch: bool
         :param patch: Whether or not to patch the description of the table
-        :type geoip: bool
-        :param geoip: Whether or not to use the custom GEOIP MERGE DDL
+        :type match_equal_columns: Union[List[str], None, Tuple[str]]
+        :param match_equal_columns: List of column names for which to set
+        equality (=) if WHEN MATCH is met during the merge.
+        :type match_unequal_columns: Union[List[str], None, Tuple[str]]
+        :param match_equal_columns: List of column names for which to set
+        inequality (<>) if WHEN MATCH is met during the merge.
         :rtype: bigquery.QueryJob
         :returns: The QueryJob object associated with the merge carried out
         :raises: Propagates everything from the underlying package
@@ -318,7 +332,10 @@ class BigqueryClient(bigquery.Client):
         query = query_template.render(
             first=table, second=temp_table_name,
             column=col, update_cols=update_cols,
+            match_equal_columns=match_equal_columns,
+            match_unequal_columns=match_unequal_columns,
         )
+        print(query)
         qjob = self.query(query)
         rutils.wait_for_bq_job_ids([qjob.job_id], self)
         if qjob.errors:

@@ -255,6 +255,8 @@ def merge_video_data(parsed_args):
             use_storage=parsed_args.youtube_file.startswith('gs://'),
             schema_dir=parsed_args.schema_dir,
             patch=parsed_args.update_description,
+            match_equal_columns=parsed_args.match_equal_columns,
+            match_unequal_columns=parsed_args.match_unequal_columns
         )
     except Exception as excp:
         _, excp, tb = sys.exc_info()
@@ -417,6 +419,24 @@ def main():
             'Default: %(default)s'
         ),
         default='id',
+    )
+    merger.add_argument(
+        '--match-equal-columns',
+        help=(
+            'Column names for which to set test equality (=) if the WHEN MATCH'
+            ' SQL condition is met. This is preceded by the AND keyword to '
+            'string conditions together.'
+        ),
+        nargs='*',
+    )
+    merger.add_argument(
+        '--match-unequal-columns',
+        help=(
+            'Column names for which to set test inequality (<>) if the WHEN '
+            'MATCH SQL condition is met. This is preceded by the AND keyword to '
+            'string conditions together.'
+        ),
+        nargs='*',
     )
     merger.add_argument(
         '--schema-dir', '-s',

@@ -335,6 +335,24 @@ def main():
         ),
         action='store_true',
     )
+    merger.add_argument(
+        '--match-equal-columns',
+        help=(
+            'Column names for which to set test equality (=) if the WHEN MATCH'
+            ' SQL condition is met. This is preceded by the AND keyword to '
+            'string conditions together.'
+        ),
+        nargs='*',
+    )
+    merger.add_argument(
+        '--match-unequal-columns',
+        help=(
+            'Column names for which to set test inequality (<>) if the WHEN '
+            'MATCH SQL condition is met. This is preceded by the AND keyword to '
+            'string conditions together.'
+        ),
+        nargs='*',
+    )
     args = parser.parse_args()
     args.logger = cli_utils.make_logger(
         user='SIMEON-GEOIP:{c}'.format(c=args.command.upper()),
@@ -442,7 +460,9 @@ def main():
             client.merge_to_table(
                 fname=args.geofile, table=args.geo_table, col=args.column,
                 use_storage=args.geofile.startswith('gs://'),
-                schema_dir=args.schema_dir, patch=args.update_description
+                schema_dir=args.schema_dir, patch=args.update_description,
+                match_equal_columns=args.match_equal_columns,
+                match_unequal_columns=args.match_unequal_columns,
             )
         except Exception as excp:
             msg = 'Merging {f} to {t} failed with the following: {e}'
