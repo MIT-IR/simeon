@@ -323,6 +323,7 @@ class BigqueryClient(bigquery.Client):
         )
         rutils.wait_for_bq_job_ids([job.job_id], self)
         if job.errors:
+            self.delete_table(temp_table, not_found_ok=True)
             msg = 'Merge job failed with: {e}'
             raise LoadJobException(msg.format(
                 e='\n'.join(self.extract_error_messages(job.errors))
@@ -335,10 +336,10 @@ class BigqueryClient(bigquery.Client):
             match_equal_columns=match_equal_columns,
             match_unequal_columns=match_unequal_columns,
         )
-        print(query)
         qjob = self.query(query)
         rutils.wait_for_bq_job_ids([qjob.job_id], self)
         if qjob.errors:
+            self.delete_table(temp_table, not_found_ok=True)
             msg = 'Merge job failed with: {e}'
             raise LoadJobException(msg.format(
                 e='\n'.join(self.extract_error_messages(job.errors))
