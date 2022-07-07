@@ -163,6 +163,7 @@ def make_geo_data(
                         print(msg, file=sys.stderr)
                     continue
                 ip_address = rec.get('ip')
+                # If there is no valid IP in the file, then skip any lookup.
                 if not ip_address:
                     continue
                 try:
@@ -187,10 +188,15 @@ def make_geo_data(
                         'longitude': info.location.longitude,
                     }
                     row.update(un_info)
-                except Exception:
-                    row = {
-                        'ip': ip_address,
-                    }
+                except Exception as e:
+                    # The DB will raise an error if it can't find the IP.
+                    # Missing IPs and any other issues should be reported
+                    # as warnings.
+                    if logger:
+                        logger.warning(e)
+                    else:
+                        print(e, file=sys.stderr)
+                    continue
                 outh.write(json.dumps(row) + '\n')
             fh.close()
 
