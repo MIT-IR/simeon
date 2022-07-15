@@ -304,6 +304,7 @@ def main():
         description=__doc__,
         formatter_class=RawDescriptionHelpFormatter,
         allow_abbrev=False,
+        prog='simeon-youtube',
     )
     parser.add_argument(
         '--log-file', '-L',

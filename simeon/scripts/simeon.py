@@ -917,6 +917,7 @@ def main():
         formatter_class=RawDescriptionHelpFormatter,
         allow_abbrev=False,
         epilog=cli_utils.CLI_MAIN_EPILOG,
+        prog='simeon',
     )
     parser.add_argument(
         '--quiet', '-Q',

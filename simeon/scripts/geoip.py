@@ -209,6 +209,7 @@ def main():
         description=__doc__,
         formatter_class=RawDescriptionHelpFormatter,
         allow_abbrev=False,
+        prog='simeon-geoip',
     )
     parser.add_argument(
         '--debug', '-B',

@@ -1,3 +1,5 @@
 include simeon/report/queries/*.sql
 include simeon/upload/schemas/*.json
 include simeon/scripts/data/*.csv
+include simeon-youtube/*.py
+include simeon-geoip/*.py
