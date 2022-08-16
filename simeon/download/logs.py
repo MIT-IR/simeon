@@ -83,6 +83,7 @@ def process_line(
     :rtype: Dict[str, Union[Dict[str, str], str]]
     :return: Dictionary with both the data and its destination file name
     """
+    original_line = line
     line = line.strip()
     if isinstance(line, bytes):
         line = line.decode('utf8', 'ignore')
@@ -91,11 +92,23 @@ def process_line(
         record = json.loads(line)
     except (JSONDecodeError, TypeError):
         return {
-            'data': line,
+            'data': original_line,
             'filename': os.path.join(
                 'dead_letters',
                 'dead_letter_queue_{p}.json.gz'.format(p=os.getpid())
-            )
+            ),
+            'error': 'Not valid JSON',
+        }
+    # If the parsed line is not a dictionary, then we return the original line
+    # with a dead letter destination file
+    if not isinstance(record, dict):
+        return {
+            'data': original_line,
+            'filename': os.path.join(
+                'dead_letters',
+                'dead_letter_queue_{p}.json.gz'.format(p=os.getpid())
+            ),
+            'error': 'The line is not a record',
         }
     if not isinstance(record.get('event'), dict):
         try:
@@ -108,21 +121,23 @@ def process_line(
     record['course_id'] = course_id
     try:
         utils.rephrase_record(record)
-    except KeyError:
+    except KeyError as e:
         return {
-            'data': line,
+            'data': original_line,
             'filename': os.path.join(
                 'dead_letters',
                 'dead_letter_queue_{p}.json.gz'.format(p=os.getpid())
-            )
+            ),
+            'error': 'Record does not have the key ' + str(e),
         }
-    if any(k not in record for k in ('event', 'event_type')):
+    if all(k not in record for k in ('event', 'event_type')):
         return {
-            'data': line,
+            'data': original_line,
             'filename': os.path.join(
                 'dead_letters',
                 'dead_letter_queue_{p}.json.gz'.format(p=os.getpid())
-            )
+            ),
+            'error': 'Missing event or event type'
         }
     if not date:
         try:
@@ -130,11 +145,11 @@ def process_line(
             outfile = utils.make_tracklog_path(
                 course_id, date.strftime('%Y-%m-%d'), is_gzip
             )
-        except Exception:
+        except Exception as e:
             ext = '.gz' if is_gzip else ''
             outfile = os.path.join(
-                course_id.replace('.', '_').replace('/', '__') or 'UNKNOWN',
-                'tracklog-unknown.json{x}'.format(x=ext)
+                course_id.replace('.', '_').replace('/', '__') or 'dead_letters',
+                'dead_letter_queue_{p}.json{x}'.format(p=os.getpid(), x=ext)
             )
     else:
         outfile = utils.make_tracklog_path(
@@ -203,13 +218,24 @@ def split_tracking_log(
             if not line_info:
                 continue
             data = line_info['data']
-            user_id = (data.get('context') or {}).get('user_id')
-            username = data.get('username')
-            if not any([user_id, username]):
-                continue
+            # If we get a dictionary from process_line, then we can do all
+            # the extra processing that is needed.
+            # Otherwise, we'll store the text/string in the target file.
             if isinstance(data, dict):
+                user_id = (data.get('context') or {}).get('user_id')
+                username = data.get('username')
+                # If there is no user_id or username, then we should skip
+                if not any([user_id, username]):
+                    continue
+                # If we're given a set of course IDs to filter on, then we
+                # will skip any record that does not match one of the courses
                 if courses and data.get('course_id') not in courses:
                     continue
+                rutils.check_record_schema(data, schema)
+                rutils.drop_extra_keys(data, schema)
+                data = json.dumps(data) + '\n'
+            elif isinstance(data, bytes):
+                data = data.decode() + '\n'
             fname = line_info.get('filename')
             fname = os.path.join(ddir, fname)
             if fname not in fhandles:
@@ -219,20 +245,18 @@ def split_tracking_log(
                     )
                 except OSError as excp:
                     if excp.errno == errno.EMFILE:
-                       stragglers.append(line_info)
-                       continue
+                        line_info['data'] = data
+                        stragglers.append(line_info)
+                        continue
                     if excp.errno == errno.ENAMETOOLONG:
                         continue
                     raise excp
             fhandle = fhandles[fname]
-            if not isinstance(data, str):
-                rutils.check_record_schema(data, schema)
-                rutils.drop_extra_keys(data, schema)
-                data = json.dumps(data)
+            fhandle.write(data)
             if isinstance(fhandle, gzip.GzipFile):
-                fhandle.write(data.encode('utf8', 'ignore') + b'\n')
+                fhandle.write(data.encode('utf8', 'ignore'))
             else:
-                fhandle.write(data + '\n')
+                fhandle.write(data)
         if not stragglers:
             return bool(fhandles)
         # Working around EMFILE errors
@@ -250,7 +274,7 @@ def split_tracking_log(
                         _cleanup_handles([fhandles[pfname]], None)
                     except OSError:
                         pass
-                data = line_info['data']
+                data = rec['data']
                 if fname not in fhandles:
                     try:
                         fhandle = utils.make_file_handle(fname, is_gzip=True)
@@ -262,14 +286,10 @@ def split_tracking_log(
                         if excp.errno == errno.ENAMETOOLONG:
                             continue
                         raise excp
-                if not isinstance(data, str):
-                    rutils.check_record_schema(data, schema)
-                    rutils.drop_extra_keys(data, schema)
-                    data = json.dumps(data)
                 if isinstance(fhandle, gzip.GzipFile):
-                    fhandle.write(data.encode('utf8', 'ignore') + b'\n')
+                    fhandle.write(data.encode())
                 else:
-                    fhandle.write(data + '\n')
+                    fhandle.write(data)
                 pfname = fname
             except IndexError:
                 break

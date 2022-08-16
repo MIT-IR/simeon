@@ -26,11 +26,8 @@ class TestDownloadUtilities(unittest.TestCase):
         self.bad_log_lines = [
             """{}""",
             """{"time": "hello-this-is-a-mess", "course_id": ""}""",
-            """{
-                "time": "2020-01-01 23:45:13",
-                "course_id": "MITx/science/3T2020"
-            }""",
-
+            """hello world""",
+            """{"username": "someusername", "user_id": 123}""",
         ]
         self.good_log_lines = [
             """{
@@ -452,7 +449,10 @@ class TestDownloadUtilities(unittest.TestCase):
                     self.dead_letter_text,
                     out.get('filename', '')
                 )
-                self.assertEqual(line, out.get('data'))
+                # If there is an error, then we must have gotten our original
+                # line back
+                if out.get('error'):
+                    self.assertEqual(line, out.get('data'))
 
     def test_good_log_lines(self):
         """
