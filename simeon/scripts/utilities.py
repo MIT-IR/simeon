@@ -352,15 +352,11 @@ def make_logger(user='SIMEON', verbose=True, stream=None):
         '%(asctime)s:%(hostname)s:%(levelname)s:%(name)s:%(message)s',
         '%Y-%m-%d %H:%M:%S%z'
     )
-    # formatter = logging.Formatter(
-    #     '%(asctime)s:%(levelname)s:%(name)s:%(message)s',
-    #     '%Y-%m-%d %H:%M:%S%z'
-    # )
+    logger = logging.getLogger(user)
     handler = logging.StreamHandler(stream=stream)
     handler.setLevel(level)
     handler.set_name(user)
     handler.setFormatter(formatter)
-    logger = logging.Logger(user, level)
     logger.addHandler(handler)
     return logging.LoggerAdapter(logger, {'hostname': socket.gethostname()})
 
