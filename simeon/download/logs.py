@@ -360,8 +360,9 @@ def batch_split_tracking_logs(
                             msg.format(f=fname, e='')
                         )
                     else:
+                        excp_str = ': {e}'.format(e-excp)
                         if debug:
-                            traces = [': {e}'.format(e=excp)]
+                            traces = [excp_str]
                             traces += map(str.strip, traceback.format_tb(tb))
                             excp_str = '\n'.join(traces)
                         logger.error(msg.format(f=fname, e=excp_str))
