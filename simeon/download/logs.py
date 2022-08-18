@@ -360,7 +360,7 @@ def batch_split_tracking_logs(
                             msg.format(f=fname, e='')
                         )
                     else:
-                        excp_str = ': {e}'.format(e-excp)
+                        excp_str = ': {e}'.format(e=excp)
                         if debug:
                             traces = [excp_str]
                             traces += map(str.strip, traceback.format_tb(tb))
