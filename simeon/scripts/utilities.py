@@ -509,7 +509,11 @@ def filter_generated_items(items, cdirs):
         return set(items)
     out = set()
     for item in items:
-        if '*' not in item:
+        # If the item is not a glob pattern, or the expansion of the pattern
+        # yields a list that contains the item itself, then we are dealing
+        # with a path that just happens to have an asterisk in its name.
+        # Either way, we'll treat item as a normal path
+        if '*' not in item or item in glob.glob(item):
             if os.path.isdir(item):
                 real_item = os.path.basename(os.path.realpath(item))
             else:
@@ -519,6 +523,8 @@ def filter_generated_items(items, cdirs):
             if real_item.lower() in cdirs:
                 out.add(item)
         else:
+            # If we're dealing with an actual glob pattern, then recursively
+            # process its matches from glob.glob
             out.update(filter_generated_items(glob.glob(item), cdirs))
     return out
 
