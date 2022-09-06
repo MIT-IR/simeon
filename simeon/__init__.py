@@ -4,7 +4,7 @@ simeon is a python package and CLI tool that helps with fetching and processing 
 import logging
 
 
-__version__ = '0.0.22'
+__version__ = '0.0.23'
 
 # Set loggers for the scripts and package users
 # 1. for simeon
