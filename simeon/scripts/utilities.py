@@ -352,7 +352,8 @@ def make_logger(user='SIMEON', verbose=True, stream=None):
         '%(asctime)s:%(hostname)s:%(levelname)s:%(name)s:%(message)s',
         '%Y-%m-%d %H:%M:%S%z'
     )
-    logger = logging.getLogger(user)
+    logger = logging.getLogger(user.split(':')[0].upper())
+    logger.setLevel(level)
     handler = logging.StreamHandler(stream=stream)
     handler.setLevel(level)
     handler.set_name(user)
