@@ -322,7 +322,7 @@ def split_files(parsed_args):
                 if not os.path.isfile(subitem):
                     msg = 'Skipping {f!r} because it is not a valid file'
                     parsed_args.logger.warning(msg.format(f=subitem))
-                    continue 
+                    continue
                 items.append(subitem)
                 nsubs += 1
             if nsubs == 0:
@@ -572,9 +572,6 @@ def push_to_bq(parsed_args):
     except Exception as excp:
         errmsg = 'Failed to connect to BigQuery: {e}'
         parsed_args.logger.error(errmsg.format(e=excp))
-        parsed_args.logger.error(
-            'The error may be from an invalid service account file'
-        )
         sys.exit(1)
     all_jobs = []
     storage = parsed_args.use_storage
@@ -653,8 +650,8 @@ def push_to_bq(parsed_args):
     err_count = 0
     for job, errors in all_jobs.items():
         if errors:
-            for err in client.extract_error_messages(errors):
-                parsed_args.logger.error(err)
+            for err, context in client.extract_error_messages(errors).items():
+                parsed_args.logger.error(err, context_dict=context)
             err_count += 1
     if err_count:
         msg = (
@@ -700,9 +697,6 @@ def push_to_gcs(parsed_args):
     except Exception as excp:
         errmsg = 'Failed to connect to Google Cloud Storage: {e}'
         parsed_args.logger.error(errmsg.format(e=excp))
-        parsed_args.logger.error(
-            'The error may be from an invalid service account file'
-        )
         sys.exit(1)
     failed = False
     nitems = 0
@@ -740,9 +734,6 @@ def push_to_gcs(parsed_args):
         except Exception as excp:
             errmsg = 'Failed to load {f} to GCS: {e}'
             parsed_args.logger.error(errmsg.format(f=item, e=excp))
-            parsed_args.logger.error(
-                'The error may be from an invalid service account file'
-            )
             if parsed_args.fail_fast:
                 parsed_args.logger.error('Exiting...')
                 sys.exit(1)
@@ -828,8 +819,7 @@ def make_secondary_tables(parsed_args):
             )
     except Exception as excp:
         errmsg = (
-            'Failed to connect to BigQuery: {e}\n'
-            'The error may be from an invalid service account file'
+            'Failed to connect to BigQuery: {e}'
         )
         parsed_args.logger.error(errmsg.format(e=excp))
         sys.exit(1)
@@ -859,7 +849,7 @@ def make_secondary_tables(parsed_args):
     else:
         all_jobs.update(make_tables_from_sql_par(
             tables=parsed_args.tables, courses=parsed_args.course_ids,
-            safile=parsed_args.service_account_file, 
+            safile=parsed_args.service_account_file,
             project=parsed_args.project,
             append=parsed_args.append, geo_table=parsed_args.geo_table,
             youtube_table=parsed_args.youtube_table,
@@ -872,14 +862,19 @@ def make_secondary_tables(parsed_args):
     num_queries = 0
     parsed_args.logger.info('Checking for errors...')
     for course_id, job_errors in all_jobs.items():
-        for table, error_dict in job_errors.items():
+        for table, error_info in job_errors.items():
             num_queries += 1
-            if error_dict:
+            if error_info:
+                context = {'course_id': course_id, 'table': table}
+                extracted_errors = client.extract_error_messages(error_info)
+                error_msg = '\n'.join(extracted_errors)
+                for context_info in extracted_errors.values():
+                    context.update(context_info)
                 msg = 'Making {t} for {c} failed with the following: {e}'
-                parsed_args.logger.error(msg.format(
-                    t=table, c=course_id,
-                    e='\n'.join(client.extract_error_messages(error_dict))
-                ))
+                parsed_args.logger.error(
+                    msg.format(t=table, c=course_id, e=error_msg),
+                    context_dict=context,
+                )
                 errors += 1
     if errors:
         sys.exit(1)
@@ -941,6 +936,12 @@ def main():
         help='Log file to use when simeon prints messages. Default: stdout',
         type=FileType('a'),
         default=sys.stdout,
+    )
+    parser.add_argument(
+        '--log-format',
+        help='Format the log messages as json or text. Default: %(default)s',
+        choices=['json', 'text'],
+        default='json',
     )
     parser.add_argument(
         '--version', '-v',
@@ -1655,6 +1656,7 @@ def main():
         verbose=args.verbose,
         stream=args.log_file,
         user='SIMEON:{cmd}'.format(cmd=args.command.upper()),
+        json_format=args.log_format == 'json',
     )
     # Get simeon configurations and plug them in wherever
     # a CLI option is not given
