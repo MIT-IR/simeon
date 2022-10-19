@@ -241,8 +241,9 @@ class BigqueryClient(bigquery.Client):
         Return the error messages from given list of error objects (dict)
         """
         messages = {}
+        errors = errors or []
+        members = []
         if isinstance(errors, dict):
-            members = []
             for e in errors.values():
                 members += e
         else:
@@ -342,16 +343,13 @@ class BigqueryClient(bigquery.Client):
         rutils.wait_for_bq_jobs([job])
         if job.errors:
             self.delete_table(temp_table, not_found_ok=True)
-            msg = 'Merge job failed with: {e}'
             # Extract the BigQuery errors and their context info
             errors = self.extract_error_messages(job.errors)
             context = dict()
             for v in errors.values():
                 context.update(v)
             # Raise an exception with some contextual information
-            raise LoadJobException(msg.format(
-                e='\n'.join(errors), context_dict=context,
-            ))
+            raise LoadJobException('\n'.join(errors), context_dict=context)
         query_template = Template(MERGE_DDL)
         update_cols = [f.name for f in bqtable.schema if f.name.lower() != col.lower()]
         query = query_template.render(
@@ -360,18 +358,15 @@ class BigqueryClient(bigquery.Client):
             match_equal_columns=match_equal_columns,
             match_unequal_columns=match_unequal_columns,
         )
-        qjob = self.query(query)
-        rutils.wait_for_bq_jobs([qjob])
-        if qjob.errors:
+        query_job = self.query(query)
+        rutils.wait_for_bq_jobs([query_job])
+        if query_job.errors:
             self.delete_table(temp_table, not_found_ok=True)
-            errors = self.extract_error_messages(job.errors)
+            errors = self.extract_error_messages(query_job.errors)
             context = dict()
             for v in errors.values():
                 context.update(v)
-            msg = 'Merge job failed with: {e}'
-            raise LoadJobException(msg.format(
-                e='\n'.join(errors), context_dict=context,
-            ))
+            raise LoadJobException('\n'.join(errors), context_dict=context)
         self.delete_table(temp_table, not_found_ok=True)
 
 
