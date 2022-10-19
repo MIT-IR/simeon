@@ -93,12 +93,23 @@ def compress_email_files(files, ddir, schema_dir=SCHEMA_DIR):
     with gzip.open(outname, 'wt') as fh:
         for file_ in files:
             with open(file_) as infile:
-                cols = [c.strip() for c in next(infile).split(',')]
+                header_row = next(infile, None)
+                if header_row is None:
+                    raise OSError(
+                        "The given file {f!r} is empty.".format(f=file_)
+                    )
+                cols = [c.strip() for c in header_row.split(',')]
+                if "user_id" not in cols:
+                    raise OSError(
+                        "The given file {f!r} has no user_id field.".format(f=file_)
+                    )
                 reader = csv.DictReader(
                     (l.replace('\0', '') for l in infile),
                     delimiter=',', lineterminator='\n', fieldnames=cols,
                 )
                 for row in reader:
+                    if row.get('user_id') is None:
+                        continue
                     row['user_id'] = int(row['user_id'])
                     cid = (row.get('course_id') or '').split(':')[-1]
                     row['course_id'] = cid.replace(
