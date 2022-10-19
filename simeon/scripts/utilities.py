@@ -723,7 +723,7 @@ class JSONLoggerAdapter(logging.LoggerAdapter):
         msg, kwargs = super().process(msg, kwargs)
         context_dict.update(self.extra)
         context_dict['message'] = msg
-        return json.dumps(context_dict), kwargs
+        return json.dumps(context_dict, default=str), kwargs
 
 
 class TextLoggerAdapter(logging.LoggerAdapter):

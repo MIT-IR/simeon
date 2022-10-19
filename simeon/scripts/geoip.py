@@ -192,6 +192,7 @@ def make_geo_data(
                         'longitude': info.location.longitude,
                     }
                     row.update(un_info)
+                    row['timestamp'] = str(datetime.utcnow())
                 except Exception as e:
                     # The DB will raise an error if it can't find the IP.
                     # Missing IPs and any other issues should be reported

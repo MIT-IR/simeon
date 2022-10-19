@@ -74,7 +74,12 @@
             "field_type": "FLOAT",
             "name": "longitude",
             "description": "longitude"
-        }
+        },
+	{
+	    "field_type": "TIMESTAMP",
+	    "name": "timestamp",
+	    "description": "Timestamp when the record was generated"
+	}
     ],
     "description": "Dimensional table that tracks the IP addresses used by learners from the edX platform. The IPs themselves are extracted from the tracking log files, and the geolocation details are extracted from the MaxMind IP database using the simeon-geoip script from the simeon CLI tool. Take a look at the documentation for simeon-geoip if you would like to generate and update this table."
 }

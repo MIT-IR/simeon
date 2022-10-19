@@ -14,6 +14,7 @@ import urllib.request as request
 from argparse import (
     ArgumentTypeError, FileType, RawDescriptionHelpFormatter
 )
+from datetime import datetime
 
 import simeon
 import simeon.scripts.utilities as cli_utils
@@ -207,6 +208,7 @@ def extract_video_info(parsed_args):
             if record.get('id') in seen:
                 continue
             record['duration'] = duration_to_seconds(record['duration'])
+            record['timestamp'] = str(datetime.utcnow())
             outfile.write(json.dumps(record) + '\n')
             seen.add(record.get('id'))
     outfile.close()
