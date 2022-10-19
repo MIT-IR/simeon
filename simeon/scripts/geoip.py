@@ -144,7 +144,7 @@ def make_geo_data(
             else:
                 fh = open(ip_file)
                 reader = csv.DictReader(fh, fieldnames=['ip'])
-            # seen = set()
+            seen = set()
             line = 0
             while True:
                 line += 1
@@ -166,6 +166,10 @@ def make_geo_data(
                 # If there is no valid IP in the file, then skip any lookup.
                 if not ip_address:
                     continue
+                # If we've seen this IP before, then move on to the next record
+                if ip_address in seen:
+                    continue
+                seen.add(ip_address)
                 try:
                     info = db.city(ip_address)
                     # If there is no country information, then we don't bother
@@ -221,6 +225,12 @@ def main():
         help='Log file to use when simeon prints messages. Default: stdout',
         type=FileType('a'),
         default=sys.stdout,
+    )
+    parser.add_argument(
+        '--log-format',
+        help='Format the log messages as json or text. Default: %(default)s',
+        choices=['json', 'text'],
+        default='json',
     )
     parser.add_argument(
         '--quiet', '-Q',
@@ -365,6 +375,7 @@ def main():
         user='SIMEON-GEOIP:{c}'.format(c=args.command.upper()),
         verbose=args.verbose,
         stream=args.log_file,
+        json_format=args.log_format == 'json',
     )
     if not GeoReader:
         args.logger.error(
@@ -457,8 +468,7 @@ def main():
                 )
         except Exception as excp:
             errmsg = (
-                'Failed to connect to BigQuery: {e}. '
-                'The error may be from an invalid service account file.'
+                'Failed to connect to BigQuery: {e}.'
             )
             args.logger.error(errmsg.format(e=excp))
             sys.exit(1)
@@ -472,9 +482,13 @@ def main():
                 match_unequal_columns=args.match_unequal_columns,
             )
         except Exception as excp:
+            context = getattr(excp, 'context_dict', {})
+            context['geo_file'] = args.geofile
+            context['geo_table'] = args.geo_table
             msg = 'Merging {f} to {t} failed with the following: {e}'
             args.logger.error(
-                msg.format(f=args.geofile, t=args.geo_table, e=excp)
+                msg.format(f=args.geofile, t=args.geo_table, e=excp),
+                context_dict=context,
             )
             sys.exit(1)
         msg = 'Successfully merged the records in {f} to the table {t}'

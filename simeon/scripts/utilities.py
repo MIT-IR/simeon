@@ -4,6 +4,7 @@ Utility functions for the simeon CLI tool
 import argparse
 import configparser
 import glob
+import json
 import logging
 import os
 import shlex
@@ -332,7 +333,7 @@ def optional_file(fname: str) -> str:
     return os.path.realpath(fname)
 
 
-def make_logger(user='SIMEON', verbose=True, stream=None):
+def make_logger(user='SIMEON', verbose=True, stream=None, json_format=True):
     """
     Create a Logger object pointing to the given stream
 
@@ -340,6 +341,8 @@ def make_logger(user='SIMEON', verbose=True, stream=None):
     :param verbose: If True, log level is INFO. Otherwise, it's WARN
     :type stream: Union[TextIOWrapper,None]
     :param stream: A file object opened for writing
+    :type json_format: bool
+    :param json_format: Whether or not to show log messages as JSON
     :rtype: logging.Logger
     :returns: Returns a Logger object used to print messages
     """
@@ -359,7 +362,8 @@ def make_logger(user='SIMEON', verbose=True, stream=None):
     handler.set_name(user)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    return logging.LoggerAdapter(logger, {'hostname': socket.gethostname()})
+    Adapter = JSONLoggerAdapter if json_format else TextLoggerAdapter
+    return Adapter(logger, {'hostname': socket.gethostname()})
 
 
 def make_config_file(output=None):
@@ -704,10 +708,39 @@ class CustomArgParser(argparse.ArgumentParser):
                 return super().print_help(file)
 
 
+class JSONLoggerAdapter(logging.LoggerAdapter):
+    """
+    A LoggerAdapter that converts the message into a JSON record.
+    This finds a dict called context_dict in the passed in keywords
+    arguments and uses that as a starting dict to eventually convert into
+    a JSON string.
+    As a result, every invocation of info, debug, error, fatal, warning
+    should pass the context_dict keyword argument if additional details
+    are to be passed to the JSON string.
+    """
+    def process(self, msg, kwargs):
+        context_dict = kwargs.pop('context_dict', {})
+        msg, kwargs = super().process(msg, kwargs)
+        context_dict.update(self.extra)
+        context_dict['message'] = msg
+        return json.dumps(context_dict), kwargs
+
+
+class TextLoggerAdapter(logging.LoggerAdapter):
+    """
+    This is basically defined to pop the context_dict dictionary
+    from the kwards dict passed to logging.LoggerAdapter.process
+    """
+    def process(self, msg, kwargs):
+        kwargs.pop('context_dict', None)
+        return super().process(msg, kwargs)
+
+
 __all__ = [
-    'CustomArgParser', 'NumberRange', 'TableOrderAction', 'bq_table',
-    'course_listings', 'course_paths_from_file', 'courses_from_file',
-    'expand_paths', 'filter_generated_items', 'find_config', 'gcs_bucket',
-    'get_pager', 'is_parallel', 'items_from_files', 'make_config_file',
-    'make_logger', 'optional_file', 'parsed_date', 'process_extra_args',
+    'CustomArgParser', 'JSONLoggerAdapter', 'NumberRange', 'TableOrderAction',
+    'TextLoggerAdapter', 'bq_table', 'course_listings', 'course_paths_from_file',
+    'courses_from_file', 'expand_paths', 'filter_generated_items',
+    'find_config', 'gcs_bucket', 'get_pager', 'is_parallel', 'items_from_files',
+    'make_config_file', 'make_logger', 'optional_file', 'parsed_date',
+    'process_extra_args',
 ]

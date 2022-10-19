@@ -222,11 +222,25 @@ class BigqueryClient(bigquery.Client):
         )
 
     @staticmethod
+    def get_not_found_object(message):
+        """
+        If the given message contains the keywords 'Not found', then
+        try and determine the name and type of the object that is not found.
+        """
+        out = dict.fromkeys(('missing_object_type', 'missing_object_name'))
+        if 'Not found' not in (message or ''):
+            return out
+        pieces = iter(message.split('Not found: ')[-1].split()[:2])
+        out['missing_object_type'] = next(pieces, None)
+        out['missing_object_name'] = next(pieces, None)
+        return out
+
+    @staticmethod
     def extract_error_messages(errors):
         """
         Return the error messages from given list of error objects (dict)
         """
-        messages = []
+        messages = {}
         if isinstance(errors, dict):
             members = []
             for e in errors.values():
@@ -237,13 +251,17 @@ class BigqueryClient(bigquery.Client):
             msg = err.get('message', '')
             if not msg:
                 continue
+            context = dict()
             src = err.get('source', '')
             if src:
+                context['source'] = src
                 msg = 'Source: {s} - {m}'.format(s=src, m=msg)
             loc = err.get('location', '')
             if loc:
+                context['file'] = loc
                 msg = '{m} - File: {f}'.format(m=msg, f=loc)
-            messages.append(msg)
+            context.update(BigqueryClient.get_not_found_object(msg))
+            messages[msg] = context
         return messages
 
     def merge_to_table(
@@ -321,12 +339,18 @@ class BigqueryClient(bigquery.Client):
         job = loader(
             fname, temp_table, job_config=config, job_id_prefix=job_prefix
         )
-        rutils.wait_for_bq_job_ids([job.job_id], self)
+        rutils.wait_for_bq_jobs([job])
         if job.errors:
             self.delete_table(temp_table, not_found_ok=True)
             msg = 'Merge job failed with: {e}'
+            # Extract the BigQuery errors and their context info
+            errors = self.extract_error_messages(job.errors)
+            context = dict()
+            for v in errors.values():
+                context.update(v)
+            # Raise an exception with some contextual information
             raise LoadJobException(msg.format(
-                e='\n'.join(self.extract_error_messages(job.errors))
+                e='\n'.join(errors), context_dict=context,
             ))
         query_template = Template(MERGE_DDL)
         update_cols = [f.name for f in bqtable.schema if f.name.lower() != col.lower()]
@@ -337,12 +361,16 @@ class BigqueryClient(bigquery.Client):
             match_unequal_columns=match_unequal_columns,
         )
         qjob = self.query(query)
-        rutils.wait_for_bq_job_ids([qjob.job_id], self)
+        rutils.wait_for_bq_jobs([qjob])
         if qjob.errors:
             self.delete_table(temp_table, not_found_ok=True)
+            errors = self.extract_error_messages(job.errors)
+            context = dict()
+            for v in errors.values():
+                context.update(v)
             msg = 'Merge job failed with: {e}'
             raise LoadJobException(msg.format(
-                e='\n'.join(self.extract_error_messages(job.errors))
+                e='\n'.join(errors), context_dict=context,
             ))
         self.delete_table(temp_table, not_found_ok=True)
 

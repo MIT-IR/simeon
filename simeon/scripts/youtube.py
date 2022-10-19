@@ -243,9 +243,6 @@ def merge_video_data(parsed_args):
     except Exception as excp:
         errmsg = 'Failed to connect to BigQuery: {e}'
         parsed_args.logger.error(errmsg.format(e=excp))
-        parsed_args.logger.error(
-            'The error may be from an invalid service account file'
-        )
         sys.exit(1)
     parsed_args.logger.info('Connection established')
     try:
@@ -260,6 +257,9 @@ def merge_video_data(parsed_args):
         )
     except Exception as excp:
         _, excp, tb = sys.exc_info()
+        context = getattr(excp, 'context_dict', {})
+        context['youtube_file'] = parsed_args.youtube_file
+        context['youtube_table'] = parsed_args.youtube_table
         msg = 'Merging {f} to {t} failed with the following: {e}'
         if parsed_args.debug:
             traces = ['{e}'.format(e=excp)]
@@ -275,7 +275,7 @@ def merge_video_data(parsed_args):
                 f=parsed_args.youtube_file,
                 t=parsed_args.youtube_table,
             )
-        parsed_args.logger.error(msg)
+        parsed_args.logger.error(msg, context_dict=context)
         sys.exit(1)
     msg = 'Successfully merged the records in {f} to the table {t}'
     parsed_args.logger.info(
@@ -311,6 +311,12 @@ def main():
         help='Log file to use when simeon prints messages. Default: stdout',
         type=FileType('a'),
         default=sys.stdout,
+    )
+    parser.add_argument(
+        '--log-format',
+        help='Format the log messages as json or text. Default: %(default)s',
+        choices=['json', 'text'],
+        default='json',
     )
     parser.add_argument(
         '--debug', '-B',
@@ -459,6 +465,7 @@ def main():
         user='SIMEON-YOUTUBE:{c}'.format(c=args.command.upper()),
         verbose=args.verbose,
         stream=args.log_file,
+        json_format=args.log_format == 'json',
     )
     try:
         configs = cli_utils.find_config(args.config_file)
@@ -479,6 +486,7 @@ def main():
         COMMANDS.get(args.command, unknown_command)(args)
     except:
         _, excp, tb = sys.exc_info()
+        context = getattr(excp, 'context_dict', {})
         if isinstance(excp, SystemExit):
             raise excp
         msg = 'The command {c} failed: {e}'
@@ -489,7 +497,7 @@ def main():
         else:
             msg = msg.format(c=args.command, e=excp)
         # msg = 'The command {c} failed with: {e}'
-        args.logger.error(msg)
+        args.logger.error(msg, context_dict=context)
         sys.exit(1)
 
 
