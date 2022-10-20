@@ -317,7 +317,7 @@ class BigqueryClient(bigquery.Client):
             # Catch the error raised when the destination table
             # does not exist.
             try:
-                self.update_table(bqtable, ['description'])
+                self.update_table(bqtable, ['schema', 'description'])
             except gcp_exceptions.NotFound:
                 pass
         temp_table.description = desc

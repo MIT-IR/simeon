@@ -242,28 +242,40 @@ def make_bq_load_config(
         format_ = bigquery.SourceFormat.CSV
         skips = 1
     if create:
-        create = bigquery.CreateDisposition.CREATE_IF_NEEDED
+        create_disp = bigquery.CreateDisposition.CREATE_IF_NEEDED
     else:
-        create = bigquery.CreateDisposition.CREATE_NEVER
+        create_disp = bigquery.CreateDisposition.CREATE_NEVER
     if append:
-        append = bigquery.WriteDisposition.WRITE_APPEND
+        write_disp = bigquery.WriteDisposition.WRITE_APPEND
     else:
-        append = bigquery.WriteDisposition.WRITE_TRUNCATE
+        write_disp = bigquery.WriteDisposition.WRITE_TRUNCATE
     if 'json' in file_format.lower():
         config = bigquery.LoadJobConfig(
             schema=schema, source_format=format_,
-            create_disposition=create, write_disposition=append,
+            create_disposition=create_disp, write_disposition=write_disp,
             max_bad_records=max_bad_rows, ignore_unknown_values=True,
             destination_table_description=desc,
         )
+        if append:
+            # Field addition should always be supported
+            config.schema_update_options = [
+                bigquery.SchemaUpdateOption.ALLOW_FIELD_ADDITION,
+                bigquery.SchemaUpdateOption.ALLOW_FIELD_RELAXATION,
+            ]
         return config, desc
     config = bigquery.LoadJobConfig(
         schema=schema, source_format=format_,
-        create_disposition=create, write_disposition=append,
+        create_disposition=create_disp, write_disposition=create_disp,
         field_delimiter=delim, skip_leading_rows=skips,
         max_bad_records=max_bad_rows, ignore_unknown_values=True,
         allow_quoted_newlines=True, destination_table_description=desc,
     )
+    if append:
+        # Field addition should always be supported
+        config.schema_update_options = [
+            bigquery.SchemaUpdateOption.ALLOW_FIELD_ADDITION,
+            bigquery.SchemaUpdateOption.ALLOW_FIELD_RELAXATION,
+        ]
     return config, desc
 
 
