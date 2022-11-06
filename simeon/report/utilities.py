@@ -24,7 +24,7 @@ from xml.etree import ElementTree
 from dateutil.parser import parse as parse_date
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
-from jinja2 import Template
+from jinja2 import Environment
 
 from simeon.download import utilities as downutils
 from simeon.exceptions import (
@@ -1427,7 +1427,8 @@ def make_table_from_sql(
             query=query,
             cols='({c})'.format(c=cols) if cols else '',
         )
-    query = Template(query).render(
+    query_template = client.make_template(query)
+    query = query_template.render(
         geo_table=geo_table, youtube_table=youtube_table,
         course_id=course_id, latest_dataset=latest_dataset,
         log_dataset=log_dataset, **kwargs
