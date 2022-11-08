@@ -4,7 +4,6 @@ Utilities functions and classes to help with loading data to Google Cloud
 import glob
 import gzip
 import os
-from jinja2 import Template
 import uuid
 from datetime import datetime
 from typing import List
@@ -12,10 +11,11 @@ from typing import List
 from google.cloud import (
     bigquery, exceptions as gcp_exceptions, storage
 )
+from jinja2 import Environment
 
-from simeon.upload import utilities as uputils
-from simeon.report import utilities as rutils
 from simeon.exceptions import LoadJobException
+from simeon.report import utilities as rutils
+from simeon.upload import utilities as uputils
 from simeon.upload.utilities import (
     SCHEMA_DIR, course_to_bq_dataset
 )
@@ -72,23 +72,114 @@ class BigqueryClient(bigquery.Client):
         :rtype: Dict[str, set]
         :return: A dict with keys as log and sql, and values as table names
         """
-        out = {'log': set(), 'sql': set()}
+        out = {'log': set(), 'latest': set()}
         log_dset = course_to_bq_dataset(course_id, 'log', self.project)
         latest_dset = course_to_bq_dataset(course_id, 'sql', self.project)
         query = """select table_schema, table_name
-        from `region-us`.INFORMATION_SCHEMA.TABLES
-        where table_schema in ('{f}', '{s}')"""
+        from {latest_dset}.INFORMATION_SCHEMA.TABLES
+        union all
+        select table_schema, table_name
+        from {log_dset}.INFORMATION_SCHEMA.TABLES"""
         query = query.format(
-            f=log_dset.split('.')[-1], s=latest_dset.split('.')[-1]
+            log_dset=log_dset, latest_dset=latest_dset,
         )
         job = self.query(query)
-        for row in job.result():
-            ds = row.get('table_schema')
-            if ds.endswith('_logs'):
-                out['log'].add(row.get('table_name'))
-            else:
-                out['sql'].add(row.get('table_name'))
+        try:
+            for row in job.result():
+                ds = row.get('table_schema')
+                if ds.endswith('_logs'):
+                    out['log'].add(row.get('table_name'))
+                else:
+                    out['latest'].add(row.get('table_name'))
+        except Exception:
+            # If the dataset does not exist, then we end up here.
+            # So, do nothing. The returned value will be a dict with
+            # no table names.
+            pass
         return out
+
+    def has_latest_table(self, course_id, table):
+        """
+        Check if the given table name exists in the _latest dataset
+        of the given course ID
+
+        :type course_id: str
+        :param course_id: edX course ID in format ORG/NUMBER/TERM
+        :type table: str
+        :param table: Name of the table being looked up
+        :rtype: bool
+        :return: True if the table is currently in BigQuery
+        """
+        latest_dset = course_to_bq_dataset(course_id, 'sql', self.project)
+        query = """select table_schema, table_name
+        from {dataset}.INFORMATION_SCHEMA.TABLES
+        where table_name = '{table}'"""
+        query = query.format(
+            dataset=latest_dset, table=table
+        )
+        # We could have used count(*) for the query, but if we ever switch from
+        # returning a boolean to returning the actual matches, we would never need
+        # to change the query.
+        job = self.query(query)
+        count = 0
+        try:
+            for row in job.result():
+                count += 1
+        except Exception:
+            pass
+        return count != 0
+
+    def has_log_table(self, course_id, table):
+        """
+        Check if the given table name exists in the _logs dataset of
+        the given course ID
+
+        :type course_id: str
+        :param course_id: edX course ID in format ORG/NUMBER/TERM
+        :type table: str
+        :param table: Name of the table being looked up
+        :type region: str
+        :param region: GCP region for the BigQuery account
+        :rtype: bool
+        :return: True if the table is currently in BigQuery
+        """
+        log_dset = course_to_bq_dataset(course_id, 'log', self.project)
+        query = """select table_schema, table_name
+        from {dataset}.INFORMATION_SCHEMA.TABLES
+        where table_name like '%{table}%'"""
+        query = query.format(
+            dataset=log_dset, table=table
+        )
+        # We could have used count(*) for the query, but if we ever switch from
+        # returning a boolean to returning the actual matches, we would never need
+        # to change the query.
+        job = self.query(query)
+        count = 0
+        # job.result() does not return an object with __len__ defined.
+        # So, it would make sense to iterate over the returned records
+        # and count stuff.
+        try:
+            for row in job.result():
+                count += 1
+        except Exception:
+            pass
+        return count != 0
+
+    def make_template(self, query):
+        """
+        Create a Template object whose environment includes some of the
+        client's methods as filters
+
+        :type query: str
+        :param query: SQL query to use with the tempate being generated
+        :rtype: jinja2.Template
+        :return: Jinja2 Template object with the passed query
+        """
+        jinja_env = Environment()
+        jinja_env.filters['get_course_tables'] = self.get_course_tables
+        jinja_env.filters['has_latest_table'] = self.has_latest_table
+        jinja_env.filters['has_log_table'] = self.has_log_table
+        return jinja_env.from_string(query)
 
     def load_tables_from_dir(
         self, dirname: str, file_type: str, project: str,
@@ -350,7 +441,7 @@ class BigqueryClient(bigquery.Client):
                 context.update(v)
             # Raise an exception with some contextual information
             raise LoadJobException('\n'.join(errors), context_dict=context)
-        query_template = Template(MERGE_DDL)
+        query_template = self.make_template(MERGE_DDL)
         update_cols = [f.name for f in bqtable.schema if f.name.lower() != col.lower()]
         query = query_template.render(
             first=table, second=temp_table_name,
