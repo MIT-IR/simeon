@@ -134,6 +134,7 @@ def make_geo_data(
     :returns: Writes data to the given output file in append mode
     """
     with gzip.open(outfile, 'at') as outh:
+        seen = set()
         for ip_file in ip_files:
             if tracking_logs:
                 fh = gzip.open(ip_file, 'rt')
@@ -144,7 +145,6 @@ def make_geo_data(
             else:
                 fh = open(ip_file)
                 reader = csv.DictReader(fh, fieldnames=['ip'])
-            seen = set()
             line = 0
             while True:
                 line += 1
