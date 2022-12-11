@@ -1366,7 +1366,7 @@ def make_table_from_sql(
     table, course_id, client, project, append=False,
     query_dir=QUERY_DIR, schema_dir=SCHEMA_DIR,
     wait=False, geo_table='geocode.geoip', youtube_table='videos.youtube',
-    **kwargs,
+    target_directory="target", **kwargs,
 ):
     """
     Generate a BigQuery table using the given table name,
@@ -1392,6 +1392,8 @@ def make_table_from_sql(
     :param youtube_table: Table name in BigQuery with YouTube video details
     :type wait: bool
     :param wait: Whether to wait for the query job to finish running
+    :type target_directory: str
+    :param target_directory: Name of a directory where compiled SQL queries are stored
     :rtype: Dict[str, Dict[str, str]]
     :return: Returns the errors dictionary from the LoadJob object tied to the query
     """
@@ -1433,6 +1435,9 @@ def make_table_from_sql(
         course_id=course_id, latest_dataset=latest_dataset,
         log_dataset=log_dataset, **kwargs
     )
+    client.export_compiled_query(
+        query=query, table=table, target_directory=target_directory
+    )
     try:
         job = client.query(
             query.format(
@@ -1464,7 +1469,7 @@ def make_tables_from_sql(
     query_dir=QUERY_DIR, wait=False,
     geo_table='geocode.geoip', youtube_table='videos.youtube',
     parallel=False, fail_fast=False,
-    schema_dir=SCHEMA_DIR, **kwargs
+    schema_dir=SCHEMA_DIR, target_directory="target", **kwargs
 ):
     """
     This is the plural/multiple tables version of make_table_from_sql
@@ -1491,6 +1496,8 @@ def make_tables_from_sql(
     :param fail_fast: Whether to stop processing after the first error
     :type schema_dir: Union[None, str]
     :param schema_dir: Directory where schema files live
+    :type target_directory: str
+    :param target_directory: Name of the directory where to store compiled SQL queries
     :rtype: Dict[str, Dict[str, str]]
     :return: Return a dict mapping table names to their corresponding errors
     """
@@ -1512,7 +1519,8 @@ def make_tables_from_sql(
                 table=table, course_id=course_id, client=client,
                 project=project, append=append, geo_table=geo_table,
                 wait=wait, query_dir=query_dir, youtube_table=youtube_table,
-                schema_dir=schema_dir, **kwargs
+                schema_dir=schema_dir, target_directory=target_directory,
+                **kwargs
             )
         except Exception as excp:
             out[table] = [{'message': str(excp)}]
@@ -1527,7 +1535,7 @@ def make_tables_from_sql_par(
     tables, courses, project, append=False, query_dir=QUERY_DIR,
     wait=False, geo_table='geocode.geoip', youtube_table='videos.youtube',
     safile=None, size=mp.cpu_count(), logger=None, fail_fast=False,
-    schema_dir=SCHEMA_DIR, **kwargs,
+    schema_dir=SCHEMA_DIR, target_directory="target", **kwargs,
 ):
     """
     Parallel version of make_tables_from_sql
@@ -1558,6 +1566,8 @@ def make_tables_from_sql_par(
     :param fail_fast: Whether to stop processing after the first error
     :type schema_dir: Union[None, str]
     :param schema_dir: Directory where schema files live
+    :type target_directory: str
+    :param target_directory: Directory where compiled SQL queries are stored.
     :rtype: Dict[str, Dict[str, Dict[str, str]]]
     :return: A dict mapping course_ids to tables and their query errors
     """
@@ -1582,6 +1592,7 @@ def make_tables_from_sql_par(
                 project=project, append=append, query_dir=query_dir, wait=wait,
                 geo_table=geo_table, youtube_table=youtube_table,
                 parallel=True, fail_fast=fail_fast, schema_dir=schema_dir,
+                target_directory=target_directory,
             )
             kwds.update(kwargs)
             async_result = pool.apply_async(
