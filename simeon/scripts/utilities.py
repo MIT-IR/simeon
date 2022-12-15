@@ -225,6 +225,7 @@ CONFIGS = {
         ('sql_bucket', configparser.ConfigParser.get),
         ('log_bucket', configparser.ConfigParser.get),
         ('rdx_bucket', configparser.ConfigParser.get),
+        ('target_directory', configparser.ConfigParser.get),
     ),
     'GCP': (
         ('project', configparser.ConfigParser.get),
@@ -240,6 +241,7 @@ CONFIGS = {
         ('query_dir', configparser.ConfigParser.get),
         ('max_bad_rows', configparser.ConfigParser.getint),
         ('extra_args', configparser.ConfigParser.get),
+        ('target_directory', configparser.ConfigParser.get),
     ),
     'AWS': (
         ('aws_cred_file', configparser.ConfigParser.get),

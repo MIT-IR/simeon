@@ -414,10 +414,6 @@ def download_files(parsed_args):
         client_secret=client_secret, session_token=session_token,
         profile_name=parsed_args.profile_name,
     )
-    if parsed_args.verbose:
-        parsed_args.logger.info(
-            'Connection to S3 established.'
-        )
     blobs = []
     if parsed_args.latest:
         range_ = range(end_year, start_year - 1, -1)
@@ -844,7 +840,7 @@ def make_secondary_tables(parsed_args):
             youtube_table=parsed_args.youtube_table,
             wait=parsed_args.wait_for_loads, fail_fast=parsed_args.fail_fast,
             query_dir=parsed_args.query_dir, schema_dir=parsed_args.schema_dir,
-            **parsed_args.extra_args
+            target_directory=parsed_args.target_directory, **parsed_args.extra_args,
         )
     else:
         all_jobs.update(make_tables_from_sql_par(
@@ -856,6 +852,7 @@ def make_secondary_tables(parsed_args):
             wait=parsed_args.wait_for_loads, size=parsed_args.jobs,
             logger=parsed_args.logger, fail_fast=parsed_args.fail_fast,
             query_dir=parsed_args.query_dir, schema_dir=parsed_args.schema_dir,
+            target_directory=parsed_args.target_directory,
             **parsed_args.extra_args
         ))
     errors = 0
@@ -885,7 +882,7 @@ def make_secondary_tables(parsed_args):
                 'tables have been refreshed.'
             )
         else:
-            msg = 'The corresponding ran successfully.'
+            msg = 'The corresponding queries ran successfully.'
         parsed_args.logger.info(msg.format(c=num_queries))
         sys.exit(0)
     msg = (
@@ -1552,6 +1549,10 @@ def main():
         '--service-account-file', '-S',
         help='The service account to carry out the data load',
         type=cli_utils.optional_file
+    )
+    reporter.add_argument(
+        '--target-directory', '-T',
+        help='A target directory where to export artifacts like compiled SQL queries',
     )
     reporter.add_argument(
         '--query-dir', '-q',

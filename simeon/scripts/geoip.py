@@ -325,6 +325,10 @@ def main():
         help='The service account file to use when connecting to BigQuery'
     )
     merger.add_argument(
+        '--target-directory', '-T',
+        help='A target directory where to export artifacts like compiled SQL queries',
+    )
+    merger.add_argument(
         '--geo-table', '-g',
         help='The target table where the geolocation data are stored.',
         default='geocode.geoip',

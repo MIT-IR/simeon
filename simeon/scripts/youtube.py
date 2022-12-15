@@ -416,6 +416,10 @@ def main():
         help='The service account file to use when connecting to BigQuery'
     )
     merger.add_argument(
+        '--target-directory', '-T',
+        help='A target directory where to export artifacts like compiled SQL queries',
+    )
+    merger.add_argument(
         '--youtube-table', '-y',
         help='The target table where the YouTube video details are stored.',
         default='videos.youtube',
