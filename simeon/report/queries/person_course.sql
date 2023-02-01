@@ -18,7 +18,11 @@ select
         False
     ) as explored,
     if(uic.certificate_status = "downloadable", true, false) as certified,
+    {% if course_id | has_latest_table('grades_persistent') %}
     if(grades.percent_grade >= (SELECT MAX(overall_lower_cutoff) from `{latest_dataset}.grading_policy`), True, False) as completed,
+    {% else %}
+    cast(null as bool) completed,
+    {% endif %}
     -- if(uic.enrollment_mode = "verified", true, false) as verified,
     modal_ip.modal_ip as ip,
     {% if geo_table is defined and geo_table %}
@@ -56,7 +60,11 @@ select
     uic.profile_level_of_education as LoE,
     uic.profile_year_of_birth as YoB,
     uic.profile_gender as gender,
+    {% if course_id | has_latest_table('grades_persistent') %}
     grades.percent_grade as grade,
+    {% else %}
+    null grade,
+    {% endif %}
     (SELECT MAX(overall_lower_cutoff) from `{latest_dataset}.grading_policy`) as passing_grade,
     uic.enrollment_created as start_time,
     pc_day.first_event,
@@ -65,16 +73,33 @@ select
     pc_day.ndays_act,
     pc_day.nvideo as nplay_video,
     pc_nchapters.nchapters,
+     {% if course_id | has_latest_table('pc_forum')%}
     pc_forum.nforum as nforum_posts,
     pc_forum.nvotes as nforum_votes,
     pc_forum.nendorsed as nforum_endorsed,
     pc_forum.nthread as nforum_threads,
     pc_forum.ncomment as nforum_comments,
     pc_forum.npinned as nforum_pinned,
+    {% else %}
+    null nforum_posts,
+    null nforum_votes,
+    null nforum_endorsed,
+    null nforum_threads,
+    null nforum_comments,
+    null nforum_pinned,
+    {% endif %}
+    {% if course_id | has_latest_table('roles') %}
     roles.roles,
+    {% else %}
+    cast(null as string) roles,
+    {% endif %}
     pc_day.nprogcheck,
     pc_day.nproblem_check,
+    {% if course_id | has_latest_table('pc_forum')%}
     pc_forum.nforum as nforum_events,
+    {% else %}
+    null nforum_events,
+    {% endif %}
     trim(uic.enrollment_mode) as mode,
     uic.enrollment_is_active as is_active,
     uic.certificate_created_date as cert_created_date,
@@ -92,8 +117,13 @@ select
     pc_day.ntranscript,
     pc_day.nshow_answer,
     pc_day.nvideo,
+    {% if course_id | has_latest_table('pc_video_watched') %}
     video.n_unique_videos_watched as nvideos_unique_viewed,
     video.fract_total_videos_watched as nvideos_total_watched,
+    {% else %}
+    null nvideos_unique_viewed,
+    null nvideos_total_watched,
+    {% endif %}
     pc_day.nseq_goto,
     pc_day.nseek_video,
     pc_day.npause_video,
@@ -102,6 +132,7 @@ select
     pc_day.max_dt,
     pc_day.n_dt,
     pc_day.sum_dt,
+    {% if course_id | has_latest_table('roles') %}
     roles.roles_isBetaTester,
     roles.roles_isInstructor,
     roles.roles_isStaff,
@@ -113,6 +144,19 @@ select
     roles.forumRoles_isCommunityTA,
     roles.forumRoles_isModerator,
     roles.forumRoles_isStudent
+    {% else %}
+    null roles_isBetaTester,
+    null roles_isInstructor,
+    null roles_isStaff,
+    null roles_isCCX,
+    null roles_isFinance,
+    null roles_isLibrary,
+    null roles_isSales,
+    null forumRoles_isAdmin,
+    null forumRoles_isCommunityTA,
+    null forumRoles_isModerator,
+    null forumRoles_isStudent
+    {% endif %}
 from `{latest_dataset}.user_info_combo` uic
 {% if geo_table is defined and geo_table %}
 left join (
@@ -125,12 +169,20 @@ left join (
 {% else %}
 left join `{latest_dataset}.course_modal_ip` modal_ip
 {% endif %}
+{% if course_id | has_latest_table('grades_persistent') %}
 left join `{latest_dataset}.grades_persistent` grades using(user_id)
+{% endif %}
 left join `{latest_dataset}.pc_day_totals` pc_day using(username)
+{% if course_id | has_latest_table('pc_forum') %}
 left join `{latest_dataset}.pc_forum` pc_forum using(user_id)
+{% endif %}
 left join `{latest_dataset}.pc_nchapters` pc_nchapters using(user_id)
+{% if course_id | has_latest_table('roles') %}
 left join `{latest_dataset}.roles` roles using(user_id)
+{% endif %}
 left join `{latest_dataset}.course_modal_language` lang using(username)
+{% if course_id | has_latest_table('pc_video_watched') %}
 left join `{latest_dataset}.pc_video_watched` video using(user_id)
+{% endif %}
 left join `{latest_dataset}.person_enrollment_verified` enroll_verified using(user_id)
 left join `{latest_dataset}.course_modal_agent` modal_agent using(username)
