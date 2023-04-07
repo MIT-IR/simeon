@@ -167,7 +167,7 @@ left join (
 
 ) modal_ip using(username)
 {% else %}
-left join `{latest_dataset}.course_modal_ip` modal_ip
+left join `{latest_dataset}.course_modal_ip` modal_ip using(username)
 {% endif %}
 {% if course_id | has_latest_table('grades_persistent') %}
 left join `{latest_dataset}.grades_persistent` grades using(user_id)
