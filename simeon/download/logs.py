@@ -252,7 +252,6 @@ def split_tracking_log(
                         continue
                     raise excp
             fhandle = fhandles[fname]
-            fhandle.write(data)
             if isinstance(fhandle, gzip.GzipFile):
                 fhandle.write(data.encode('utf8', 'ignore'))
             else:
