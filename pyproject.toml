@@ -56,3 +56,4 @@ simeon-youtube = "simeon.scripts.youtube:main"
 [project.urls]
 "Homepage" = "https://github.com/MIT-IR/simeon"
 "Bug Tracker" = "https://github.com/MIT-IR/simeon/issues"
+"Documentation" = "https://mit-ir.github.io/simeon/"
