@@ -1,9 +1,10 @@
 ### simeon
 
-`simeon` is a CLI tool to help with the processing of edx Research data. It can `list`, `download`, and `split` edX data packages. It can also `push` the output of the `split` subcommand to both GCS and BigQuery. It is heavily inspired by the [edx2bigquery
-](https://github.com/mitodl/edx2bigquery) package. If you've used that tool, you should be able to navigate the quirks that may come with this one.
+`simeon` is a CLI tool to help with the processing of edx Research data.
+It can `list`, `download`, and `split` edX data packages. It can also `push` the output of the `split` subcommand to both GCS and BigQuery.
+It is heavily inspired by the [edx2bigquery](https://github.com/mitodl/edx2bigquery) package. If you've used that tool, you should be able to navigate the quirks that may come with this one.
 
-### Installing with pip
+### Installing from pypi
 ```sh
 python3 -m pip install simeon
 # Or with geoip
@@ -12,19 +13,19 @@ python3 -m pip install simeon[geoip]
 simeon --help
 ```
 
-### Installing with git clone
+### Installing with git clone and pip
 ```sh
 git clone git@github.com:MIT-IR/simeon.git
-cd simeon && python -m pip install .
+cd simeon && python3 -m venv venv && source venv/bin/activate && python -m pip install .
 # Or with geoip
-cd simeon && python -m pip install .[geoip]
+cd simeon && python3 -m venv venv && source venv/bin/activate &&  python -m pip install .[geoip]
 # Then invoke the CLI tool with
 simeon --help
 ```
 
 ### Using Docker
 ```sh
-docker run -it mitir/simeon:latest
+docker run --rm -it mitir/simeon:latest
 simeon --help
 ```
 
@@ -34,7 +35,7 @@ git clone git@github.com:MIT-IR/simeon.git
 cd simeon
 # Set up a virtual environment if you don't already have on
 python3 -m venv venv
-. venv/bin/activate
+source venv/bin/activate
 # pip install the package in an editable way
 python3 -m pip install -e .[test,geoip]
 # Invoke the executable
@@ -46,7 +47,7 @@ tox
 
 
 ### Setups and configurations
-`simeon` is a glorified downloader and uploader set of scripts. Much of the downloading and uploading that it does makes the assumptions that you have your AWS credentials configured properly and that you've got a service account file for GCP services available on your machine. If the latter is missing, you may have to authenticate to GCP services through the SDK. However, both we and Google recommend you not do that.
+`simeon` is a glorified downloader and uploader set of scripts. Much of the downloading and uploading that it does make the assumptions that you have your AWS credentials configured properly and that you've got a service account file for GCP services available on your machine. If the latter is missing, you may have to authenticate to GCP services through the SDK. However, both we and Google recommend you not do that.
 
 Every downloaded file is decrypted either during the download process or while it gets split by the `simeon split` command. So, this tool assumes that you've installed and configured `gpg` to be able to decrypt files from edX.
 
@@ -57,7 +58,7 @@ The following steps may be useful to someone just getting started with the edX d
     - Configure both AWS and gpg, so your credentials can access the S3 buckets and your `gpg` key can decrypt the files there
 2. Setup a GCP project
     - Create a GCP project
-    - Setup a BigQuery workspace
+    - Set up a BigQuery workspace
     - Create a GCS bucket
     - Create a service account and download the associated file
     - Give the service account Admin Role access to both the BigQuery project and the GCS bucket
@@ -105,7 +106,7 @@ The options in the config file(s) should match the optional arguments of the CLI
     ```sh
     # List the latest SQL bundle
     simeon list -s edx -o mitx -f sql -L
-    # List the laetst email data dump
+    # List the latest email data dump
     simeon list -s edx -o mitx -f email -L
     # List the latest tracking log file
     simeon list -s edx -o mitx -f log -L
@@ -189,21 +190,15 @@ The options in the config file(s) should match the optional arguments of the CLI
 1. Please note that SQL bundles are quite large when split up, so consider using the `-c` or `--courses` option when invoking `simeon download -S` or `simeon split` to make sure that you limit the splitting to a set of course IDs. You may also use the `--clistings-file` option, which expects a txt file of course IDs; one ID per line.
 If the aforementioned options are not used, `simeon` may end up failing to complete the split operation due to exhausted system resources (storage to be specific).
 
-
 2. `simeon download` with file types `log` and `email` will both download and decrypt the files matching the given criteria. If the latter operations are successful, then the encrypted files are deleted by default. This is to make sure that you don't exhaust storage resources. If you wish to keep those files, you can always use the `--keep-encrypted` option that comes with `simeon download` and `simeon split`.
 SQL bundles are only downloaded (not decrypted). Their decryption is done during a `split` operation.
 
-
 3. Unless there is an unhandled exception (which should be reported as a bug), `simeon` should, by default, print to the standard output both information and errors encountered while processing your files. You can capture those logs in a file by using the global option `--log-file` and providing a destination file for the logs.
-
 
 4. When using multi argument options like `--tables` or `--courses`, you should try not to place them right before the expected positional arguments. This will help the CLI parser not confuse your positional arguments with table names (in the case of `--tables`) or course IDs (when `--courses` is used).
 
-
 5. Splitting tracking logs is a resource intensive process. The routine that splits the logs generates a file for each course ID encountered. If you happen to have more course IDs in your logs than the running process can open operating system file descriptors, then `simeon` will put away records it can't save to disk for a second pass. Putting away the records involves using more memory than normally required. The second pass will only require one file descriptor at a time, so it should be safe in terms of file descriptor limits. To help `simeon` not have to do a second pass, you may increase the file descriptor limits of processes from your shell by running something like `ulimit -n 2000` before calling `simeon split` on Unix machines. For Windows users, you may have to dig into the Windows Registries for a corresponding setting. This should tell your OS kernel to allow OS processes to open up to 2000 file handles.
-
 
 6. Care must be taken when using `simeon split` and `simeon push` to make sure that the number of positional arguments passed does not lead to the invoked command exceeding the maximum command-line length allowed for arguments in a command. To avoid errors along those lines, please consider passing the positional arguments as UNIX glob patterns. For instance, `simeon split --file-type log 'data/TRACKING-LOGS/*/*.log.gz'` tells `simeon` to expand the given glob pattern, instead of relying on the shell to do it.
 
-
-7. The `report` subcommand relies on the presence of SQL query files to parse and send to BigQuery to execute. Any errors arising from executing the parsed queries will be shown to the end user through the given log stream. While the `simeon` tool ships with query files for most secondary/reporting tables that are based on the `edx2bigquery` tool, an end user should be able to point `simeon` to a different location with SQL query files by using the `--query-dir` option that comes with `simeon report`. Additionally, these query files can contain [`jinja2 templated`](https://jinja.palletsprojects.com/en/latest/) SQL code. Any mentioned variables within these templated queries can be passed to `simeon report` by using the `--extra-args` option and passing key-value pair items in the format `var1=value1,var2=value2,var3=value3,...,varn=valuen`. Further, these key-value pair items can also be typed by using the format `var1:i=value1,var2:s=value2,var3:f=value3,...,varn:s=valuen`. In this format, the type is append to the key, separated by a colon. The only supported scalar types, so far, are `s` for `str`, `i` for `int`, and `f` for `float`. If any conversion errors occur during value parsing, then those are shown to the end user, and the query won't get executed. Finally, if you wish to pass an `array` or `list` to the template, you will need to repeat a key multiple times. For instance, if you want to pass a list named `mylist` containing the integers, you could write something like `--extra-args mylist:i=1,mylist:i=2,mylist:i=3`. This means that you'll have a python `list` named `mylist` within your template, and it should contain `[1, 2, 3]`.
+7. The `report` subcommand relies on the presence of SQL query files to parse and send to BigQuery to execute. Any errors arising from executing the parsed queries will be shown to the end user through the given log stream. While the `simeon` tool ships with query files for most secondary/reporting tables that are based on the `edx2bigquery` tool, an end user should be able to point `simeon` to a different location with SQL query files by using the `--query-dir` option that comes with `simeon report`. Additionally, these query files can contain [jinja2 templated](https://jinja.palletsprojects.com/en/latest/) SQL code. Any mentioned variables within these templated queries can be passed to `simeon report` by using the `--extra-args` option and passing key-value pair items in the format `var1=value1,var2=value2,var3=value3,...,var_n=value_n`. Further, these key-value pair items can also be typed by using the format `var1:i=value1,var2:s=value2,var3:f=value3,...,var_n:s=value_n`. In this format, the type is appended to the key, separated by a colon. The only supported scalar types, so far, are `s` for `str`, `i` for `int`, and `f` for `float`. If any conversion errors occur during value parsing, then those are shown to the end user, and the query won't get executed. Finally, if you wish to pass an `array` or `list` to the template, you will need to repeat a key multiple times. For instance, if you want to pass a list named `mylist` containing the integers, you could write something like `--extra-args mylist:i=1,mylist:i=2,mylist:i=3`. This means that you'll have a python `list` named `mylist` within your template, and it should contain `[1, 2, 3]`. You can also pass a JSON file whose top-level objects are parsed as variables. Use a leading `@` when passing a JSON file.

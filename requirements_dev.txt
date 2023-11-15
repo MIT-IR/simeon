@@ -1,2 +1,4 @@
+black
+isort
 Sphinx>=3.4.3
 tox>=3.21.2

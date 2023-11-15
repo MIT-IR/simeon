@@ -9,8 +9,8 @@ BigQuery. It is heavily inspired by the
 you’ve used that tool, you should be able to navigate the quirks that
 may come with this one.
 
-Installing with pip
-~~~~~~~~~~~~~~~~~~~
+Installing from pypi
+~~~~~~~~~~~~~~~~~~~~
 
 .. code:: sh
 
@@ -20,15 +20,15 @@ Installing with pip
    # Then invoke the CLI tool with
    simeon --help
 
-Installing with git clone
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Installing with git clone and pip
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: sh
 
    git clone git@github.com:MIT-IR/simeon.git
-   cd simeon && python -m pip install .
+   cd simeon && python3 -m venv venv && source venv/bin/activate && python -m pip install .
    # Or with geoip
-   cd simeon && python -m pip install .[geoip]
+   cd simeon && python3 -m venv venv && source venv/bin/activate &&  python -m pip install .[geoip]
    # Then invoke the CLI tool with
    simeon --help
 
@@ -37,7 +37,7 @@ Using Docker
 
 .. code:: sh
 
-   docker run -it mitir/simeon:latest
+   docker run --rm -it mitir/simeon:latest
    simeon --help
 
 Developing
@@ -49,7 +49,7 @@ Developing
    cd simeon
    # Set up a virtual environment if you don't already have on
    python3 -m venv venv
-   . venv/bin/activate
+   source venv/bin/activate
    # pip install the package in an editable way
    python3 -m pip install -e .[test,geoip]
    # Invoke the executable
@@ -85,7 +85,7 @@ the edX data package:
 2. Setup a GCP project
 
    -  Create a GCP project
-   -  Setup a BigQuery workspace
+   -  Set up a BigQuery workspace
    -  Create a GCS bucket
    -  Create a service account and download the associated file
    -  Give the service account Admin Role access to both the BigQuery
@@ -154,7 +154,7 @@ and end dates), and site (``edx`` or ``edge`` or ``patches``).
 
       # List the latest SQL bundle
       simeon list -s edx -o mitx -f sql -L
-      # List the laetst email data dump
+      # List the latest email data dump
       simeon list -s edx -o mitx -f email -L
       # List the latest tracking log file
       simeon list -s edx -o mitx -f log -L
@@ -306,11 +306,11 @@ Notes:
    ``edx2bigquery`` tool, an end user should be able to point ``simeon``
    to a different location with SQL query files by using the
    ``--query-dir`` option that comes with ``simeon report``.
-   Additionally, these query files can contain
-   ```jinja2 templated`` <https://jinja.palletsprojects.com/en/latest/>`__
-   SQL code. Any mentioned variables within these templated queries can
-   be passed to ``simeon report`` by using the ``--extra-args`` option
-   and passing key-value pair items in the format
+   Additionally, these query files can contain `jinja2
+   templated <https://jinja.palletsprojects.com/en/latest/>`__ SQL code.
+   Any mentioned variables within these templated queries can be passed
+   to ``simeon report`` by using the ``--extra-args`` option and passing
+   key-value pair items in the format
    ``var1=value1,var2=value2,var3=value3,...,varn=valuen``. Further,
    these key-value pair items can also be typed by using the format
    ``var1:i=value1,var2:s=value2,var3:f=value3,...,varn:s=valuen``. In
