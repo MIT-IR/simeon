@@ -35,7 +35,7 @@ jobs:
           tags: mitir/simeon:${{ env.SOURCE_TAG }}
       -
         name: Publish Latest Tag
-        id: docker_build_laest
+        id: docker_build_latest
         uses: docker/build-push-action@v2
         with:
           push: true

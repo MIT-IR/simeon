@@ -4,7 +4,7 @@ The python API of this tool is divided into the following sections:
 
 - upload: Handles the uploading of data to GCS and BigQuery. It matches up with the ``simeon push`` command
 
-- report: Handles the generation of seconary tables in BigQuery. It matches up with the ``simeon report`` command
+- report: Handles the generation of secondary tables in BigQuery. It matches up with the ``simeon report`` command
 
 
 Components of the :class:`~simeon.download` package
