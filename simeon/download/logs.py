@@ -12,23 +12,17 @@ import time
 import traceback
 from datetime import datetime
 from json.decoder import JSONDecodeError
-from multiprocessing.pool import (
-    Pool, TimeoutError
-)
-from typing import Dict, List, Union
+from multiprocessing.pool import Pool
+from typing import Dict, Iterable, Union
 
 from dateutil.parser import parse as parse_date
 
 from simeon.download import utilities as utils
-from simeon.exceptions import (
-    EarlyExitError, MissingSchemaException, SplitException,
-)
+from simeon.exceptions import EarlyExitError, MissingSchemaException, SplitException
 from simeon.report import utilities as rutils
 
-
 SCHEMA_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    'upload', 'schemas'
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas"
 )
 
 
@@ -36,35 +30,33 @@ def _process_initializer():
     """
     Process initializer for multiprocessing pools
     """
-    def sighandler(sig, frame):
-        raise EarlyExitError(
-            'Tracking log splitting interrupted prematurely'
-        )
     sigs = [signal.SIGABRT, signal.SIGTERM, signal.SIGINT]
     for sig in sigs:
         signal.signal(sig, signal.SIG_DFL)
 
 
-def _cleanup_handles(fhandles, sleep=1):
+def _cleanup_handles(file_handles, sleep=1):
     """
     Flush and close the given file handles.
     Sleep sleep number of seconds if necessary,
     so the OS can reclaim the file descriptors
     associated with the given handles.
     """
-    for fhandle in fhandles:
-        fhandle.flush()
-        os.fsync(fhandle.fileno())
-        os.close(fhandle.fileno())
+    for file_andle in file_handles:
+        file_andle.flush()
+        os.fsync(file_andle.fileno())
+        os.close(file_andle.fileno())
     if sleep:
         time.sleep(sleep)
 
 
 # pylint:disable=unsubscriptable-object
 def process_line(
-    line: Union[str, bytes], lcount: int,
-    date: Union[None, datetime]=None, is_gzip=True,
-    courses: List[str]=None
+    line: Union[str, bytes],
+    lcount: int,
+    date: Union[None, datetime] = None,
+    is_gzip=True,
+    courses: Iterable[str] = None,
 ) -> dict:
     """
     Process the line from a tracking log file and return the reformatted
@@ -86,82 +78,80 @@ def process_line(
     original_line = line
     line = line.strip()
     if isinstance(line, bytes):
-        line = line.decode('utf8', 'ignore')
-    line = line[line.find('{'):]
+        line = line.decode("utf8", "ignore")
+    line = line[line.find("{") :]
     try:
         record = json.loads(line)
     except (JSONDecodeError, TypeError):
         return {
-            'data': original_line,
-            'filename': os.path.join(
-                'dead_letters',
-                'dead_letter_queue_{p}.json.gz'.format(p=os.getpid())
+            "data": original_line,
+            "filename": os.path.join(
+                "dead_letters", "dead_letter_queue_{p}.json.gz".format(p=os.getpid())
             ),
-            'error': 'Not valid JSON',
+            "error": "Not valid JSON",
         }
     # If the parsed line is not a dictionary, then we return the original line
     # with a dead letter destination file
     if not isinstance(record, dict):
         return {
-            'data': original_line,
-            'filename': os.path.join(
-                'dead_letters',
-                'dead_letter_queue_{p}.json.gz'.format(p=os.getpid())
+            "data": original_line,
+            "filename": os.path.join(
+                "dead_letters", "dead_letter_queue_{p}.json.gz".format(p=os.getpid())
             ),
-            'error': 'The line is not a record',
+            "error": "The line is not a record",
         }
-    if not isinstance(record.get('event'), dict):
+    if not isinstance(record.get("event"), dict):
         try:
-            record['event'] = json.loads(record.get('event', '{}'))
+            record["event"] = json.loads(record.get("event", "{}"))
         except (JSONDecodeError, TypeError):
-            record['event'] = {'event': record['event']}
+            record["event"] = {"event": record["event"]}
     course_id = utils.get_course_id(record)
     if courses and course_id not in courses:
         return {}
-    record['course_id'] = course_id
+    record["course_id"] = course_id
     try:
         utils.rephrase_record(record)
     except KeyError as e:
         return {
-            'data': original_line,
-            'filename': os.path.join(
-                'dead_letters',
-                'dead_letter_queue_{p}.json.gz'.format(p=os.getpid())
+            "data": original_line,
+            "filename": os.path.join(
+                "dead_letters", "dead_letter_queue_{p}.json.gz".format(p=os.getpid())
             ),
-            'error': 'Record does not have the key ' + str(e),
+            "error": "Record does not have the key " + str(e),
         }
-    if all(k not in record for k in ('event', 'event_type')):
+    if all(k not in record for k in ("event", "event_type")):
         return {
-            'data': original_line,
-            'filename': os.path.join(
-                'dead_letters',
-                'dead_letter_queue_{p}.json.gz'.format(p=os.getpid())
+            "data": original_line,
+            "filename": os.path.join(
+                "dead_letters", "dead_letter_queue_{p}.json.gz".format(p=os.getpid())
             ),
-            'error': 'Missing event or event type'
+            "error": "Missing event or event type",
         }
     if not date:
         try:
-            date = parse_date(record.get('time', ''))
+            date = parse_date(record.get("time", ""))
             outfile = utils.make_tracklog_path(
-                course_id, date.strftime('%Y-%m-%d'), is_gzip
+                course_id, date.strftime("%Y-%m-%d"), is_gzip
             )
         except Exception as e:
-            ext = '.gz' if is_gzip else ''
+            ext = ".gz" if is_gzip else ""
             outfile = os.path.join(
-                course_id.replace('.', '_').replace('/', '__') or 'dead_letters',
-                'dead_letter_queue_{p}.json{x}'.format(p=os.getpid(), x=ext)
+                course_id.replace(".", "_").replace("/", "__") or "dead_letters",
+                "dead_letter_queue_{p}.json{x}".format(p=os.getpid(), x=ext),
             )
     else:
         outfile = utils.make_tracklog_path(
-            course_id, date.strftime('%Y-%m-%d'), is_gzip
+            course_id, date.strftime("%Y-%m-%d"), is_gzip
         )
-    return {'data': record, 'filename': outfile}
+    return {"data": record, "filename": outfile}
 
 
 # pylint:enable=unsubscriptable-object
 def split_tracking_log(
-    filename: str, ddir: str, dynamic_date: bool=False,
-    courses: List[str]=None,
+    filename: str,
+    ddir: str,
+    dynamic_date: bool = False,
+    courses: Iterable[str] = None,
     schema_dir=SCHEMA_DIR,
 ):
     """
@@ -170,7 +160,7 @@ def split_tracking_log(
     a lot of open file handles and writes to them whenever it processes
     a good record. Some attempts are made to keep records around whenever
     the process is no longer allowed to open new files. But that will likely
-    lead to the exhaustion of the running process's alotted memory.
+    lead to the exhaustion of the running process's allotted memory.
 
     :NOTE: If you've got a better way, please update me.
 
@@ -189,21 +179,17 @@ def split_tracking_log(
     :return: True if files have been generated. False, otherwise
     """
     schema_dir = schema_dir or SCHEMA_DIR
-    targets = glob.iglob(os.path.join(
-        schema_dir, '*tracking_log.json'
-    ))
+    targets = glob.iglob(os.path.join(schema_dir, "*tracking_log.json"))
     schema_file = next(targets, None)
     if schema_file is None or not os.path.exists(schema_file):
         msg = (
-            'No valid schema file tracking_log.json was found '
-            'in the schema directory {d}. Please provide a valid '
-            'schema directory.'
+            "No valid schema file tracking_log.json was found "
+            "in the schema directory {d}. Please provide a valid "
+            "schema directory."
         )
-        raise MissingSchemaException(
-            msg.format(d=os.path.abspath(schema_dir))
-        )
+        raise MissingSchemaException(msg.format(d=os.path.abspath(schema_dir)))
     with open(schema_file) as sfh:
-        schema = json.load(sfh).get('tracking_log')
+        schema = json.load(sfh).get("tracking_log")
     if not isinstance(courses, set):
         courses = set(c for c in (courses or []))
     fhandles = dict()
@@ -217,35 +203,33 @@ def split_tracking_log(
             line_info = process_line(line, i + 1, date=date, courses=courses)
             if not line_info:
                 continue
-            data = line_info['data']
+            data = line_info["data"]
             # If we get a dictionary from process_line, then we can do all
             # the extra processing that is needed.
             # Otherwise, we'll store the text/string in the target file.
             if isinstance(data, dict):
-                user_id = (data.get('context') or {}).get('user_id')
-                username = data.get('username')
+                user_id = (data.get("context") or {}).get("user_id")
+                username = data.get("username")
                 # If there is no user_id or username, then we should skip
                 if not any([user_id, username]):
                     continue
                 # If we're given a set of course IDs to filter on, then we
                 # will skip any record that does not match one of the courses
-                if courses and data.get('course_id') not in courses:
+                if courses and data.get("course_id") not in courses:
                     continue
                 rutils.check_record_schema(data, schema)
                 rutils.drop_extra_keys(data, schema)
-                data = json.dumps(data) + '\n'
+                data = json.dumps(data) + "\n"
             elif isinstance(data, bytes):
-                data = data.decode() + '\n'
-            fname = line_info.get('filename')
+                data = data.decode() + "\n"
+            fname = line_info.get("filename")
             fname = os.path.join(ddir, fname)
             if fname not in fhandles:
                 try:
-                    fhandles[fname] = utils.make_file_handle(
-                        fname, is_gzip=True
-                    )
+                    fhandles[fname] = utils.make_file_handle(fname, is_gzip=True)
                 except OSError as excp:
                     if excp.errno == errno.EMFILE:
-                        line_info['data'] = data
+                        line_info["data"] = data
                         stragglers.append(line_info)
                         continue
                     if excp.errno == errno.ENAMETOOLONG:
@@ -253,7 +237,7 @@ def split_tracking_log(
                     raise excp
             fhandle = fhandles[fname]
             if isinstance(fhandle, gzip.GzipFile):
-                fhandle.write(data.encode('utf8', 'ignore'))
+                fhandle.write(data.encode("utf8", "ignore"))
             else:
                 fhandle.write(data)
         if not stragglers:
@@ -261,19 +245,19 @@ def split_tracking_log(
         # Working around EMFILE errors
         _cleanup_handles(fhandles.values())
         # Sort the stragglers by file name and use a file tracker
-        stragglers = sorted(stragglers, key=lambda s: s.get('filename'))
+        stragglers = sorted(stragglers, key=lambda s: s.get("filename"))
         pfname = None
         while stragglers:
             try:
                 rec = stragglers.pop()
-                fname = rec.get('filename')
+                fname = rec.get("filename")
                 fname = os.path.join(ddir, fname)
                 if pfname and pfname != fname:
                     try:
                         _cleanup_handles([fhandles[pfname]], None)
                     except OSError:
                         pass
-                data = rec['data']
+                data = rec["data"]
                 if fname not in fhandles:
                     try:
                         fhandle = utils.make_file_handle(fname, is_gzip=True)
@@ -296,9 +280,15 @@ def split_tracking_log(
 
 
 def batch_split_tracking_logs(
-    filenames, ddir, dynamic_date=False,
-    courses=None, verbose=True, logger=None,
-    size=10, schema_dir=SCHEMA_DIR, debug=False,
+    filenames,
+    ddir,
+    dynamic_date=False,
+    courses=None,
+    verbose=True,
+    logger=None,
+    size=10,
+    schema_dir=SCHEMA_DIR,
+    debug=False,
 ):
     """
     Call split_tracking_log on each file inside a process or thread pool
@@ -312,13 +302,16 @@ def batch_split_tracking_logs(
         results = dict()
         for fname in filenames:
             if verbose and logger:
-                logger.info('Splitting {f}'.format(f=fname))
+                logger.info("Splitting {f}".format(f=fname))
             result = pool.apply_async(
                 func=split_tracking_log,
                 kwds=dict(
-                    filename=fname, ddir=ddir,
-                    dynamic_date=dynamic_date, courses=courses,
-                )
+                    filename=fname,
+                    ddir=ddir,
+                    dynamic_date=dynamic_date,
+                    courses=courses,
+                    schema_dir=schema_dir,
+                ),
             )
             results[fname] = (result, False)
         while processed < len(filenames):
@@ -335,35 +328,33 @@ def batch_split_tracking_logs(
                     processed += 1
                     if rc:
                         if verbose and logger:
-                            logger.info('Done splitting {f}'.format(f=fname))
+                            logger.info("Done splitting {f}".format(f=fname))
                         continue
                     if logger:
                         errmsg = (
-                            'No files were extracted while splitting the tracking '
-                            'log file {f!r} with the given criteria. Moving on...'
+                            "No files were extracted while splitting the tracking "
+                            "log file {f!r} with the given criteria. Moving on..."
                         )
                         logger.warning(errmsg.format(f=fname))
-                        logger.warning('Done splitting {f}'.format(f=fname))
+                        logger.warning("Done splitting {f}".format(f=fname))
                 except TimeoutError:
                     continue
                 except KeyboardInterrupt:
-                    msg = 'Failed to split {f}: Interrupted by the user'
+                    msg = "Failed to split {f}: Interrupted by the user"
                     logger.error(msg.format(f=fname))
                     return False
                 except:
                     _, excp, tb = sys.exc_info()
-                    msg = 'Failed to split {f}{e}'
+                    msg = "Failed to split {f}{e}"
                     exit_excepts = (EarlyExitError, SystemExit)
                     if isinstance(excp, exit_excepts):
-                        raise SplitException(
-                            msg.format(f=fname, e='')
-                        )
+                        raise SplitException(msg.format(f=fname, e=""))
                     else:
-                        excp_str = ': {e}'.format(e=excp)
+                        excp_str = ": {e}".format(e=excp)
                         if debug:
                             traces = [excp_str]
                             traces += map(str.strip, traceback.format_tb(tb))
-                            excp_str = '\n'.join(traces)
+                            excp_str = "\n".join(traces)
                         logger.error(msg.format(f=fname, e=excp_str))
                     results[fname] = (result, True)
                     processed += 1

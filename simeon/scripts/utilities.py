@@ -17,7 +17,6 @@ from argparse import ArgumentTypeError
 
 from dateutil.parser import parse as dateparse
 
-
 CLI_MAIN_EPILOG = """
 RETURN CODES:
     simeon returns either 0 or 1, depending on whether an error was encountered.
@@ -195,8 +194,8 @@ NOTES:
     that are based on the edx2bigquery tool, an end user should be able to point simeon to a different location with SQL query files by using
     the --query-dir option that comes with simeon report. Additionally, these query files can contain jinja2 templated SQL code.
     Any mentioned variables within these templated queries can be passed to simeon report by using the --extra-args option and passing key-value pair items
-    in the format var1=value1,var2=value2,var3=value3,...,varn=valuen. Further, these key-value pair items can also be typed by using the format
-    var1:i=value1,var2:s=value2,var3:f=value3,...,varn:s=valuen. In this format, the type is append to the key, separated by a colon.
+    in the format var1=value1,var2=value2,var3=value3,...,var_n=value_n. Further, these key-value pair items can also be typed by using the format
+    var1:i=value1,var2:s=value2,var3:f=value3,...,var_n:s=value_n. In this format, the type is append to the key, separated by a colon.
     The only supported scalar types, so far, are s for str, i for int, and f for float. If any conversion errors occur during value parsing,
     then those are shown to the end user, and the query won't get executed. Finally, if you wish to pass an array or list to the template,
     you will need to repeat a key multiple times. For instance, if you want to pass a list named mylist containing the integers,
@@ -204,67 +203,91 @@ NOTES:
     mylist within your template, and it should contain [1, 2, 3].
 """
 CONFIGS = {
-    'DEFAULT': (
-        ('site', configparser.ConfigParser.get),
-        ('org', configparser.ConfigParser.get),
-        ('clistings_file', configparser.ConfigParser.get),
-        ('youtube_token', configparser.ConfigParser.get),
-        ('file_format', configparser.ConfigParser.get),
-        ('schema_dir', configparser.ConfigParser.get),
-        ('max_bad_rows', configparser.ConfigParser.getint),
-        ('update_description', configparser.ConfigParser.getboolean),
-        ('schema_dir', configparser.ConfigParser.get),
-        ('query_dir', configparser.ConfigParser.get),
-        ('project', configparser.ConfigParser.get),
-        ('bucket', configparser.ConfigParser.get),
-        ('service_account_file', configparser.ConfigParser.get),
-        ('geo_table', configparser.ConfigParser.get),
-        ('youtube_table', configparser.ConfigParser.get),
-        ('extra_args', configparser.ConfigParser.get),
-        ('email_bucket', configparser.ConfigParser.get),
-        ('sql_bucket', configparser.ConfigParser.get),
-        ('log_bucket', configparser.ConfigParser.get),
-        ('rdx_bucket', configparser.ConfigParser.get),
-        ('target_directory', configparser.ConfigParser.get),
+    "DEFAULT": (
+        ("site", configparser.ConfigParser.get),
+        ("org", configparser.ConfigParser.get),
+        ("clistings_file", configparser.ConfigParser.get),
+        ("youtube_token", configparser.ConfigParser.get),
+        ("file_format", configparser.ConfigParser.get),
+        ("schema_dir", configparser.ConfigParser.get),
+        ("max_bad_rows", configparser.ConfigParser.getint),
+        ("update_description", configparser.ConfigParser.getboolean),
+        ("schema_dir", configparser.ConfigParser.get),
+        ("query_dir", configparser.ConfigParser.get),
+        ("project", configparser.ConfigParser.get),
+        ("bucket", configparser.ConfigParser.get),
+        ("service_account_file", configparser.ConfigParser.get),
+        ("geo_table", configparser.ConfigParser.get),
+        ("youtube_table", configparser.ConfigParser.get),
+        ("extra_args", configparser.ConfigParser.get),
+        ("email_bucket", configparser.ConfigParser.get),
+        ("sql_bucket", configparser.ConfigParser.get),
+        ("log_bucket", configparser.ConfigParser.get),
+        ("rdx_bucket", configparser.ConfigParser.get),
+        ("target_directory", configparser.ConfigParser.get),
     ),
-    'GCP': (
-        ('project', configparser.ConfigParser.get),
-        ('bucket', configparser.ConfigParser.get),
-        ('service_account_file', configparser.ConfigParser.get),
-        ('wait_for_loads', configparser.ConfigParser.getboolean),
-        ('use_storage', configparser.ConfigParser.getboolean),
-        ('geo_table', configparser.ConfigParser.get),
-        ('youtube_table', configparser.ConfigParser.get),
-        ('youtube_token', configparser.ConfigParser.get),
-        ('file_format', configparser.ConfigParser.get),
-        ('schema_dir', configparser.ConfigParser.get),
-        ('query_dir', configparser.ConfigParser.get),
-        ('max_bad_rows', configparser.ConfigParser.getint),
-        ('extra_args', configparser.ConfigParser.get),
-        ('target_directory', configparser.ConfigParser.get),
+    "GCP": (
+        ("project", configparser.ConfigParser.get),
+        ("bucket", configparser.ConfigParser.get),
+        ("service_account_file", configparser.ConfigParser.get),
+        ("wait_for_loads", configparser.ConfigParser.getboolean),
+        ("use_storage", configparser.ConfigParser.getboolean),
+        ("geo_table", configparser.ConfigParser.get),
+        ("youtube_table", configparser.ConfigParser.get),
+        ("youtube_token", configparser.ConfigParser.get),
+        ("file_format", configparser.ConfigParser.get),
+        ("schema_dir", configparser.ConfigParser.get),
+        ("query_dir", configparser.ConfigParser.get),
+        ("max_bad_rows", configparser.ConfigParser.getint),
+        ("extra_args", configparser.ConfigParser.get),
+        ("target_directory", configparser.ConfigParser.get),
     ),
-    'AWS': (
-        ('aws_cred_file', configparser.ConfigParser.get),
-        ('profile_name', configparser.ConfigParser.get),
-        ('email_bucket', configparser.ConfigParser.get),
-        ('sql_bucket', configparser.ConfigParser.get),
-        ('log_bucket', configparser.ConfigParser.get),
-        ('rdx_bucket', configparser.ConfigParser.get),
+    "AWS": (
+        ("aws_cred_file", configparser.ConfigParser.get),
+        ("profile_name", configparser.ConfigParser.get),
+        ("email_bucket", configparser.ConfigParser.get),
+        ("sql_bucket", configparser.ConfigParser.get),
+        ("log_bucket", configparser.ConfigParser.get),
+        ("rdx_bucket", configparser.ConfigParser.get),
     ),
 }
 REPORT_TABLES = [
-    'video_axis', 'forum_events', 'problem_grades', 'chapter_grades',
-    'show_answer', 'video_stats_day', 'show_answer_stats_by_user',
-    'show_answer_stats_by_course', 'course_item', 'person_item',
-    'person_problem', 'course_problem', 'person_course_day',
-    'pc_video_watched', 'pc_day_totals', 'pc_day_trlang',
-    'pc_day_ip_counts', 'language_multi_transcripts', 'pc_nchapters',
-    'pc_forum', 'course_modal_language', 'course_modal_ip',
-    'forum_posts', 'forum_person', 'enrollment_events', 'enrollday_all',
-    'person_enrollment_verified', 'pc_day_agent_counts', 'course_modal_agent',
-    'person_course',
+    "video_axis",
+    "forum_events",
+    "problem_grades",
+    "chapter_grades",
+    "show_answer",
+    "video_stats_day",
+    "show_answer_stats_by_user",
+    "show_answer_stats_by_course",
+    "course_item",
+    "person_item",
+    "person_problem",
+    "course_problem",
+    "person_course_day",
+    "pc_video_watched",
+    "pc_day_totals",
+    "pc_day_trlang",
+    "pc_day_ip_counts",
+    "language_multi_transcripts",
+    "pc_nchapters",
+    "pc_forum",
+    "course_modal_language",
+    "course_modal_ip",
+    "forum_posts",
+    "forum_person",
+    "enrollment_events",
+    "enrollday_all",
+    "person_enrollment_verified",
+    "pc_day_agent_counts",
+    "course_modal_agent",
+    "person_course",
 ]
-EXTRA_ARG_TYPE = {'i': int, 'f': float, 's': str,}
+EXTRA_ARG_TYPE = {
+    "i": int,
+    "f": float,
+    "s": str,
+}
 
 
 def parsed_date(datestr: str) -> str:
@@ -279,9 +302,9 @@ def parsed_date(datestr: str) -> str:
     :raises: ArgumentTypeError
     """
     try:
-        return dateparse(datestr).strftime('%Y-%m-%d')
+        return dateparse(datestr).strftime("%Y-%m-%d")
     except Exception:
-        msg = '{d!r} could not be parsed into a proper date'
+        msg = "{d!r} could not be parsed into a proper date"
         raise ArgumentTypeError(msg.format(d=datestr))
 
 
@@ -294,8 +317,8 @@ def gcs_bucket(bucket: str) -> str:
     :rtype: str
     :returns: A properly formatted GCS bucket name
     """
-    if not bucket.startswith('gs://'):
-        return 'gs://{b}'.format(b=bucket)
+    if not bucket.startswith("gs://"):
+        return "gs://{b}".format(b=bucket)
     return bucket
 
 
@@ -306,12 +329,12 @@ def bq_table(name):
     """
     if not name:
         return None
-    chunks = name.split('.')
+    chunks = name.split(".")
     if len(chunks) not in (2, 3):
         raise ArgumentTypeError(
-            '{n} is not a valid BigQuery table name.\nValid table names '
-            'should be in the form project.dataset.table '
-            'or dataset.table.'.format(n=name)
+            "{n} is not a valid BigQuery table name.\nValid table names "
+            "should be in the form project.dataset.table "
+            "or dataset.table.".format(n=name)
         )
     return name
 
@@ -330,32 +353,34 @@ def optional_file(fname: str) -> str:
     if fname is not None:
         fname = os.path.expanduser(fname)
         if not os.path.exists(fname):
-            msg = 'The given file name {f!r} does not exist.'
+            msg = "The given file name {f!r} does not exist."
             raise ArgumentTypeError(msg.format(f=fname))
     return os.path.realpath(fname)
 
 
-def make_logger(user='SIMEON', verbose=True, stream=None, json_format=True):
+def make_logger(user="SIMEON", verbose=True, stream=None, json_format=True):
     """
     Create a Logger object pointing to the given stream
 
+    :type user: str
+    :param user: User running the process
     :type verbose: bool
     :param verbose: If True, log level is INFO. Otherwise, it's WARN
     :type stream: Union[TextIOWrapper,None]
     :param stream: A file object opened for writing
     :type json_format: bool
     :param json_format: Whether or not to show log messages as JSON
-    :rtype: logging.Logger
+    :rtype: Union[TextLoggerAdapter, JSONLoggerAdapter]
     :returns: Returns a Logger object used to print messages
     """
     if stream is None:
         stream = sys.stdout
-    if not hasattr(stream, 'write'):
-        stream = open(stream, 'a')
+    if not hasattr(stream, "write"):
+        stream = open(stream, "a")
     level = logging.INFO if verbose else logging.WARN
     formatter = logging.Formatter(
-        '%(asctime)s:%(hostname)s:%(levelname)s:%(name)s:%(message)s',
-        '%Y-%m-%d %H:%M:%S%z'
+        "%(asctime)s:%(hostname)s:%(levelname)s:%(name)s:%(message)s",
+        "%Y-%m-%d %H:%M:%S%z",
     )
     logger = logging.getLogger(user.upper())
     logger.setLevel(level)
@@ -364,8 +389,8 @@ def make_logger(user='SIMEON', verbose=True, stream=None, json_format=True):
     handler.set_name(user)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    Adapter = JSONLoggerAdapter if json_format else TextLoggerAdapter
-    return Adapter(logger, {'hostname': socket.gethostname()})
+    adapter_class = JSONLoggerAdapter if json_format else TextLoggerAdapter
+    return adapter_class(logger, {"hostname": socket.gethostname()})
 
 
 def make_config_file(output=None):
@@ -379,23 +404,22 @@ def make_config_file(output=None):
     :returns: Write the config info to the given output file
     """
     if output is None:
-        output = os.path.join(os.path.expanduser('~'), 'simeon.cfg')
+        output = os.path.join(os.path.expanduser("~"), "simeon.cfg")
     config = configparser.ConfigParser()
-    config.optionxform = lambda s: s.lstrip('-').lower().replace('-', '_')
-    config['DEFAULT'] = {
-        'site': '',
-        'org': '',
-    }
-    config['GCP'] = {
-        'project': '',
-        'bucket': '',
-        'service_account_file': '',
-    }
-    config['AWS'] = {
-        'credential_file': '',
-        'profile_name': '',
-    }
-    with open(output, 'w') as configfile:
+    config.optionxform = lambda s: s.lstrip("-").lower().replace("-", "_")
+    seen = set()
+    # The order of the sections matters. We should not duplicate configs in DEFAULT.
+    for section in ["AWS", "GCP", "DEFAULT"]:
+        details = CONFIGS.get(section)
+        section_info = dict()
+        for detail in details:
+            name, *_ = detail
+            if name in seen:
+                continue
+            seen.add(name)
+            section_info[name] = ""
+        config[section] = section_info
+    with open(output, "w") as configfile:
         config.write(configfile)
 
 
@@ -407,21 +431,25 @@ def find_config(fname=None, no_raise=False):
 
     :type fname: Union[None, str, pathlib.Path]
     :param fname: Path to an INI config file, default "simeon.cfg"
+    :type no_raise: bool
+    :param no_raise: Whether to raise an error when the config file fails to parse.
     :rtype: configparser.ConfigParser
     :returns: Returns a ConfigParser with configs from the file(s)
     """
     if fname is None:
-        names = ('simeon.cfg', 'simeon.ini', '.simeon.cfg', '.simeon.ini')
+        names = ("simeon.cfg", "simeon.ini", ".simeon.cfg", ".simeon.ini")
         files = []
         for name in names:
-            files.extend([
-                os.path.join(os.path.expanduser('~'), name),
-                os.path.join(os.getcwd(), name)
-            ])
+            files.extend(
+                [
+                    os.path.join(os.path.expanduser("~"), name),
+                    os.path.join(os.getcwd(), name),
+                ]
+            )
     else:
         files = [os.path.expanduser(fname)]
     config = configparser.ConfigParser()
-    config.optionxform = lambda s: s.lstrip('-').lower().replace('-', '_')
+    config.optionxform = lambda s: s.lstrip("-").lower().replace("-", "_")
     for config_file in files:
         try:
             config.read(config_file)
@@ -446,7 +474,7 @@ def course_listings(courses):
         return None
     out = set()
     for c in courses:
-        out.add(c.strip().split(':')[-1].replace('+', '/'))
+        out.add(c.strip().split(":")[-1].replace("+", "/"))
     return out
 
 
@@ -464,12 +492,12 @@ def courses_from_file(fname):
         return None
     fname = os.path.expanduser(fname)
     if not os.path.isfile(fname):
-        msg = 'The given course listings file, {f!r}, is not a valid file'
+        msg = "The given course listings file, {f!r}, is not a valid file"
         raise ArgumentTypeError(msg.format(f=fname))
     out = set()
     with open(fname) as fh:
         for c in fh:
-            out.add(c.strip().split(':')[-1].replace('+', '/'))
+            out.add(c.strip().split(":")[-1].replace("+", "/"))
     return out
 
 
@@ -487,14 +515,14 @@ def course_paths_from_file(fname):
         return None
     fname = os.path.expanduser(fname)
     if not os.path.isfile(fname):
-        msg = 'The given course listings file, {f!r}, is not a valid file'
+        msg = "The given course listings file, {f!r}, is not a valid file"
         raise ArgumentTypeError(msg.format(f=fname))
     out = set()
     with open(fname) as fh:
         for line in fh:
-            line = line.split(':')[-1]
-            c = line.strip().replace('/', '__').replace('+', '__')
-            out.add(c.replace('.', '_').replace('-', '_').lower())
+            line = line.split(":")[-1]
+            c = line.strip().replace("/", "__").replace("+", "__")
+            out.add(c.replace(".", "_").replace("-", "_").lower())
         return out
 
 
@@ -503,12 +531,12 @@ def filter_generated_items(items, cdirs):
     This is used to filter the given items (which are file paths)
     using the provided course ID directories. Since the directories
     are generated by the course_paths_from_file function, the items
-    in cdirs are expected to be lowercased.
+    in cdirs are expected to be lowercase.
 
     :type items: Union[List[str], Set[str]]
     :param items: Items passed to the simeon push command
     :type cdirs: Set[str]
-    :param cdirs: Course ID directories (lowercased)
+    :param cdirs: Course ID directories (lowercase)
     :rtype: Set[str]
     :return: Returns a set of file paths whose directories are in cdirs
     """
@@ -520,13 +548,11 @@ def filter_generated_items(items, cdirs):
         # yields a list that contains the item itself, then we are dealing
         # with a path that just happens to have an asterisk in its name.
         # Either way, we'll treat item as a normal path
-        if '*' not in item or item in glob.glob(item):
+        if "*" not in item or item in glob.glob(item):
             if os.path.isdir(item):
                 real_item = os.path.basename(os.path.realpath(item))
             else:
-                real_item = os.path.basename(
-                    os.path.dirname(os.path.realpath(item))
-                )
+                real_item = os.path.basename(os.path.dirname(os.path.realpath(item)))
             if real_item.lower() in cdirs:
                 out.add(item)
         else:
@@ -560,42 +586,52 @@ def expand_paths(items):
 def is_parallel(args):
     """
     Take a parsed argparse.Namespace and check that simeon
-    will be using some paraellism.
+    will be using some parallelism.
     It also sets an is_parallel on the Namespace object
     """
-    if getattr(args, 'command', '') not in ('download', 'split', 'report'):
+    if getattr(args, "command", "") not in ("download", "split", "report"):
         args.is_parallel = False
-    elif getattr(args, 'dynamic_date', False):
+    elif getattr(args, "dynamic_date", False):
         args.is_parallel = False
-    elif hasattr(args, 'in_files'):
+    elif hasattr(args, "in_files"):
         args.is_parallel = True
     else:
-        items = getattr(
-            args, 'downloaded_files', getattr(args, 'course_ids', [])
-        )
+        items = getattr(args, "downloaded_files", getattr(args, "course_ids", []))
         args.is_parallel = len(expand_paths(items)) > 1
     return args.is_parallel
 
 
 def process_extra_args(extras):
     """
-    Take a string in the form "var1=val1,var2,val2,...,varn=valn" and convert
+    Take a string in the form "var1=val1,var2,val2,...,var_n=val_n" and convert
     it to a dict
 
-    :type extras: str
-    :param extras: String in the form "var1=val1,var2,val2,...,varn=valn"
+    :type extras: Union[dict, str]
+    :param extras: String in the form "var1=val1,var2,val2,...,var_n=val_n"
     :rtype: dict
     :return: Returns a dict from the string: var for key and val for value
     """
+    # If we nothing, return an empty dictionary
     if not extras:
         return {}
+
+    # If we already have a dict object, then give it back to the user.
+    if isinstance(extras, dict):
+        return extras
+
+    # If it's a file, try reading it as a JSON file
+    if isinstance(extras, str) and extras.startswith("@"):
+        with open(extras) as file_handle:
+            return json.load(file_handle)
+
+    # Otherwise, process the string
     out = dict()
     types = EXTRA_ARG_TYPE
-    extras = map(lambda p: p.lstrip().split('=')[:2], extras.split(','))
+    extras = map(lambda p: p.lstrip().split("=")[:2], extras.split(","))
     while 1:
         try:
             k, v = next(extras)
-            chunks = iter(k.split(':'))
+            chunks = iter(k.split(":"))
             k = next(chunks)
             type_ = next(chunks, None)
             func = types.get(type_) or str
@@ -609,9 +645,7 @@ def process_extra_args(extras):
         except StopIteration:
             break
         except ValueError as excp:
-            msg = (
-                'The provided extra arguments are not properly formatted: {e}'
-            )
+            msg = "The provided extra arguments are not properly formatted: {e}"
             raise Exception(msg.format(e=excp)) from None
     return out
 
@@ -620,6 +654,7 @@ class NumberRange(object):
     """
     Check if a number is within a range. Otherwise, raise ArgumentTypeError
     """
+
     def __init__(self, type_=int, lower=1, upper=50):
         self.type_ = type_
         self.lower = lower
@@ -630,23 +665,21 @@ class NumberRange(object):
             v = self.type_(value)
         except Exception as excp:
             msg = (
-                'The given value {v} could not be converted to a number. '
-                'Please provide a valid value: {e}.'
+                "The given value {v} could not be converted to a number. "
+                "Please provide a valid value: {e}."
             )
             raise ArgumentTypeError(msg.format(v=value, e=excp)) from None
         if not (self.lower <= v <= self.upper):
-            msg = '{v} is not in the range [{l}, {u}]'
-            raise ArgumentTypeError(
-                msg.format(v=value, l=self.lower, u=self.upper)
-            )
+            msg = "{v} is not in the range [{l}, {u}]"
+            raise ArgumentTypeError(msg.format(v=value, l=self.lower, u=self.upper))
         return v
 
 
 class TableOrderAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string):
-        if any(k in sys.argv for k in ('--no-reorder', '-O')):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if any(k in sys.argv for k in ("--no-reorder", "-O")):
             print(values)
-            setattr(namespace, 'tables', values)
+            setattr(namespace, "tables", values)
             return
         tables = []
         for table in REPORT_TABLES:
@@ -654,33 +687,35 @@ class TableOrderAction(argparse.Action):
                 tables.append(table)
         if not tables:
             if not values:
-                raise ArgumentTypeError(
-                    'Table names required when --tables is given'
-                )
-            setattr(namespace, 'tables', values)
+                raise ArgumentTypeError("Table names required when --tables is given")
+            setattr(namespace, "tables", values)
             return
         for table in values:
             if table not in tables:
                 tables.append(table)
-        setattr(namespace, 'tables', tables)
+        setattr(namespace, "tables", tables)
 
 
 def get_pager():
     """
     Get path to less or more
     """
-    pagers = (os.getenv('PAGER'), 'less', 'more',)
-    for path in (os.getenv('PATH') or '').split(os.path.pathsep):
+    pagers = (
+        os.getenv("PAGER"),
+        "less",
+        "more",
+    )
+    for path in (os.getenv("PATH") or "").split(os.path.pathsep):
         for pager in pagers:
             if pager is None:
                 continue
-            pager = iter(pager.split(' ', 1))
+            pager = iter(pager.split(" ", 1))
             prog = os.path.join(path, next(pager))
-            args = next(pager, None) or ''
+            args = next(pager, None) or ""
             try:
                 md = os.stat(prog).st_mode
                 if md & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH):
-                    return '{p} {a}'.format(p=prog, a=args)
+                    return "{p} {a}".format(p=prog, a=args)
             except OSError:
                 continue
 
@@ -691,15 +726,15 @@ class CustomArgParser(argparse.ArgumentParser):
     using either less or more, if available. Otherwise, it does
     what ArgumentParser does.
     """
+
     def print_help(self, file=None):
-        text = self.format_help()
         pager = get_pager()
         if pager is None:
             return super().print_help(file)
-        fd, fname = tempfile.mkstemp(prefix='simeon_help_', suffix='.txt')
-        with open(fd, 'w') as fh:
+        fd, fname = tempfile.mkstemp(prefix="simeon_help_", suffix=".txt")
+        with open(fd, "w") as fh:
             super().print_help(fh)
-        cmd = shlex.split('{p} {f}'.format(p=pager, f=fname))
+        cmd = shlex.split("{p} {f}".format(p=pager, f=fname))
         with sb.Popen(cmd) as proc:
             rc = proc.wait()
             try:
@@ -713,36 +748,53 @@ class CustomArgParser(argparse.ArgumentParser):
 class JSONLoggerAdapter(logging.LoggerAdapter):
     """
     A LoggerAdapter that converts the message into a JSON record.
-    This finds a dict called context_dict in the passed in keywords
+    This finds a dict called context_dict in the passed-in keywords
     arguments and uses that as a starting dict to eventually convert into
     a JSON string.
     As a result, every invocation of info, debug, error, fatal, warning
     should pass the context_dict keyword argument if additional details
     are to be passed to the JSON string.
     """
+
     def process(self, msg, kwargs):
-        context_dict = kwargs.pop('context_dict', {})
+        context_dict = kwargs.pop("context_dict", {})
         msg, kwargs = super().process(msg, kwargs)
         context_dict.update(self.extra)
-        context_dict['message'] = msg
+        context_dict["message"] = msg
         return json.dumps(context_dict, default=str), kwargs
 
 
 class TextLoggerAdapter(logging.LoggerAdapter):
     """
     This is basically defined to pop the context_dict dictionary
-    from the kwards dict passed to logging.LoggerAdapter.process
+    from the kwargs dict passed to logging.LoggerAdapter.process
     """
+
     def process(self, msg, kwargs):
-        kwargs.pop('context_dict', None)
+        kwargs.pop("context_dict", None)
         return super().process(msg, kwargs)
 
 
 __all__ = [
-    'CustomArgParser', 'JSONLoggerAdapter', 'NumberRange', 'TableOrderAction',
-    'TextLoggerAdapter', 'bq_table', 'course_listings', 'course_paths_from_file',
-    'courses_from_file', 'expand_paths', 'filter_generated_items',
-    'find_config', 'gcs_bucket', 'get_pager', 'is_parallel', 'items_from_files',
-    'make_config_file', 'make_logger', 'optional_file', 'parsed_date',
-    'process_extra_args',
+    "CustomArgParser",
+    "JSONLoggerAdapter",
+    "NumberRange",
+    "TableOrderAction",
+    "TextLoggerAdapter",
+    "bq_table",
+    "course_listings",
+    "course_paths_from_file",
+    "courses_from_file",
+    "expand_paths",
+    "filter_generated_items",
+    "find_config",
+    "gcs_bucket",
+    "get_pager",
+    "is_parallel",
+    "items_from_files",
+    "make_config_file",
+    "make_logger",
+    "optional_file",
+    "parsed_date",
+    "process_extra_args",
 ]

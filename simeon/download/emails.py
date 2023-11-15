@@ -10,10 +10,8 @@ from datetime import datetime
 
 from simeon.download.utilities import decrypt_files
 
-
 SCHEMA_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    'upload', 'schemas'
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas"
 )
 
 
@@ -24,19 +22,17 @@ def parse_date(datestr):
     try:
         # It's been UTC forever, so there is no need to capture the timezone
         # component of the string
-        datestr = datestr.split('+')[0]
-        dt = datetime.strptime(datestr, '%Y-%m-%d %H:%M:%S')
+        datestr = datestr.split("+")[0]
+        dt = datetime.strptime(datestr, "%Y-%m-%d %H:%M:%S")
         return dt.isoformat()
     except Exception:
         return None
 
 
-def process_email_file(
-    fname, verbose=True, logger=None, timeout=None, keepfiles=False
-):
+def process_email_file(fname, verbose=True, logger=None, timeout=None, keepfiles=False):
     """
     Email opt-in files are kind of different in that
-    they are zip archives inside of which reside GPG encrypted files.
+    they are zip archives inside which reside GPG encrypted files.
 
     :type fname: str
     :param fname: Zip archive containing the email opt-in data file
@@ -53,10 +49,10 @@ def process_email_file(
     """
     dirname, out = os.path.split(fname)
     out, _ = os.path.splitext(out)
-    out = os.path.join(dirname, '{o}.csv.gpg'.format(o=out))
-    with zipfile.ZipFile(fname) as zf, open(out, 'wb') as fh:
+    out = os.path.join(dirname, "{o}.csv.gpg".format(o=out))
+    with zipfile.ZipFile(fname) as zf, open(out, "wb") as fh:
         for file_ in zf.infolist():
-            if file_.filename.endswith('/'):
+            if file_.filename.endswith("/"):
                 continue
             with zf.open(file_) as zfh:
                 while True:
@@ -65,8 +61,11 @@ def process_email_file(
                         break
                     fh.write(chunk)
             decrypt_files(
-                fnames=out, verbose=verbose, logger=logger,
-                timeout=timeout, keepfiles=keepfiles
+                fnames=out,
+                verbose=verbose,
+                logger=logger,
+                timeout=timeout,
+                keepfiles=keepfiles,
             )
     return os.path.splitext(out)[0]
 
@@ -88,36 +87,34 @@ def compress_email_files(files, ddir, schema_dir=SCHEMA_DIR):
     :return: Writes the contents of files into email_opt_in.json.gz
     """
     schema_dir = schema_dir or SCHEMA_DIR
-    outname = os.path.join(ddir, 'email_opt_in.json.gz')
+    outname = os.path.join(ddir, "email_opt_in.json.gz")
     os.makedirs(ddir, exist_ok=True)
-    with gzip.open(outname, 'wt') as fh:
+    with gzip.open(outname, "wt") as fh:
         for file_ in files:
             with open(file_) as infile:
                 header_row = next(infile, None)
                 if header_row is None:
-                    raise OSError(
-                        "The given file {f!r} is empty.".format(f=file_)
-                    )
-                cols = [c.strip() for c in header_row.split(',')]
+                    raise OSError("The given file {f!r} is empty.".format(f=file_))
+                cols = [c.strip() for c in header_row.split(",")]
                 if "user_id" not in cols:
                     raise OSError(
                         "The given file {f!r} has no user_id field.".format(f=file_)
                     )
                 reader = csv.DictReader(
-                    (l.replace('\0', '') for l in infile),
-                    delimiter=',', lineterminator='\n', fieldnames=cols,
+                    (line.replace("\0", "") for line in infile),
+                    delimiter=",",
+                    lineterminator="\n",
+                    fieldnames=cols,
                 )
                 for row in reader:
-                    if row.get('user_id') is None:
+                    if row.get("user_id") is None:
                         continue
-                    row['user_id'] = int(row['user_id'])
-                    cid = (row.get('course_id') or '').split(':')[-1]
-                    row['course_id'] = cid.replace(
-                        '+', '/', 2
-                    ).replace('+', '_')
-                    row['preference_set_datetime'] = parse_date(
-                        row.get('preference_set_datetime') or ''
+                    row["user_id"] = int(row["user_id"])
+                    cid = (row.get("course_id") or "").split(":")[-1]
+                    row["course_id"] = cid.replace("+", "/", 2).replace("+", "_")
+                    row["preference_set_datetime"] = parse_date(
+                        row.get("preference_set_datetime") or ""
                     )
-                    is_opt = (row.get('is_opted_in_for_email') or '').strip()
-                    row['is_opted_in_for_email'] = is_opt.lower() == 'true'
-                    fh.write(json.dumps(row) + '\n')
+                    is_opt = (row.get("is_opted_in_for_email") or "").strip()
+                    row["is_opted_in_for_email"] = is_opt.lower() == "true"
+                    fh.write(json.dumps(row) + "\n")

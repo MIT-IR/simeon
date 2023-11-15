@@ -1,10 +1,8 @@
-
 """
 Entry point for the cli if invoked with python -m simeon
 """
 import os
 import sys
-
 
 # Remove '' and current working directory from the first entry
 # of sys.path, if present to avoid using current directory
@@ -23,7 +21,7 @@ if __package__ == "":
     path = os.path.dirname(os.path.dirname(__file__))
     sys.path.insert(0, path)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from simeon.scripts.youtube import main as _main
-    sys.exit(_main())
 
+    sys.exit(_main())

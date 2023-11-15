@@ -27,9 +27,7 @@ import json
 import os
 import sys
 import urllib.request as requests
-from argparse import (
-    FileType, RawDescriptionHelpFormatter
-)
+from argparse import FileType, RawDescriptionHelpFormatter
 from datetime import datetime
 
 import simeon
@@ -43,12 +41,12 @@ except ImportError:
 
 
 SCHEMA_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    'upload', 'schemas'
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas"
 )
 UN_DATA_FILE = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), 'data',
-    'geographic_regions_by_country.csv'
+    os.path.dirname(os.path.abspath(__file__)),
+    "data",
+    "geographic_regions_by_country.csv",
 )
 
 
@@ -63,13 +61,13 @@ def get_log_record(line, lcnt, fname, logger):
     :type fname: str
     :param fname: Name of file being processed
     :type logger: logging.Logger
-    :param logger: Logger object through which to output messages
+    :param logger: A Logger object through which to output messages
     :rtype: dict
     :return: Deserialized data
     """
-    errmsg = 'Line number {l} from file {f} not processed: {e}'
+    errmsg = "Line number {l} from file {f} not processed: {e}"
     try:
-        line = line[line.find('{'):]
+        line = line[line.find("{"):]
         return json.loads(line)
     except Exception as excp:
         if logger:
@@ -85,43 +83,52 @@ def import_un_denominations(fname=None):
     to their UN denominations.
     """
     header = [
-        'iso_code', 'code', 'name', 'un_major_region',
-        'continent', 'un_economic_group', 'un_developing_nation',
-        'un_special_region'
+        "iso_code",
+        "code",
+        "name",
+        "un_major_region",
+        "continent",
+        "un_economic_group",
+        "un_developing_nation",
+        "un_special_region",
     ]
     if fname and os.path.exists(fname):
         fp = open(fname)
         next(fp)
     else:
         url = (
-            'https://raw.githubusercontent.com/mitodl/'
-            'world_geographic_regions/master/'
-            'geographic_regions_by_country.csv'
+            "https://raw.githubusercontent.com/mitodl/"
+            "world_geographic_regions/master/"
+            "geographic_regions_by_country.csv"
         )
-        req = requests.Request(url, method='GET')
+        req = requests.Request(url, method="GET")
         resp = requests.urlopen(req)
         fp = resp.fp
         next(fp)
-        fp = (l.decode('utf8', 'ignore') for l in fp)
-    reader = csv.DictReader(fp, delimiter=',', fieldnames=header)
+        fp = (line.decode("utf8", "ignore") for line in fp)
+    reader = csv.DictReader(fp, delimiter=",", fieldnames=header)
     out = dict()
     for row in reader:
-        out[row.get('iso_code')] = dict((k, row[k]) for k in header[3:])
+        out[row.get("iso_code")] = dict((k, row[k]) for k in header[3:])
     return out
 
 
 def make_geo_data(
-    db, ip_files, outfile='geoip.json.gz',
-    un_data=None, tracking_logs=False, logger=None,
+    db,
+    ip_files,
+    outfile="geoip.json.gz",
+    un_data=None,
+    tracking_logs=False,
+    logger=None,
 ):
     """
-    Given a MaxMind DB and a credentials file to PROPROD,
-    extract distinct IPs from obscured and get their location data
+    Given a MaxMind DB and a list of files with IPs in them, extract distinct IPs
+    from them and generate records with geolocation data for the IPs.
 
-    :type fname: geoip2.database.Reader
-    :param fname: MaxMind geolocation database Reader object to extract info
-    :type ip_file: Iterable[str]
-    :param ip_file: List of files (text or tracking log) containing IPs
+    :type db: geoip2.database.Reader
+    :param db: MaxMind geolocation database Reader object to extract info
+    :type ip_files: Iterable[str]
+    :param ip_files: List of files (text or tracking log) containing IPs
     :type outfile: str
     :param outfile: File in which to dump geolocation data
     :type un_data: Union[Dict[str, str], None]
@@ -133,18 +140,18 @@ def make_geo_data(
     :rtype: None
     :returns: Writes data to the given output file in append mode
     """
-    with gzip.open(outfile, 'at') as outh:
+    with gzip.open(outfile, "at") as outh:
         seen = set()
         for ip_file in ip_files:
             if tracking_logs:
-                fh = gzip.open(ip_file, 'rt')
+                fh = gzip.open(ip_file, "rt")
                 reader = map(
                     lambda t: get_log_record(t[1], t[0], ip_file, logger),
-                    enumerate(fh, 1)
+                    enumerate(fh, 1),
                 )
             else:
                 fh = open(ip_file)
-                reader = csv.DictReader(fh, fieldnames=['ip'])
+                reader = csv.DictReader(fh, fieldnames=["ip"])
             line = 0
             while True:
                 line += 1
@@ -154,15 +161,15 @@ def make_geo_data(
                     break
                 except Exception as excp:
                     msg = (
-                        'Record {i} from {f} could not be parsed: {e}. '
-                        'Skipping it...'
+                        "Record {i} from {f} could not be parsed: {e}. "
+                        "Skipping it..."
                     ).format(i=line, f=ip_file, e=excp)
                     if logger:
                         logger.warning(msg)
                     else:
                         print(msg, file=sys.stderr)
                     continue
-                ip_address = rec.get('ip')
+                ip_address = rec.get("ip")
                 # If there is no valid IP in the file, then skip any lookup.
                 if not ip_address:
                     continue
@@ -174,25 +181,25 @@ def make_geo_data(
                     info = db.city(ip_address)
                     # If there is no country information, then we don't bother
                     # with this IP
-                    if not info.country.iso_code or not info.country.names.get('en'):
+                    if not info.country.iso_code or not info.country.names.get("en"):
                         continue
                     un_info = un_data.get(info.country.iso_code, {})
                     subdiv = info.subdivisions.most_specific
                     row = {
-                        'ip': ip_address,
-                        'city': info.city.names.get('en'),
-                        'countryLabel': info.country.names.get('en'),
-                        'country': info.country.iso_code,
-                        'cc_by_ip': info.country.iso_code,
-                        'postalCode': info.postal.code,
-                        'continent': info.continent.names.get('en'),
-                        'subdivision': subdiv.names.get('en'),
-                        'region': subdiv.iso_code,
-                        'latitude': info.location.latitude,
-                        'longitude': info.location.longitude,
+                        "ip": ip_address,
+                        "city": info.city.names.get("en"),
+                        "countryLabel": info.country.names.get("en"),
+                        "country": info.country.iso_code,
+                        "cc_by_ip": info.country.iso_code,
+                        "postalCode": info.postal.code,
+                        "continent": info.continent.names.get("en"),
+                        "subdivision": subdiv.names.get("en"),
+                        "region": subdiv.iso_code,
+                        "latitude": info.location.latitude,
+                        "longitude": info.location.longitude,
                     }
                     row.update(un_info)
-                    row['timestamp'] = str(datetime.utcnow())
+                    row["timestamp"] = str(datetime.utcnow())
                 except Exception as e:
                     # The DB will raise an error if it can't find the IP.
                     # Missing IPs and any other issues should be reported
@@ -202,7 +209,7 @@ def make_geo_data(
                     else:
                         print(e, file=sys.stderr)
                     continue
-                outh.write(json.dumps(row) + '\n')
+                outh.write(json.dumps(row) + "\n")
             fh.close()
 
 
@@ -214,195 +221,200 @@ def main():
         description=__doc__,
         formatter_class=RawDescriptionHelpFormatter,
         allow_abbrev=False,
-        prog='simeon-geoip',
+        prog="simeon-geoip",
     )
     parser.add_argument(
-        '--debug', '-B',
-        help='Show some stacktrace if simeon stops because of a fatal error',
-        action='store_true',
+        "--debug",
+        "-B",
+        help="Show some stacktrace if simeon stops because of a fatal error",
+        action="store_true",
     )
     parser.add_argument(
-        '--log-file', '-L',
-        help='Log file to use when simeon prints messages. Default: stdout',
-        type=FileType('a'),
+        "--log-file",
+        "-L",
+        help="Log file to use when simeon prints messages. Default: stdout",
+        type=FileType("a"),
         default=sys.stdout,
     )
     parser.add_argument(
-        '--log-format',
-        help='Format the log messages as json or text. Default: %(default)s',
-        choices=['json', 'text'],
-        default='json',
+        "--log-format",
+        help="Format the log messages as json or text. Default: %(default)s",
+        choices=["json", "text"],
+        default="json",
     )
     parser.add_argument(
-        '--quiet', '-Q',
-        help='Only print error messages to standard streams.',
-        action='store_false',
-        dest='verbose',
+        "--quiet",
+        "-Q",
+        help="Only print error messages to standard streams.",
+        action="store_false",
+        dest="verbose",
     )
     parser.add_argument(
-        '--config-file', '-C',
-        help=(
-            'The INI configuration file to use for default arguments.'
-        ),
+        "--config-file",
+        "-C",
+        help="The INI configuration file to use for default arguments.",
     )
     parser.add_argument(
-        '--version', '-v',
-        action='version',
-        version='%(prog)s {v}'.format(v=simeon.__version__)
+        "--version",
+        "-v",
+        action="version",
+        version="%(prog)s {v}".format(v=simeon.__version__),
     )
     subparsers = parser.add_subparsers(
-        description='Choose a subcommand to carry out a task with simeon-geoip',
-        dest='command'
+        description="Choose a subcommand to carry out a task with simeon-geoip",
+        dest="command",
     )
     subparsers.required = True
     extracter = subparsers.add_parser(
-        'extract',
-        help='Extract geolocation information from the given MaxMind DB',
+        "extract",
+        help="Extract geolocation information from the given MaxMind DB",
         description=(
-            'Extract geolocation information for the IP addresses '
-            'in the given IP files from the MaxMind version2 database'
+            "Extract geolocation information for the IP addresses "
+            "in the given IP files from the MaxMind version2 database"
         ),
         allow_abbrev=False,
     )
+    extracter.add_argument("db", help="MaxMind version 2 geolocation database file.")
     extracter.add_argument(
-        'db',
-        help='MaxMind version 2 geolocation database file.'
-    )
-    extracter.add_argument(
-        'ip_files',
+        "ip_files",
         help=(
-            'File(s) containing IP addresses. If it\'s a text file, '
-            'it should be one IP address per record.\n\nIf the file is '
-            'a tracking log file, then each record is assumed to have '
+            "File(s) containing IP addresses. If it's a text file, "
+            "it should be one IP address per record.\n\nIf the file is "
+            "a tracking log file, then each record is assumed to have "
             'an "ip" string value.'
         ),
-        nargs='+',
+        nargs="+",
     )
     extracter.add_argument(
-        '--un-data', '-u',
+        "--un-data",
+        "-u",
         help=(
-            'Path to a file with UN denominations. If no valid file is '
-            'provided, one is downloaded from Github at '
-            'https://raw.githubusercontent.com/mitodl/'
-            'world_geographic_regions/master/'
-            'geographic_regions_by_country.csv'
+            "Path to a file with UN denominations. If no valid file is "
+            "provided, one is downloaded from Github at "
+            "https://raw.githubusercontent.com/mitodl/"
+            "world_geographic_regions/master/"
+            "geographic_regions_by_country.csv"
         ),
         default=UN_DATA_FILE,
     )
     extracter.add_argument(
-        '--output', '-o',
-        help='Output file name for the generated data. Default: %(default)s',
+        "--output",
+        "-o",
+        help="Output file name for the generated data. Default: %(default)s",
         default=os.path.join(
             os.getcwd(),
-            'geoip_{dt}.json.gz'.format(
-                dt=datetime.now().strftime('%Y%m%d%H%M%S')
-            )
+            "geoip_{dt}.json.gz".format(dt=datetime.now().strftime("%Y%m%d%H%M%S")),
         ),
     )
     extracter.add_argument(
-        '--tracking-logs', '-t',
-        help='Whether or not the given ip files are tracking log files',
-        action='store_true',
+        "--tracking-logs",
+        "-t",
+        help="Whether or not the given ip files are tracking log files",
+        action="store_true",
     )
     merger = subparsers.add_parser(
-        'merge',
-        help='Merge the given file to a target BigQuery table name',
-        description=(
-            'Merge the given file to a target BigQuery table name'
-        ),
+        "merge",
+        help="Merge the given file to a target BigQuery table name",
+        description="Merge the given file to a target BigQuery table name",
         allow_abbrev=False,
     )
     merger.add_argument(
-        'geofile',
-        help='A .json.gz file generated from the extract command'
+        "geofile", help="A .json.gz file generated from the extract command"
     )
     merger.add_argument(
-        '--project', '-p',
-        help='The BigQuery project id where the target table resides.'
+        "--project",
+        "-p",
+        help="The BigQuery project id where the target table resides.",
     )
     merger.add_argument(
-        '--service-account-file', '-S',
-        help='The service account file to use when connecting to BigQuery'
+        "--service-account-file",
+        "-S",
+        help="The service account file to use when connecting to BigQuery",
     )
     merger.add_argument(
-        '--target-directory', '-T',
-        help='A target directory where to export artifacts like compiled SQL queries',
+        "--target-directory",
+        "-T",
+        help="A target directory where to export artifacts like compiled SQL queries",
     )
     merger.add_argument(
-        '--geo-table', '-g',
-        help='The target table where the geolocation data are stored.',
-        default='geocode.geoip',
+        "--geo-table",
+        "-g",
+        help="The target table where the geolocation data are stored.",
+        default="geocode.geoip",
         type=cli_utils.bq_table,
     )
     merger.add_argument(
-        '--column', '-c',
+        "--column",
+        "-c",
         help=(
-            'The column on which to to merge the file and table. '
-            'Default: %(default)s'
+            "The column on which to to merge the file and table. "
+            "Default: %(default)s"
         ),
-        default='ip',
+        default="ip",
     )
     merger.add_argument(
-        '--schema-dir', '-s',
+        "--schema-dir",
+        "-s",
         help=(
-            'Directory where schema file are found. '
-            'Default: {d}'.format(d=SCHEMA_DIR)
+            "Directory where schema file are found. "
+            "Default: {d}".format(d=SCHEMA_DIR)
         ),
     )
     merger.add_argument(
-        '--update-description', '-u',
+        "--update-description",
+        "-u",
         help=(
-            'Update the description of the destination table with '
+            "Update the description of the destination table with "
             'the "description" value from the corresponding schema file'
         ),
-        action='store_true',
+        action="store_true",
     )
     merger.add_argument(
-        '--match-equal-columns',
+        "--match-equal-columns",
         help=(
-            'Column names for which to set test equality (=) if the WHEN MATCH'
-            ' SQL condition is met. This is preceded by the AND keyword to '
-            'string conditions together.'
+            "Column names for which to set test equality (=) if the WHEN MATCH"
+            " SQL condition is met. This is preceded by the AND keyword to "
+            "string conditions together."
         ),
-        nargs='*',
+        nargs="*",
     )
     merger.add_argument(
-        '--match-unequal-columns',
+        "--match-unequal-columns",
         help=(
-            'Column names for which to set test inequality (<>) if the WHEN '
-            'MATCH SQL condition is met. This is preceded by the AND keyword to '
-            'string conditions together.'
+            "Column names for which to set test inequality (<>) if the WHEN "
+            "MATCH SQL condition is met. This is preceded by the AND keyword to "
+            "string conditions together."
         ),
-        nargs='*',
+        nargs="*",
     )
     args = parser.parse_args()
     args.logger = cli_utils.make_logger(
-        user='SIMEON-GEOIP:{c}'.format(c=args.command.upper()),
+        user="SIMEON-GEOIP:{c}".format(c=args.command.upper()),
         verbose=args.verbose,
         stream=args.log_file,
-        json_format=args.log_format == 'json',
+        json_format=args.log_format == "json",
     )
     if not GeoReader:
         args.logger.error(
-            'simeon was installed without geoip2. '
-            'please reinstall it with python -m pip install simeon[geoip]. '
-            'Or, install geoip2 with python -m pip install geoip2.'
+            "simeon was installed without geoip2. "
+            "please reinstall it with python -m pip install simeon[geoip]. "
+            "Or, install geoip2 with python -m pip install geoip2."
         )
         sys.exit(1)
-    if args.command == 'extract':
+    if args.command == "extract":
         if args.logger:
             args.logger.info(
-                'Generating geolocation data from the IPs in the given files'
+                "Generating geolocation data from the IPs in the given files"
             )
         files = []
         for file_ in args.ip_files:
-            if '*' in file_:
+            if "*" in file_:
                 files.extend(glob.iglob(file_))
             else:
                 files.append(file_)
         args.ip_files = files
         if not args.ip_files:
-            msg = 'No valid IP data provided. Exiting...'
+            msg = "No valid IP data provided. Exiting..."
             if args.logger:
                 args.logger.error(msg)
             else:
@@ -414,7 +426,7 @@ def main():
         try:
             un_denoms = import_un_denominations(args.un_data)
         except Exception as e:
-            msg = 'Failed to get UN denominations because: {e}'
+            msg = "Failed to get UN denominations because: {e}"
             if args.logger:
                 args.logger.warning(msg.format(e=e))
             else:
@@ -423,82 +435,73 @@ def main():
         try:
             locs = GeoReader(args.db)
         except Exception as excp:
-            args.logger.error(
-                'Failed to open the MaxMind database: {e}'.format(e=excp)
-            )
+            args.logger.error("Failed to open the MaxMind database: {e}".format(e=excp))
             sys.exit(1)
         try:
             make_geo_data(
-                db=locs, ip_files=args.ip_files,
-                outfile=args.output, un_data=un_denoms,
+                db=locs,
+                ip_files=args.ip_files,
+                outfile=args.output,
+                un_data=un_denoms,
                 tracking_logs=args.tracking_logs,
                 logger=args.logger,
             )
-            args.logger.info('Done processing the given IP files')
+            args.logger.info("Done processing the given IP files")
         except Exception as excp:
-            args.logger.error(
-                'Failed to make geolocation data: {e}'.format(e=excp)
-            )
+            args.logger.error("Failed to make geolocation data: {e}".format(e=excp))
             sys.exit(1)
     else:
         try:
             configs = cli_utils.find_config(args.config_file)
         except Exception as excp:
-            args.logger.error(str(excp).replace('\n', ' '))
+            args.logger.error(str(excp).replace("\n", " "))
             sys.exit(1)
         for k, v in cli_utils.CONFIGS.items():
-            for (attr, cgetter) in v:
+            for attr, cgetter in v:
                 cli_arg = getattr(args, attr, None)
                 config_arg = cgetter(configs, k, attr, fallback=None)
                 if not cli_arg and config_arg:
                     setattr(args, attr, config_arg)
-        keys = ('geo-table', 'column', 'project')
-        if not all(getattr(args, k.replace('-', '_'), None) for k in keys):
-            msg = 'The following options expected valid values: {o}'
-            args.logger.error(msg.format(o=', '.join(keys)))
+        keys = ("geo-table", "column", "project")
+        if not all(getattr(args, k.replace("-", "_"), None) for k in keys):
+            msg = "The following options expected valid values: {o}"
+            args.logger.error(msg.format(o=", ".join(keys)))
             sys.exit(1)
-        args.logger.info(
-            'Merging {f} to {t}'.format(f=args.geofile, t=args.geo_table)
-        )
-        args.logger.info('Connecting to BigQuery')
+        args.logger.info("Merging {f} to {t}".format(f=args.geofile, t=args.geo_table))
+        args.logger.info("Connecting to BigQuery")
         try:
             if args.service_account_file is not None:
                 client = gcp.BigqueryClient.from_service_account_json(
-                    args.service_account_file,
-                    project=args.project
+                    args.service_account_file, project=args.project
                 )
             else:
-                client = client = gcp.BigqueryClient(
-                    project=args.project
-                )
+                client = gcp.BigqueryClient(project=args.project)
         except Exception as excp:
-            errmsg = (
-                'Failed to connect to BigQuery: {e}.'
-            )
+            errmsg = "Failed to connect to BigQuery: {e}."
             args.logger.error(errmsg.format(e=excp))
             sys.exit(1)
-        args.logger.info('Connection established')
+        args.logger.info("Connection established")
         try:
             client.merge_to_table(
-                fname=args.geofile, table=args.geo_table, col=args.column,
-                use_storage=args.geofile.startswith('gs://'),
-                schema_dir=args.schema_dir, patch=args.update_description,
+                fname=args.geofile,
+                table=args.geo_table,
+                col=args.column,
+                use_storage=args.geofile.startswith("gs://"),
+                schema_dir=args.schema_dir,
+                patch=args.update_description,
                 match_equal_columns=args.match_equal_columns,
                 match_unequal_columns=args.match_unequal_columns,
             )
         except Exception as excp:
-            context = getattr(excp, 'context_dict', {})
-            context['geo_file'] = args.geofile
-            context['geo_table'] = args.geo_table
-            msg = 'Merging {f} to {t} failed with the following: {e}'
-            args.logger.error(
-                msg.format(f=args.geofile, t=args.geo_table, e=excp),
-                context_dict=context,
-            )
+            context = getattr(excp, "context_dict", {})
+            context["geo_file"] = args.geofile
+            context["geo_table"] = args.geo_table
+            msg = f"Merging {args.geofile} to {args.geo_table} failed with the following: {excp}"
+            args.logger.error(msg, context_dict=context)
             sys.exit(1)
-        msg = 'Successfully merged the records in {f} to the table {t}'
+        msg = "Successfully merged the records in {f} to the table {t}"
         args.logger.info(msg.format(f=args.geofile, t=args.geo_table))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

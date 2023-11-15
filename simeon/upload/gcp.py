@@ -10,23 +10,17 @@ import uuid
 from datetime import datetime
 from typing import List
 
-from google.cloud import (
-    bigquery, exceptions as gcp_exceptions, storage
-)
+from google.cloud import bigquery
+from google.cloud import exceptions as gcp_exceptions
+from google.cloud import storage
 from jinja2 import Environment
 
 from simeon.exceptions import LoadJobException
 from simeon.report import utilities as rutils
 from simeon.upload import utilities as uputils
-from simeon.upload.utilities import (
-    SCHEMA_DIR, course_to_bq_dataset
-)
+from simeon.upload.utilities import SCHEMA_DIR, course_to_bq_dataset
 
-
-FILE_FORMATS = {
-    'log': ['json'],
-    'sql': ['csv', 'txt', 'sql', 'json']
-}
+FILE_FORMATS = {"log": ["json"], "sql": ["csv", "txt", "sql", "json"]}
 MERGE_DDL = """MERGE {{ first }} f USING {{ second }} s
 ON f.{{ column }} = s.{{ column }}
 WHEN NOT MATCHED THEN
@@ -48,15 +42,15 @@ THEN UPDATE SET {% for col in update_cols -%}
 {% endif %}
 """
 DST_DESC = {
-    'log': 'Dataset to host the tracking log data from edX courses',
-    'sql': (
-        'Dataset to host all the tables that are computed from a combination'
-        ' of tab-delimited files from edX\'s weekly SQL data dump and '
-        'tracking log tables.'
+    "log": "Dataset to host the tracking log data from edX courses",
+    "sql": (
+        "Dataset to host all the tables that are computed from a combination"
+        " of tab-delimited files from edX's weekly SQL data dump and "
+        "tracking log tables."
     ),
-    'email': (
-        'Dataset to host the dimensional details about users\' email'
-        ' adresses and email opt-in preferences'
+    "email": (
+        "Dataset to host the dimensional details about users' email"
+        " addresses and email opt-in preferences"
     ),
 }
 
@@ -65,6 +59,7 @@ class BigqueryClient(bigquery.Client):
     """
     Subclass bigquery.Client and add convenience methods
     """
+
     def get_course_tables(self, course_id):
         """
         Get all the tables related to the given course ID
@@ -74,25 +69,22 @@ class BigqueryClient(bigquery.Client):
         :rtype: Dict[str, set]
         :return: A dict with keys as log and sql, and values as table names
         """
-        out = {'log': set(), 'latest': set()}
-        log_dset = course_to_bq_dataset(course_id, 'log', self.project)
-        latest_dset = course_to_bq_dataset(course_id, 'sql', self.project)
-        query = """select table_schema, table_name
+        out = {"log": set(), "latest": set()}
+        log_dset = course_to_bq_dataset(course_id, "log", self.project)
+        latest_dset = course_to_bq_dataset(course_id, "sql", self.project)
+        query = f"""select table_schema, table_name
         from {latest_dset}.INFORMATION_SCHEMA.TABLES
         union all
         select table_schema, table_name
         from {log_dset}.INFORMATION_SCHEMA.TABLES"""
-        query = query.format(
-            log_dset=log_dset, latest_dset=latest_dset,
-        )
         job = self.query(query)
         try:
             for row in job.result():
-                ds = row.get('table_schema')
-                if ds.endswith('_logs'):
-                    out['log'].add(row.get('table_name'))
+                ds = row.get("table_schema")
+                if ds.endswith("_logs"):
+                    out["log"].add(row.get("table_name"))
                 else:
-                    out['latest'].add(row.get('table_name'))
+                    out["latest"].add(row.get("table_name"))
         except Exception:
             # If the dataset does not exist, then we end up here.
             # So, do nothing. The returned value will be a dict with
@@ -112,20 +104,17 @@ class BigqueryClient(bigquery.Client):
         :rtype: bool
         :return: True if the table is currently in BigQuery
         """
-        latest_dset = course_to_bq_dataset(course_id, 'sql', self.project)
-        query = """select table_schema, table_name
-        from {dataset}.INFORMATION_SCHEMA.TABLES
+        latest_dset = course_to_bq_dataset(course_id, "sql", self.project)
+        query = f"""select table_schema, table_name
+        from {latest_dset}.INFORMATION_SCHEMA.TABLES
         where table_name = '{table}'"""
-        query = query.format(
-            dataset=latest_dset, table=table
-        )
         # We could have used count(*) for the query, but if we ever switch from
         # returning a boolean to returning the actual matches, we would never need
         # to change the query.
         job = self.query(query)
         count = 0
         try:
-            for row in job.result():
+            for _ in job.result():
                 count += 1
         except Exception:
             pass
@@ -140,18 +129,13 @@ class BigqueryClient(bigquery.Client):
         :param course_id: edX course ID in format ORG/NUMBER/TERM
         :type table: str
         :param table: Name of the table being looked up
-        :type region: str
-        :param region: GCP region for the BigQuery account
         :rtype: bool
         :return: True if the table is currently in BigQuery
         """
-        log_dset = course_to_bq_dataset(course_id, 'log', self.project)
-        query = """select table_schema, table_name
-        from {dataset}.INFORMATION_SCHEMA.TABLES
+        log_dset = course_to_bq_dataset(course_id, "log", self.project)
+        query = f"""select table_schema, table_name
+        from {log_dset}.INFORMATION_SCHEMA.TABLES
         where table_name like '%{table}%'"""
-        query = query.format(
-            dataset=log_dset, table=table
-        )
         # We could have used count(*) for the query, but if we ever switch from
         # returning a boolean to returning the actual matches, we would never need
         # to change the query.
@@ -161,7 +145,7 @@ class BigqueryClient(bigquery.Client):
         # So, it would make sense to iterate over the returned records
         # and count stuff.
         try:
-            for row in job.result():
+            for _ in job.result():
                 count += 1
         except Exception:
             pass
@@ -173,21 +157,29 @@ class BigqueryClient(bigquery.Client):
         client's methods as filters
 
         :type query: str
-        :param query: SQL query to use with the tempate being generated
+        :param query: SQL query to use with the template being generated
         :rtype: jinja2.Template
         :return: Jinja2 Template object with the passed query
         """
         jinja_env = Environment()
-        jinja_env.filters['get_course_tables'] = self.get_course_tables
-        jinja_env.filters['has_latest_table'] = self.has_latest_table
-        jinja_env.filters['has_log_table'] = self.has_log_table
+        jinja_env.filters["get_course_tables"] = self.get_course_tables
+        jinja_env.filters["has_latest_table"] = self.has_latest_table
+        jinja_env.filters["has_log_table"] = self.has_log_table
         return jinja_env.from_string(query)
 
     def load_tables_from_dir(
-        self, dirname: str, file_type: str, project: str,
-        create: bool, append: bool, use_storage: bool=False,
-        bucket: str=None, max_bad_rows=0,
-        schema_dir=SCHEMA_DIR, format_='json', patch=False,
+        self,
+        dirname: str,
+        file_type: str,
+        project: str,
+        create: bool,
+        append: bool,
+        use_storage: bool = False,
+        bucket: str = None,
+        max_bad_rows=0,
+        schema_dir=SCHEMA_DIR,
+        format_="json",
+        patch=False,
     ) -> List[bigquery.LoadJob]:
         """
         Load all the files in the given directory.
@@ -221,8 +213,8 @@ class BigqueryClient(bigquery.Client):
         schema_dir = schema_dir or SCHEMA_DIR
         formats = FILE_FORMATS.get(file_type, [])
         patts = (
-            os.path.join(dirname, '*.{f}*.gz'),
-            os.path.join(dirname, '*', '*.{f}*.gz')
+            os.path.join(dirname, "*.{f}*.gz"),
+            os.path.join(dirname, "*", "*.{f}*.gz"),
         )
         files = []
         for patt in patts:
@@ -232,18 +224,34 @@ class BigqueryClient(bigquery.Client):
         for file_ in files:
             jobs.append(
                 self.load_one_file_to_table(
-                    file_, file_type, project, create, append,
-                    use_storage, bucket, max_bad_rows, schema_dir, format_,
-                    patch
+                    file_,
+                    file_type,
+                    project,
+                    create,
+                    append,
+                    use_storage,
+                    bucket,
+                    max_bad_rows,
+                    schema_dir,
+                    format_,
+                    patch,
                 )
             )
         return jobs
 
     def load_one_file_to_table(
-        self, fname: str, file_type: str, project: str,
-        create: bool, append: bool, use_storage: bool=False,
-        bucket: str=None, max_bad_rows=0,
-        schema_dir=SCHEMA_DIR, format_='json', patch=False,
+        self,
+        fname: str,
+        file_type: str,
+        project: str,
+        create: bool,
+        append: bool,
+        use_storage: bool = False,
+        bucket: str = None,
+        max_bad_rows=0,
+        schema_dir=SCHEMA_DIR,
+        format_="json",
+        patch=False,
     ):
         """
         Load the given file to a target BigQuery table
@@ -275,30 +283,33 @@ class BigqueryClient(bigquery.Client):
         :raises: Propagates everything from the underlying package
         """
         schema_dir = schema_dir or SCHEMA_DIR
-        use_storage = use_storage or fname.startswith('gs://')
+        use_storage = use_storage or fname.startswith("gs://")
         if use_storage:
             if bucket is None:
-                raise ValueError('use_storage=True requires a bucket name')
+                raise ValueError("use_storage=True requires a bucket name")
             loader = self.load_table_from_uri
         else:
             loader = self.load_table_from_file
-        job_prefix = 'simeon_{t}_data_load_{dt}-'.format(
-            t=file_type, dt=datetime.now().strftime('%Y%m%d%H%M%S%f')
+        job_prefix = "simeon_{t}_data_load_{dt}-".format(
+            t=file_type, dt=datetime.now().strftime("%Y%m%d%H%M%S%f")
         )
         dest = uputils.local_to_bq_table(fname, file_type, project)
         # dataset = self.dataset(dest.rsplit('.', 1)[0])
-        dataset = bigquery.Dataset.from_string(dest.rsplit('.', 1)[0])
+        dataset = bigquery.Dataset.from_string(dest.rsplit(".", 1)[0])
         dataset.description = DST_DESC.get(file_type)
         self.create_dataset(dataset, exists_ok=True)
         if use_storage:
-            if not fname.startswith('gs://'):
+            if not fname.startswith("gs://"):
                 fname = uputils.local_to_gcs_path(fname, file_type, bucket)
         else:
-            fname = gzip.open(fname, 'rb')
+            fname = gzip.open(fname, "rb")
         config, desc = uputils.make_bq_load_config(
-            table=dest, schema_dir=schema_dir,
-            append=append, create=create, file_format=format_,
-            max_bad_rows=max_bad_rows
+            table=dest,
+            schema_dir=schema_dir,
+            append=append,
+            create=create,
+            file_format=format_,
+            max_bad_rows=max_bad_rows,
         )
         dest = bigquery.Table.from_string(dest)
         dest.description = desc
@@ -307,12 +318,10 @@ class BigqueryClient(bigquery.Client):
             # Catch the error raised when the destination table
             # does not exist.
             try:
-                self.update_table(dest, ['description'])
+                self.update_table(dest, ["description"])
             except gcp_exceptions.NotFound:
                 pass
-        return loader(
-            fname, dest, job_config=config, job_id_prefix=job_prefix
-        )
+        return loader(fname, dest, job_config=config, job_id_prefix=job_prefix)
 
     @staticmethod
     def get_not_found_object(message):
@@ -320,12 +329,12 @@ class BigqueryClient(bigquery.Client):
         If the given message contains the keywords 'Not found', then
         try and determine the name and type of the object that is not found.
         """
-        out = dict.fromkeys(('missing_object_type', 'missing_object_name'))
-        if 'Not found' not in (message or ''):
+        out = dict.fromkeys(("missing_object_type", "missing_object_name"))
+        if "Not found" not in (message or ""):
             return out
-        pieces = iter(message.split('Not found: ')[-1].split()[:2])
-        out['missing_object_type'] = next(pieces, None)
-        out['missing_object_name'] = next(pieces, None)
+        pieces = iter(message.split("Not found: ")[-1].split()[:2])
+        out["missing_object_type"] = next(pieces, None)
+        out["missing_object_name"] = next(pieces, None)
         return out
 
     @staticmethod
@@ -378,26 +387,32 @@ class BigqueryClient(bigquery.Client):
         else:
             members = errors
         for err in members:
-            msg = err.get('message', '')
+            msg = err.get("message", "")
             if not msg:
                 continue
             context = dict()
-            src = err.get('source', '')
+            src = err.get("source", "")
             if src:
-                context['source'] = src
-                msg = 'Source: {s} - {m}'.format(s=src, m=msg)
-            loc = err.get('location', '')
+                context["source"] = src
+                msg = "Source: {s} - {m}".format(s=src, m=msg)
+            loc = err.get("location", "")
             if loc:
-                context['file'] = loc
-                msg = '{m} - File: {f}'.format(m=msg, f=loc)
+                context["file"] = loc
+                msg = "{m} - File: {f}".format(m=msg, f=loc)
             context.update(BigqueryClient.get_not_found_object(msg))
             messages[msg] = context
         return messages
 
     def merge_to_table(
-        self, fname, table, col,
-        schema_dir=SCHEMA_DIR, use_storage=False, patch=False,
-        match_equal_columns=None, match_unequal_columns=None,
+        self,
+        fname,
+        table,
+        col,
+        schema_dir=SCHEMA_DIR,
+        use_storage=False,
+        patch=False,
+        match_equal_columns=None,
+        match_unequal_columns=None,
         target_directory="target",
     ):
         """
@@ -418,11 +433,9 @@ class BigqueryClient(bigquery.Client):
         :type patch: bool
         :param patch: Whether or not to patch the description of the table
         :type match_equal_columns: Union[List[str], None, Tuple[str]]
-        :param match_equal_columns: List of column names for which to set
-        equality (=) if WHEN MATCH is met during the merge.
+        :param match_equal_columns: List of column names for which to set equality (=) if WHEN MATCH is met during the merge.
         :type match_unequal_columns: Union[List[str], None, Tuple[str]]
-        :param match_unequal_columns: List of column names for which to set
-        inequality (<>) if WHEN MATCH is met during the merge.
+        :param match_unequal_columns: List of column names for which to set inequality (<>) if WHEN MATCH is met during the merge.
         :type target_directory: str
         :param target_directory: Target directory where to store SQL queries
         :rtype: bigquery.QueryJob
@@ -430,14 +443,14 @@ class BigqueryClient(bigquery.Client):
         :raises: Propagates everything from the underlying package
         """
         schema_dir = schema_dir or SCHEMA_DIR
-        if len(table.split('.')) < 3:
-            table = '{p}.{t}'.format(p=self.project, t=table)
-        dataset = table.rsplit('.', 1)[0]
+        if len(table.split(".")) < 3:
+            table = "{p}.{t}".format(p=self.project, t=table)
+        dataset = table.rsplit(".", 1)[0]
         bqtable = bigquery.Table.from_string(table)
-        temp_table_name = '{t}_{d}_{u}_temp'.format(
+        temp_table_name = "{t}_{d}_{u}_temp".format(
             t=table,
-            d=datetime.now().strftime('%Y%m%d%H%M%S%f'),
-            u=uuid.uuid4().hex.replace('-', '').replace('.', '')
+            d=datetime.now().strftime("%Y%m%d%H%M%S%f"),
+            u=uuid.uuid4().hex.replace("-", "").replace(".", ""),
         )
         temp_table = bigquery.Table.from_string(temp_table_name)
         schema, desc = uputils.get_bq_schema(table, schema_dir=schema_dir)
@@ -449,17 +462,19 @@ class BigqueryClient(bigquery.Client):
             # Catch the error raised when the destination table
             # does not exist.
             try:
-                self.update_table(bqtable, ['schema', 'description'])
+                self.update_table(bqtable, ["schema", "description"])
             except gcp_exceptions.NotFound:
                 pass
         temp_table.description = desc
-        job_prefix = 'simeon_{t}_data_load_{dt}-'.format(
-            t=bqtable.table_id,
-            dt=datetime.now().strftime('%Y%m%d%H%M%S%f')
+        job_prefix = "simeon_{t}_data_load_{dt}-".format(
+            t=bqtable.table_id, dt=datetime.now().strftime("%Y%m%d%H%M%S%f")
         )
         config, _ = uputils.make_bq_load_config(
-            table=table, schema_dir=schema_dir, append=False,
-            create=True, file_format='json',
+            table=table,
+            schema_dir=schema_dir,
+            append=False,
+            create=True,
+            file_format="json",
         )
         self.create_dataset(dataset, exists_ok=True)
         for tbl in (bqtable, temp_table):
@@ -468,10 +483,8 @@ class BigqueryClient(bigquery.Client):
             loader = self.load_table_from_uri
         else:
             loader = self.load_table_from_file
-            fname = gzip.open(fname, 'rb')
-        job = loader(
-            fname, temp_table, job_config=config, job_id_prefix=job_prefix
-        )
+            fname = gzip.open(fname, "rb")
+        job = loader(fname, temp_table, job_config=config, job_id_prefix=job_prefix)
         rutils.wait_for_bq_jobs([job])
         if job.errors:
             self.delete_table(temp_table, not_found_ok=True)
@@ -481,12 +494,14 @@ class BigqueryClient(bigquery.Client):
             for v in errors.values():
                 context.update(v)
             # Raise an exception with some contextual information
-            raise LoadJobException('\n'.join(errors), context_dict=context)
+            raise LoadJobException("\n".join(errors), context_dict=context)
         query_template = self.make_template(MERGE_DDL)
         update_cols = [f.name for f in bqtable.schema if f.name.lower() != col.lower()]
         query = query_template.render(
-            first=table, second=temp_table_name,
-            column=col, update_cols=update_cols,
+            first=table,
+            second=temp_table_name,
+            column=col,
+            update_cols=update_cols,
             match_equal_columns=match_equal_columns,
             match_unequal_columns=match_unequal_columns,
         )
@@ -503,7 +518,7 @@ class BigqueryClient(bigquery.Client):
             context = dict()
             for v in errors.values():
                 context.update(v)
-            raise LoadJobException('\n'.join(errors), context_dict=context)
+            raise LoadJobException("\n".join(errors), context_dict=context)
         self.delete_table(temp_table, not_found_ok=True)
 
 
@@ -511,9 +526,8 @@ class GCSClient(storage.Client):
     """
     Make a client to load data files to GCS
     """
-    def load_one_file_to_gcs(
-        self, fname: str, file_type: str, bucket: str
-    ):
+
+    def load_one_file_to_gcs(self, fname: str, file_type: str, bucket: str):
         """
         Load the given file to GCS
 
@@ -523,23 +537,18 @@ class GCSClient(storage.Client):
         :param: file_type: One of sql, email, log, rdx
         :type bucket: str
         :param bucket: GCS bucket name
-        :type overwrite: bool
-        :param overwrite: Overwrite the target blob if it exists
         :rtype: None
         :returns: Nothing, but should load the given file to GCS
         :raises: Propagates everything from the underlying package
         """
         dest = storage.Blob.from_string(
-            uputils.local_to_gcs_path(fname, file_type, bucket),
-            client=self
+            uputils.local_to_gcs_path(fname, file_type, bucket), client=self
         )
-        if 'cold' in file_type.lower():
+        if "cold" in file_type.lower():
             dest.storage_class = storage.constants.COLDLINE_STORAGE_CLASS
         dest.upload_from_filename(fname, timeout=20 * 60)
 
-    def load_dir(
-        self, dirname: str, file_type: str, bucket: str
-    ):
+    def load_dir(self, dirname: str, file_type: str, bucket: str):
         """
         Load all the files in the given directory or
         any immediate subdirectories
@@ -556,8 +565,8 @@ class GCSClient(storage.Client):
         """
         formats = FILE_FORMATS.get(file_type, [])
         patts = (
-            os.path.join(dirname, '*.{f}*.gz'),
-            os.path.join(dirname, '*', '*.{f}*.gz')
+            os.path.join(dirname, "*.{f}*.gz"),
+            os.path.join(dirname, "*", "*.{f}*.gz"),
         )
         files = []
         for patt in patts:

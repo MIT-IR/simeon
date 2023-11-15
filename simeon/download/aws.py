@@ -4,47 +4,43 @@ Module of utilities to help with listing and downloading files from S3
 import json
 import os
 import re
-import sys
 import weakref
-import zipfile
 from datetime import datetime
 
 import boto3 as boto
 
-from simeon.exceptions import (
-    AWSException, BlobDownloadError
-)
-from simeon.download.utilities import decrypt_files
+from simeon.exceptions import AWSException, BlobDownloadError
 
 
 BUCKETS = {
-    'email': {
-        'Bucket': '{bucket}',
-        'Prefix': 'email-opt-in/email-opt-in-{org}-',
+    "email": {
+        "Bucket": "{bucket}",
+        "Prefix": "email-opt-in/email-opt-in-{org}-",
     },
-    'sql': {
-        'Bucket': '{bucket}',
-        'Prefix': '{org}-',
+    "sql": {
+        "Bucket": "{bucket}",
+        "Prefix": "{org}-",
     },
-    'log': {
-        'Bucket': '{bucket}',
-        'Prefix': '{org}/{site}/events/{year}/{org}-{site}-events-',
+    "log": {
+        "Bucket": "{bucket}",
+        "Prefix": "{org}/{site}/events/{year}/{org}-{site}-events-",
     },
-    'rdx': {
-        'Bucket': '{bucket}',
-        'Prefix': '{org}/rdx/{request}',
+    "rdx": {
+        "Bucket": "{bucket}",
+        "Prefix": "{org}/rdx/{request}",
     },
 }
-BEGIN_DATE = '2012-09-01'
-END_DATE = datetime.utcnow().strftime('%Y-%m-%d')
-DATE_PATT = re.compile(r'\d{4}-\d{2}-\d{2}')
-O2B_MAP = dict(
-    key='name', last_modified='last_modified', size='size'
-)
+BEGIN_DATE = "2012-09-01"
+END_DATE = datetime.utcnow().strftime("%Y-%m-%d")
+DATE_PATT = re.compile(r"\d{4}-\d{2}-\d{2}")
+O2B_MAP = dict(key="name", last_modified="last_modified", size="size")
 
 
 def make_s3_bucket(
-    bucket, client_id=None, client_secret=None, session_token=None,
+    bucket,
+    client_id=None,
+    client_secret=None,
+    session_token=None,
     profile_name=None,
 ):
     """
@@ -52,10 +48,12 @@ def make_s3_bucket(
     """
     try:
         session = boto.Session(
-            aws_access_key_id=client_id, aws_secret_access_key=client_secret,
-            aws_session_token=session_token, profile_name=profile_name,
+            aws_access_key_id=client_id,
+            aws_secret_access_key=client_secret,
+            aws_session_token=session_token,
+            profile_name=profile_name,
         )
-        resource = session.resource('s3')
+        resource = session.resource("s3")
         return resource.Bucket(bucket)
     except Exception as excp:
         raise AWSException(excp)
@@ -69,13 +67,14 @@ def get_file_date(fname):
     match = DATE_PATT.search(fname)
     if match:
         return match.group(0)
-    return ''
+    return ""
 
 
-class S3Blob():
+class S3Blob:
     """
     A class to represent S3 blobs
     """
+
     def __init__(self, name, size, last_modified, bucket, local_name=None):
         """
         :type name: str
@@ -117,17 +116,15 @@ class S3Blob():
         try:
             matches = bucket.objects.filter(Prefix=prefix)
             for obj in matches:
-                details = dict(
-                    (v, getattr(obj, k, None)) for k, v in maps.items()
-                )
-                details['bucket'] = bucket
+                details = dict((v, getattr(obj, k, None)) for k, v in maps.items())
+                details["bucket"] = bucket
                 out.append(cls(**details))
             return out
         except Exception as excp:
-            raise AWSException('{e}'.format(e=excp)) from None
+            raise AWSException("{e}".format(e=excp)) from None
 
     @classmethod
-    def from_info(cls, bucket, type_, date, org='mitx', site='edx'):
+    def from_info(cls, bucket, type_, date, org="mitx", site="edx"):
         """
         Make a list of blobs with the given parameters
 
@@ -144,20 +141,18 @@ class S3Blob():
         :rtype: List[S3Blob]
         :raises: AWSException
         """
-        prefix = BUCKETS.get(type_, {}).get('Prefix')
+        prefix = BUCKETS.get(type_, {}).get("Prefix")
         if not prefix:
             msg = (
-                'The given file type, {t!r}, does not have any associated'
-                ' AWS S3 information.'
+                "The given file type, {t!r}, does not have any associated"
+                " AWS S3 information."
             )
             raise AWSException(msg.format(t=type_)) from None
         if isinstance(date, datetime):
-            date = date.strftime('%Y-%m-%d')
+            date = date.strftime("%Y-%m-%d")
         year = date[:4]
         month = date[5:7]
-        prefix = prefix.format(
-            org=org, year=year, site=site, date=date, month=month
-        )
+        prefix = prefix.format(org=org, year=year, site=site, date=date, month=month)
         return cls.from_prefix(bucket, prefix)
 
     @staticmethod
@@ -165,7 +160,7 @@ class S3Blob():
         """
         Convert the given name into a local name for the file system
         """
-        return os.path.join(*name.split('/'))
+        return os.path.join(*name.split("/"))
 
     def download_file(self, filename=None):
         """
@@ -185,7 +180,7 @@ class S3Blob():
         try:
             self.bucket.download_file(self.name, filename)
         except Exception as excp:
-            msg = 'Failed to download blob {n}: {e}'
+            msg = "Failed to download blob {n}: {e}"
             raise BlobDownloadError(msg.format(n=self.name, e=excp))
         return filename
 
@@ -198,7 +193,10 @@ class S3Blob():
         """
         Jsonify the Blob
         """
-        return json.dumps({
-            'name': self.name, 'size': self.size,
-            'last_modified': self.last_modified.strftime('%c %Z'),
-        })
+        return json.dumps(
+            {
+                "name": self.name,
+                "size": self.size,
+                "last_modified": self.last_modified.strftime("%c %Z"),
+            }
+        )
