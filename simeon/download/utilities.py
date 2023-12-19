@@ -42,14 +42,14 @@ def _extract_values(record, paths):
     all the values associated with the given paths
     """
     for path in paths:
-        subrec = record or {}
+        sub_record = record or {}
         start = path[:-1]
         end = path[-1]
         for k in start:
-            subrec = record.get(k, {}) or {}
-        if not isinstance(subrec, dict):
+            sub_record = record.get(k, {}) or {}
+        if not isinstance(sub_record, dict):
             continue
-        yield subrec.get(end, "")
+        yield sub_record.get(end, "")
 
 
 def _is_gpg_legacy():
@@ -81,20 +81,24 @@ def decrypt_files(fnames, verbose=True, logger=None, timeout=None, keepfiles=Fal
     :type timeout: Union[int, None]
     :param timeout: Number of seconds to wait for the decryption to finish
     :type keepfiles: bool
-    :param keepfiles: Whether or not to keep the encrypted files after decryption
+    :param keepfiles: Keep the encrypted files after decryption, if True.
     :rtype: bool
     :return: Returns True if the decryption does not fail
     :raises: DecryptionError
     """
     if isinstance(fnames, str):
         fnames = [fnames]
-    cmd = "gpg {v}--status-fd 2 --batch --yes {p}" "--decrypt-files {f}"
+    # Construct the command for the gpg child process
     verbosity = "--verbose " if verbose else ""
     pinentry = "" if _is_gpg_legacy() else "--pinentry error "
-    cmd = cmd.format(f=" ".join(fnames), v=verbosity, p=pinentry)
+    cmd = f"gpg {verbosity}--status-fd 2 --batch --yes {pinentry}" "--decrypt-files"
     if verbose and logger is not None:
-        logger.info("{m}...".format(m=cmd[:200]))
-    proc = sb.Popen(shlex.split(cmd), stdout=sb.PIPE, stderr=sb.PIPE)
+        logger.info(cmd)
+    # Create a child process with the generated command and send the file names to its standard input
+    proc = sb.Popen(shlex.split(cmd), stdout=sb.PIPE, stderr=sb.PIPE, stdin=sb.PIPE)
+    proc.stdin.write("\n".join(fnames).encode() + b"\n")
+    proc.stdin.close()
+    # Wait for the decryption process to complete while handling its return status
     if proc.wait(timeout=timeout) != 0:
         errs = []
         for line in proc.stderr:
@@ -103,6 +107,7 @@ def decrypt_files(fnames, verbose=True, logger=None, timeout=None, keepfiles=Fal
         raise DecryptionError(
             msg.format(f=" ".join(fnames), e="\n".join(errs), rc=proc.returncode)
         )
+    # If the caller doesn't want to keep the encrypted files around, delete them.
     if not keepfiles:
         for file_ in fnames:
             try:
@@ -150,7 +155,7 @@ def make_file_handle(fname: str, mode: str = "wt", is_gzip: bool = False):
     :type mode: str
     :param mode: "a[bt]?" for append or "w[bt]?" for write
     :type is_gzip: bool
-    :param is_gzip: Whether or not to open it as a gzip file handle
+    :param is_gzip: Open it as a gzip file handle, if True.
     :rtype: Union[TextIOWrapper, BufferedReader]
     """
     fname = os.path.expanduser(fname)
@@ -181,15 +186,15 @@ def format_sql_filename(fname: str):
     """
     Reformat the given edX SQL encrypted file name into a name indicative
     of where the file should end up after the SQL archive is unpacked.
-    site/folder/filename.ext.gext
+    site/folder/filename.ext.gpg
     """
     if fname.endswith("/"):
         return None, None
     file_ = fname.replace("prod-edge", "edge").replace("ora/", "")
     if fname.endswith(".gpg"):
         file_, _ = os.path.splitext(file_)
-    dirname, bname = os.path.split(file_)
-    _, ext = os.path.splitext(bname)
+    dirname, base_name = os.path.split(file_)
+    _, ext = os.path.splitext(base_name)
     limit = SQL_FILE_EXTS.get(ext)
     if limit is None:
         raise ValueError(
@@ -197,8 +202,8 @@ def format_sql_filename(fname: str):
                 f=fname, x=", ".join(SQL_FILE_EXTS)
             )
         )
-    components = bname.rsplit("-", limit)
-    if ".mongo" in bname:
+    components = base_name.rsplit("-", limit)
+    if ".mongo" in base_name:
         cid, out = components
         site, out, ending = out.replace(".mongo", ""), "forum.mongo.gpg", ""
     else:
@@ -281,7 +286,7 @@ def make_tracklog_path(course_id: str, datestr: str, is_gzip=True) -> str:
     :type datestr: str
     :param datestr: %Y-%m-%d formatted date associated with the tracking log
     :type is_gzip: bool
-    :param is_gzip: Whether or not we're making a GZIP file path
+    :param is_gzip: Make a GZIP file, if True.
     :rtype: str
     :return: A local FS file path
     """
@@ -303,7 +308,7 @@ def parse_mongo_tstamp(timestamp: str):
     Try converting a MongoDB timestamp into a stringified datetime
 
     :type timestamp: str
-    :param timestamp: String representing a timestamp
+    :param timestamp: String representing a timestamp. This can be either a unix timestamp or a datetime.
     :rtype: str
     :return: A formatted datetime
     """
@@ -347,10 +352,10 @@ def check_for_funny_keys(record, name="toplevel"):
         if key[0] in "0123456789":
             return True
         if "-" in key or "." in key:
-            newkey = key.replace("-", "_").replace(".", "__")
-            record[newkey] = val
+            new_key = key.replace("-", "_").replace(".", "__")
+            record[new_key] = val
             record.pop(key)
-            key = newkey
+            key = new_key
         if isinstance(val, dict):
             ret = check_for_funny_keys(val, name + "/" + key)
             if ret:
@@ -399,10 +404,10 @@ def move_unknown_fields_to_agent(record, *keys):
         if "." in key:
             prefix, subkey = key.split(".", 1)
             if prefix in record:
-                subrecord = record[prefix]
-                if subkey in subrecord:
-                    agent[key] = subrecord[subkey]
-                    subrecord.pop(subkey)
+                sub_record = record[prefix]
+                if subkey in sub_record:
+                    agent[key] = sub_record[subkey]
+                    sub_record.pop(subkey)
         else:
             if key in record:
                 agent[key] = record[key]
@@ -522,9 +527,9 @@ def rephrase_record(record: dict):
     }
     if isinstance(event, dict):
         outs = ("video_embedded", "harvardx.button", "harvardx.")
-        out_conds = not any(k in event_type for k in outs)
-        in_conds = "problem_" in event_type or event_type in known_types
-        if in_conds and out_conds:
+        out_conditions = not any(k in event_type for k in outs)
+        in_conditions = "problem_" in event_type or event_type in known_types
+        if in_conditions and out_conditions:
             record["event_struct"] = event
         else:
             record["event_struct"] = {

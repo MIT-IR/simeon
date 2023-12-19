@@ -60,13 +60,13 @@ def process_email_file(fname, verbose=True, logger=None, timeout=None, keepfiles
                     if not chunk:
                         break
                     fh.write(chunk)
-            decrypt_files(
-                fnames=out,
-                verbose=verbose,
-                logger=logger,
-                timeout=timeout,
-                keepfiles=keepfiles,
-            )
+    decrypt_files(
+        fnames=out,
+        verbose=verbose,
+        logger=logger,
+        timeout=timeout,
+        keepfiles=keepfiles,
+    )
     return os.path.splitext(out)[0]
 
 

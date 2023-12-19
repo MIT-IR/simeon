@@ -141,6 +141,7 @@ cython_debug/
 # Data files and folders
 data/
 logs/
+dead_letters/
 *.csv
 *.txt
 *.dat
@@ -155,3 +156,7 @@ logs/
 .simeon.cfg
 simeon.ini
 .simeon.ini
+
+# OS artifacts
+.DS_Store
+.ol
