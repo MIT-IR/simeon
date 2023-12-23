@@ -48,10 +48,7 @@ DST_DESC = {
         " of tab-delimited files from edX's weekly SQL data dump and "
         "tracking log tables."
     ),
-    "email": (
-        "Dataset to host the dimensional details about users' email"
-        " addresses and email opt-in preferences"
-    ),
+    "email": "Dataset to host the dimensional details about users' email addresses and email opt-in preferences",
 }
 
 
@@ -290,9 +287,7 @@ class BigqueryClient(bigquery.Client):
             loader = self.load_table_from_uri
         else:
             loader = self.load_table_from_file
-        job_prefix = "simeon_{t}_data_load_{dt}-".format(
-            t=file_type, dt=datetime.now().strftime("%Y%m%d%H%M%S%f")
-        )
+        job_prefix = "simeon_{t}_data_load_{dt}-".format(t=file_type, dt=datetime.now().strftime("%Y%m%d%H%M%S%f"))
         dest = uputils.local_to_bq_table(fname, file_type, project)
         # dataset = self.dataset(dest.rsplit('.', 1)[0])
         dataset = bigquery.Dataset.from_string(dest.rsplit(".", 1)[0])
@@ -365,9 +360,7 @@ class BigqueryClient(bigquery.Client):
         hasher.update(str(os.getpid()).encode())
         hasher.update(str(threading.get_ident()).encode())
         unique_id = hasher.hexdigest()
-        full_target_directory = os.path.join(
-            os.path.expanduser(target_directory), "compiled", unique_id
-        )
+        full_target_directory = os.path.join(os.path.expanduser(target_directory), "compiled", unique_id)
         filename = table + ".sql"
         os.makedirs(full_target_directory, exist_ok=True)
         with open(os.path.join(full_target_directory, filename), "w") as fh:
@@ -508,9 +501,7 @@ class BigqueryClient(bigquery.Client):
         query_job = self.query(query)
         # Export the compiled query in the given target directory under
         # a folder called compiled.
-        self.export_compiled_query(
-            query=query, table=table, target_directory=target_directory
-        )
+        self.export_compiled_query(query=query, table=table, target_directory=target_directory)
         rutils.wait_for_bq_jobs([query_job])
         if query_job.errors:
             self.delete_table(temp_table, not_found_ok=True)
@@ -541,9 +532,7 @@ class GCSClient(storage.Client):
         :returns: Nothing, but should load the given file to GCS
         :raises: Propagates everything from the underlying package
         """
-        dest = storage.Blob.from_string(
-            uputils.local_to_gcs_path(fname, file_type, bucket), client=self
-        )
+        dest = storage.Blob.from_string(uputils.local_to_gcs_path(fname, file_type, bucket), client=self)
         if "cold" in file_type.lower():
             dest.storage_class = storage.constants.COLDLINE_STORAGE_CLASS
         dest.upload_from_filename(fname, timeout=20 * 60)

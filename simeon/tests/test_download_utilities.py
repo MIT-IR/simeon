@@ -90,19 +90,13 @@ class TestDownloadUtilities(unittest.TestCase):
             },
             {
                 "event": {},
-                "event_type": (
-                    "/courses/course-v1:ORGx+Course1x+4T2099/xblock/"
-                    "block-v1:a+a+a+type@foo+block@bar"
-                ),
+                "event_type": "/courses/course-v1:ORGx+Course1x+4T2099/xblock/block-v1:a+a+a+type@foo+block@bar",
             },
             {
                 "event": {},
                 "event_type": "",
                 "context": {
-                    "path": (
-                        "/courses/course-v1:ORGx+Course1x+4T2099/"
-                        "xblock/block-v1:a+a+a+type@foo+block@bar"
-                    )
+                    "path": "/courses/course-v1:ORGx+Course1x+4T2099/xblock/block-v1:a+a+a+type@foo+block@bar"
                 },
             },
             {
@@ -111,17 +105,9 @@ class TestDownloadUtilities(unittest.TestCase):
             },
             {"event": {"id": "i4x-ORGx-Course1x-foo-bar"}, "event_type": ""},
             {
-                "event": {
-                    "id": (
-                        "/courses/course-v1:ORGx+Course1x+4T2099"
-                        "/courseware/chapter0/bar/"
-                    )
-                },
+                "event": {"id": "/courses/course-v1:ORGx+Course1x+4T2099/courseware/chapter0/bar/"},
                 "event_type": "play_video",
-                "page": (
-                    "/courses/course-v1:ORGx+Course1x+4T2099"
-                    "/courseware/chapter0/bar/"
-                ),
+                "page": "/courses/course-v1:ORGx+Course1x+4T2099/courseware/chapter0/bar/",
             },
             {
                 "event": {"id": "block-v1:ORGx+Course1x+4T2099+type@foo+block@bar"},
@@ -171,24 +157,17 @@ class TestDownloadUtilities(unittest.TestCase):
             },
             {
                 "event": {},
-                "event_type": (
-                    "/courses/ORGx/Course1x/4T2019/discussion/"
-                    "forum/i4xfoo/threads/bar"
-                ),
+                "event_type": "/courses/ORGx/Course1x/4T2019/discussion/forum/i4xfoo/threads/bar",
                 "event_source": "",
             },
             {
                 "event": {},
-                "event_type": (
-                    "/courses/ORGx/Course1x/4T2019/" "discussion/i4xfoo/threads/create"
-                ),
+                "event_type": "/courses/ORGx/Course1x/4T2019/discussion/i4xfoo/threads/create",
                 "event_source": "",
             },
             {
                 "event": {},
-                "event_type": (
-                    "/courses/ORGx/Course1x/4T2019/" "discussion/forum/foo/threads/bar"
-                ),
+                "event_type": "/courses/ORGx/Course1x/4T2019/discussion/forum/foo/threads/bar",
                 "event_source": "",
             },
             {
@@ -208,22 +187,14 @@ class TestDownloadUtilities(unittest.TestCase):
             },
             {
                 "event": {},
-                "event_type": (
-                    "/courses/ORGx/Course1x/4T2019/xblock/"
-                    "i4x:;_;_a;_a;_foo;_bar/handler/"
-                ),
+                "event_type": "/courses/ORGx/Course1x/4T2019/xblock/i4x:;_;_a;_a;_foo;_bar/handler/",
                 "event_source": "",
             },
             {
                 "event": {},
                 "event_type": "",
                 "event_source": "",
-                "context": {
-                    "path": (
-                        "/courses/ORGx/Course1x/4T2019/xblock/"
-                        "i4x:;_;_a;_a;_foo;_bar/handler/"
-                    )
-                },
+                "context": {"path": "/courses/ORGx/Course1x/4T2019/xblock/i4x:;_;_a;_a;_foo;_bar/handler/"},
             },
             {
                 "event": {"id": "input_i4x-ORGx-Course1x-foo-bar_0_a="},
@@ -405,9 +376,7 @@ class TestDownloadUtilities(unittest.TestCase):
         """
         should just return a tuple of Nones if the given name is a directory
         """
-        self.assertEqual(
-            down_utils.format_sql_filename(self.sql_file_name_directory), (None, None)
-        )
+        self.assertEqual(down_utils.format_sql_filename(self.sql_file_name_directory), (None, None))
 
     def test_unexpected_extension(self):
         """

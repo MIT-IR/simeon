@@ -14,9 +14,7 @@ from multiprocessing.pool import Pool as ProcessPool
 from simeon.download.utilities import decrypt_files, format_sql_filename
 from simeon.exceptions import DecryptionError, SplitException
 
-SCHEMA_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas"
-)
+SCHEMA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas")
 
 
 proc_zip_file: typing.Optional[zipfile.ZipFile] = None
@@ -51,9 +49,7 @@ def _batch_by_dirs(dirnames, size):
     bucket = []
     for dir_name in dirnames:
         files = glob.iglob(os.path.join(dir_name, "*.gpg"))
-        files = itertools.chain(
-            files, glob.iglob(os.path.join(dir_name, "ora", "*.gpg"))
-        )
+        files = itertools.chain(files, glob.iglob(os.path.join(dir_name, "ora", "*.gpg")))
         for file_ in files:
             bucket.append(file_)
             if len(bucket) >= size:
@@ -176,10 +172,7 @@ def batch_decrypt_files(
         if decryptions == 0 or failures or keepfiles:
             break
     if failures:
-        msg = (
-            "{c} batches of {s} files each failed to decrypt. "
-            "Please consult the logs"
-        )
+        msg = "{c} batches of {s} files each failed to decrypt. Please consult the logs"
         raise DecryptionError(msg.format(c=failures, s=size))
 
 
@@ -203,13 +196,9 @@ def unpacker(fname, names, ddir, cpaths=None, tables_only=False):
             continue
         if "ccx" in cfolder:
             dir_segments = cfolder.replace("-", "__", 1).split("-")
-            clean = "{f}__{s}".format(
-                f="_".join(dir_segments[:-3]), s="_".join(dir_segments[-3:])
-            )
+            clean = "{f}__{s}".format(f="_".join(dir_segments[:-3]), s="_".join(dir_segments[-3:]))
         else:
-            clean = "__".join(cfolder.replace("-", "__", 1).rsplit("-", 1)).replace(
-                "-", "_"
-            )
+            clean = "__".join(cfolder.replace("-", "__", 1).rsplit("-", 1)).replace("-", "_")
         clean = clean.replace(".", "_")
         target_dir = target_dir.replace(cfolder, clean)
         target_name = target_name.replace(cfolder, clean)
@@ -268,11 +257,7 @@ def process_sql_archive(
     with ProcessPool(size, initializer=_pool_initializer, initargs=(archive,)) as pool:
         results = []
         for batch in batches:
-            results.append(
-                pool.apply_async(
-                    unpacker, args=(archive, batch, ddir, cpaths, tables_only)
-                )
-            )
+            results.append(pool.apply_async(unpacker, args=(archive, batch, ddir, cpaths, tables_only)))
         processed = 0
         while processed < len(results):
             for result in results:
@@ -283,9 +268,7 @@ def process_sql_archive(
                 except TimeoutError:
                     continue
                 except KeyboardInterrupt:
-                    raise SplitException(
-                        "The SQL bundle unpacking was interrupted by " "the user."
-                    )
+                    raise SplitException("The SQL bundle unpacking was interrupted by the user.")
                 except:
                     _, excp, tb = sys.exc_info()
                     traces = ["{e}".format(e=excp)]

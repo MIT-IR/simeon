@@ -21,9 +21,7 @@ from simeon.download import utilities as utils
 from simeon.exceptions import EarlyExitError, MissingSchemaException, SplitException
 from simeon.report import utilities as rutils
 
-SCHEMA_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas"
-)
+SCHEMA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas")
 
 
 def _process_initializer():
@@ -38,7 +36,7 @@ def _process_initializer():
 def _cleanup_handles(file_handles, sleep=1):
     """
     Flush and close the given file handles.
-    Sleep sleep number of seconds if necessary,
+    Sleep number of seconds given by the sleep parameter if necessary,
     so the OS can reclaim the file descriptors
     associated with the given handles.
     """
@@ -85,9 +83,7 @@ def process_line(
     except (JSONDecodeError, TypeError):
         return {
             "data": original_line,
-            "filename": os.path.join(
-                "dead_letters", "dead_letter_queue_{p}.json.gz".format(p=os.getpid())
-            ),
+            "filename": os.path.join("dead_letters", "dead_letter_queue_{p}.json.gz".format(p=os.getpid())),
             "error": "Not valid JSON",
         }
     # If the parsed line is not a dictionary, then we return the original line
@@ -95,9 +91,7 @@ def process_line(
     if not isinstance(record, dict):
         return {
             "data": original_line,
-            "filename": os.path.join(
-                "dead_letters", "dead_letter_queue_{p}.json.gz".format(p=os.getpid())
-            ),
+            "filename": os.path.join("dead_letters", "dead_letter_queue_{p}.json.gz".format(p=os.getpid())),
             "error": "The line is not a record",
         }
     if not isinstance(record.get("event"), dict):
@@ -114,25 +108,19 @@ def process_line(
     except KeyError as e:
         return {
             "data": original_line,
-            "filename": os.path.join(
-                "dead_letters", "dead_letter_queue_{p}.json.gz".format(p=os.getpid())
-            ),
+            "filename": os.path.join("dead_letters", "dead_letter_queue_{p}.json.gz".format(p=os.getpid())),
             "error": "Record does not have the key " + str(e),
         }
     if all(k not in record for k in ("event", "event_type")):
         return {
             "data": original_line,
-            "filename": os.path.join(
-                "dead_letters", "dead_letter_queue_{p}.json.gz".format(p=os.getpid())
-            ),
+            "filename": os.path.join("dead_letters", "dead_letter_queue_{p}.json.gz".format(p=os.getpid())),
             "error": "Missing event or event type",
         }
     if not date:
         try:
             date = parse_date(record.get("time", ""))
-            outfile = utils.make_tracklog_path(
-                course_id, date.strftime("%Y-%m-%d"), is_gzip
-            )
+            outfile = utils.make_tracklog_path(course_id, date.strftime("%Y-%m-%d"), is_gzip)
         except Exception as e:
             ext = ".gz" if is_gzip else ""
             outfile = os.path.join(
@@ -140,9 +128,7 @@ def process_line(
                 "dead_letter_queue_{p}.json{x}".format(p=os.getpid(), x=ext),
             )
     else:
-        outfile = utils.make_tracklog_path(
-            course_id, date.strftime("%Y-%m-%d"), is_gzip
-        )
+        outfile = utils.make_tracklog_path(course_id, date.strftime("%Y-%m-%d"), is_gzip)
     return {"data": record, "filename": outfile}
 
 
@@ -254,7 +240,7 @@ def split_tracking_log(
                 fname = os.path.join(ddir, fname)
                 if pfname and pfname != fname:
                     try:
-                        _cleanup_handles([fhandles[pfname]], None)
+                        _cleanup_handles([fhandles[pfname]], 0)
                     except OSError:
                         pass
                 data = rec["data"]

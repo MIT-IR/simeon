@@ -83,25 +83,17 @@ class TestReportUtilities(unittest.TestCase):
         with records missing various fields
         """
         for record in self.records:
-            msg = (
-                "Test check_record_schema with {r} and coerce=True"
-                " and the schema files {f}"
-            )
+            msg = "Test check_record_schema with {r} and coerce=True and the schema files {f}"
             with self.subTest(msg.format(r=record, f=", ".join(self.sfiles))):
                 for schema in self.schemas:
                     copied = record.copy()
                     rutils.check_record_schema(copied, schema, True, True)
                     self.assertTrue(len(copied) > len(record))
-            msg = (
-                "Test check_record_schema with {r} and coerce=False"
-                " and the schema files for {f}"
-            )
+            msg = "Test check_record_schema with {r} and coerce=False and the schema files for {f}"
             with self.subTest(msg.format(r=record, f=", ".join(self.sfiles))):
                 with self.assertRaises(rutils.SchemaMismatchException):
                     for schema in self.schemas:
-                        rutils.check_record_schema(
-                            record.copy(), schema, False, True
-                        )
+                        rutils.check_record_schema(record.copy(), schema, False, True)
 
     def test_drop_extra_keys(self):
         """
@@ -109,7 +101,7 @@ class TestReportUtilities(unittest.TestCase):
         that have extra fields.
         """
         for record in self.extra_records:
-            msg = "Test drop_extra_keys with {r} " " and the schema files {f}"
+            msg = "Test drop_extra_keys with {r} and the schema files {f}"
             with self.subTest(msg.format(r=record, f=", ".join(self.sfiles))):
                 for schema in self.schemas:
                     copied = record.copy()

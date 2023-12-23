@@ -143,10 +143,7 @@ class S3Blob:
         """
         prefix = BUCKETS.get(type_, {}).get("Prefix")
         if not prefix:
-            msg = (
-                "The given file type, {t!r}, does not have any associated"
-                " AWS S3 information."
-            )
+            msg = "The given file type, {t!r}, does not have any associated AWS S3 information."
             raise AWSException(msg.format(t=type_)) from None
         if isinstance(date, datetime):
             date = date.strftime("%Y-%m-%d")
@@ -185,9 +182,7 @@ class S3Blob:
         return filename
 
     def __repr__(self):
-        return "Name: {n} - Size: {s} - Last Modified: {m}".format(
-            n=self.name, s=self.size, m=self.last_modified
-        )
+        return "Name: {n} - Size: {s} - Last Modified: {m}".format(n=self.name, s=self.size, m=self.last_modified)
 
     def to_json(self):
         """

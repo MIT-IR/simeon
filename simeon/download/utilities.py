@@ -58,9 +58,7 @@ def _is_gpg_legacy():
     """
     p = sb.Popen(shlex.split("gpg --version"), stdout=sb.PIPE, stderr=sb.PIPE)
     if p.wait() != 0:
-        raise DecryptionError(
-            "The gpg command does not exist, " "or it is not properly configured."
-        )
+        raise DecryptionError("The gpg command does not exist, or it is not properly configured.")
     line = p.stdout.readline().decode("utf8", "ignore").strip()
     version = line.split()[-1]
     return version < "2.1.0"
@@ -91,7 +89,7 @@ def decrypt_files(fnames, verbose=True, logger=None, timeout=None, keepfiles=Fal
     # Construct the command for the gpg child process
     verbosity = "--verbose " if verbose else ""
     pinentry = "" if _is_gpg_legacy() else "--pinentry error "
-    cmd = f"gpg {verbosity}--status-fd 2 --batch --yes {pinentry}" "--decrypt-files"
+    cmd = f"gpg {verbosity}--status-fd 2 --batch --yes {pinentry}--decrypt-files"
     if verbose and logger is not None:
         logger.info(cmd)
     # Create a child process with the generated command and send the file names to its standard input
@@ -104,9 +102,7 @@ def decrypt_files(fnames, verbose=True, logger=None, timeout=None, keepfiles=Fal
         for line in proc.stderr:
             errs.append(line.decode("utf8", "ignore").strip())
         msg = "Failed to decrypt file names {f} with return code {rc}:\n{e}"
-        raise DecryptionError(
-            msg.format(f=" ".join(fnames), e="\n".join(errs), rc=proc.returncode)
-        )
+        raise DecryptionError(msg.format(f=" ".join(fnames), e="\n".join(errs), rc=proc.returncode))
     # If the caller doesn't want to keep the encrypted files around, delete them.
     if not keepfiles:
         for file_ in fnames:
@@ -197,11 +193,7 @@ def format_sql_filename(fname: str):
     _, ext = os.path.splitext(base_name)
     limit = SQL_FILE_EXTS.get(ext)
     if limit is None:
-        raise ValueError(
-            "{f} has an expected extension. Expected are {x}".format(
-                f=fname, x=", ".join(SQL_FILE_EXTS)
-            )
-        )
+        raise ValueError("{f} has an expected extension. Expected are {x}".format(f=fname, x=", ".join(SQL_FILE_EXTS)))
     components = base_name.rsplit("-", limit)
     if ".mongo" in base_name:
         cid, out = components
@@ -293,9 +285,7 @@ def make_tracklog_path(course_id: str, datestr: str, is_gzip=True) -> str:
     ext = ".gz" if is_gzip else ""
     segments = course_id.strip().split("/")[:3]
     if len(segments) < 3:
-        return os.path.join(
-            "UNKNOWN", "tracklog-{ds}.json{x}".format(ds=datestr, x=ext)
-        )
+        return os.path.join("UNKNOWN", "tracklog-{ds}.json{x}".format(ds=datestr, x=ext))
     return os.path.join(
         "__".join(segments).replace(".", "_"),
         "tracklog-{ds}.json{x}".format(ds=datestr, x=ext),
@@ -494,7 +484,7 @@ def rephrase_record(record: dict):
     event = record.get("event")
     try:
         if not isinstance(event, dict):
-            event = json.loads(event)
+            event = json.loads(event or "")
         event_js = True
     except:
         event_js = False

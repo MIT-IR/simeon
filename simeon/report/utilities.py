@@ -157,9 +157,7 @@ ADDED_COLS = [
     "edxinstructordash_Grade_timestamp",
     "y1_anomalous",
 ]
-SCHEMA_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas"
-)
+SCHEMA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas")
 QUERY_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "queries",
@@ -225,9 +223,7 @@ def _report_pool_init(proj, safile=None):
     if not safile:
         report_bq_client = gcp.BigqueryClient(project=proj)
     else:
-        report_bq_client = gcp.BigqueryClient.from_service_account_json(
-            safile, project=proj
-        )
+        report_bq_client = gcp.BigqueryClient.from_service_account_json(safile, project=proj)
 
 
 def _course_has_all_files(folder, files=TARGET_FILES, encrypted=False):
@@ -266,7 +262,7 @@ def _get_schema_dict(schema_dir, table):
         if os.path.exists(schema_file):
             with open(schema_file) as fh:
                 return json.load(fh)
-    msg = "A schema file for table {t} could not be found in the given " "directory {d}"
+    msg = "A schema file for table {t} could not be found in the given directory {d}"
     raise MissingSchemaException(msg.format(t=table, d=schema_dir))
 
 
@@ -350,9 +346,7 @@ def check_record_schema(record, schema, coerce=True, nullify=False):
         if field.get("field_type") != "RECORD":
             if field.get("name") not in record and nullify:
                 if not coerce:
-                    raise SchemaMismatchException(
-                        "{f} is missing from the record".format(f=field.get("name"))
-                    )
+                    raise SchemaMismatchException("{f} is missing from the record".format(f=field.get("name")))
                 record[field.get("name")] = None
             elif field.get("name") in record and coerce:
                 val = record[field.get("name")]
@@ -426,9 +420,7 @@ def extract_table_query(table, query_dir):
     return "".join(query), "".join(description)
 
 
-def make_user_info_combo(
-    dirname, schema_dir=SCHEMA_DIR, outname="user_info_combo.json.gz"
-):
+def make_user_info_combo(dirname, schema_dir=SCHEMA_DIR, outname="user_info_combo.json.gz"):
     """
     Given a course's SQL directory, make a user_info_combo report
 
@@ -451,9 +443,7 @@ def make_user_info_combo(
     user_cols = USER_INFO_COLS.get((user_file, None))
     with open(os.path.join(dirname, user_file)) as ufh:
         incols = [c.strip() for c in ufh.readline().split("\t")]
-        reader = csv.DictReader(
-            ufh, delimiter="\t", lineterminator="\n", quotechar='"', fieldnames=incols
-        )
+        reader = csv.DictReader(ufh, delimiter="\t", lineterminator="\n", quotechar='"', fieldnames=incols)
         for row in reader:
             uid = row.get("id")
             row["user_id"] = uid
@@ -488,7 +478,7 @@ def make_user_info_combo(
                 target.update(dict((k, row.get(k)) for k in cols))
                 if target.get("username") is None and row.get(username_col):
                     target["username"] = row[username_col]
-    outcols = reduce(lambda l, r: l + r, USER_INFO_COLS.values())
+    outcols = reduce(lambda left, right: left + right, USER_INFO_COLS.values())
     outcols += ADDED_COLS
     with gzip.open(os.path.join(dirname, outname), "wt") as zh:
         for record in users.values():
@@ -722,9 +712,7 @@ def process_course_structure(data, start, mapping, parent=None):
         ("visible_to_staff_only", "visible_to_staff_only"),
     )
     for key, target in targets:
-        item[key] = _get_first_axis_meta(
-            block=start, name=target, struct=data, mapping=mapping
-        )
+        item[key] = _get_first_axis_meta(block=start, name=target, struct=data, mapping=mapping)
     item["graded"] = bool(item.get("graded"))
     item["is_split"] = any(
         [
@@ -818,9 +806,7 @@ def make_course_axis(dirname, schema_dir=SCHEMA_DIR, outname="course_axis.json.g
             record["course_id"] = course_id
             record["chapter_mid"] = chapter_mid
             record["index"] = index
-            record["data"]["itype"] = itypes.get(
-                record.get("module_id", "").split("/")[-1]
-            )
+            record["data"]["itype"] = itypes.get(record.get("module_id", "").split("/")[-1])
             record["data"]["duration"] = durations.get(record["url_name"])
             if record["gformat"]:
                 if not record.get("due"):
@@ -885,9 +871,7 @@ def make_grades_persistent(
                 zh.write(json.dumps(record) + "\n")
 
 
-def make_grading_policy(
-    dirname, schema_dir=SCHEMA_DIR, outname="grading_policy.json.gz"
-):
+def make_grading_policy(dirname, schema_dir=SCHEMA_DIR, outname="grading_policy.json.gz"):
     """
     Generate a file to be loaded into the grading_policy table
     of the given SQL directory.
@@ -906,13 +890,9 @@ def make_grading_policy(
     if not os.path.exists(file_):
         raise OSError("{f} does not exist in the SQL bundle".format(f=file_))
     with tarfile.open(file_) as tar:
-        policy = next(
-            (m for m in tar.getmembers() if "grading_policy.json" in m.name), None
-        )
+        policy = next((m for m in tar.getmembers() if "grading_policy.json" in m.name), None)
         if policy is None:
-            raise MissingFileException(
-                "No grading policy found in {f!r}".format(f=file_)
-            )
+            raise MissingFileException("No grading policy found in {f!r}".format(f=file_))
         with tar.extractfile(policy) as jh:
             grading_policy = json.load(jh)
         outname = os.path.join(dirname, outname)
@@ -1040,9 +1020,7 @@ def make_forum_table(dirname, schema_dir=SCHEMA_DIR, outname="forum.json.gz"):
                         subcol = None
                     if subkey is not None:
                         if subcol:
-                            val = _extract_mongo_values(
-                                (record.get(col, {}) or {}), subcol, subkey
-                            )
+                            val = _extract_mongo_values((record.get(col, {}) or {}), subcol, subkey)
                             if not isinstance(record.get(col), dict):
                                 record[col] = {}
                             record[col][subcol] = val
@@ -1057,9 +1035,7 @@ def make_forum_table(dirname, schema_dir=SCHEMA_DIR, outname="forum.json.gz"):
                             if isinstance(record[col][k], list):
                                 record[col][k] = json.dumps(record[col][k])
             record["mongoid"] = record["_id"]
-            record["course_id"] = down_utils.get_sql_course_id(
-                record.get("course_id") or ""
-            )
+            record["course_id"] = down_utils.get_sql_course_id(record.get("course_id") or "")
             drop_extra_keys(record, schema)
             check_record_schema(record, schema, True)
             zh.write(json.dumps(record) + "\n")
@@ -1102,9 +1078,7 @@ def make_problem_analysis(state, **extras):
     return out
 
 
-def make_student_module(
-    dirname, schema_dir=SCHEMA_DIR, outname="studentmodule.json.gz"
-):
+def make_student_module(dirname, schema_dir=SCHEMA_DIR, outname="studentmodule.json.gz"):
     """
     Generate files to load into studentmodule and problem_analysis
     using the given SQL directory
@@ -1133,7 +1107,7 @@ def make_student_module(
     with open(file_, encoding="UTF8", errors="ignore") as fh:
         header = [c.strip() for c in fh.readline().split("\t")]
         reader = csv.DictReader(
-            (l.replace("\0", "") for l in fh),
+            (line.replace("\0", "") for line in fh),
             delimiter="\t",
             quotechar="'",
             lineterminator="\n",
@@ -1151,9 +1125,7 @@ def make_student_module(
                 # check_record_schema(record, module_schema)
                 zh.write(json.dumps(record) + "\n")
                 try:
-                    state = json.loads(
-                        (record.get("state") or "{}").replace("\\\\", "\\")
-                    )
+                    state = json.loads((record.get("state") or "{}").replace("\\\\", "\\"))
                 except json.JSONDecodeError:
                     continue
                 if not all(k in state for k in prob_cols):
@@ -1246,9 +1218,7 @@ def make_roles_table(dirname, schema_dir=SCHEMA_DIR, outname="roles.json.gz"):
                 for inrow in reader:
                     outrow = data[inrow.get("user_id")]
                     outrow["user_id"] = inrow.get("user_id")
-                    outrow["course_id"] = down_utils.get_sql_course_id(
-                        inrow.get("course_id", "")
-                    )
+                    outrow["course_id"] = down_utils.get_sql_course_id(inrow.get("course_id", ""))
                     col = roles.get(inrow.get("role"))
                     if col is not None:
                         outrow[col] = 1
@@ -1318,10 +1288,7 @@ def make_sql_tables_seq(
                     traces = ["{e}".format(e=excp)]
                     traces += map(str.strip, traceback.format_tb(tb))
                     excp = "\n".join(traces)
-                msg = (
-                    "Error encountered while making the {n} table(s) "
-                    "with the given directory {d}: {e}"
-                )
+                msg = "Error encountered while making the {n} table(s) with the given directory {d}: {e}"
                 excp = MissingFileException(msg.format(d=dirname, n=tbl, e=excp))
                 if fail_fast:
                     raise excp from None
@@ -1384,26 +1351,21 @@ def make_sql_tables_par(
                 if verbose and logger is not None:
                     msg = "Making {f} with files in {d}"
                     logger.info(msg.format(f=tbl, d=dirname))
-                results[(tbl, dirname)] = pool.apply_async(
-                    fn, args=(dirname, schema_dir)
-                )
+                results[(tbl, dirname)] = pool.apply_async(fn, args=(dirname, schema_dir))
         fails = []
         for (tbl, dirname), result in results.items():
             try:
                 result.get()
             except KeyboardInterrupt:
                 logger.error("Report generation interrupted by user.")
-                raise EarlyExitError()
+                raise EarlyExitError("Report generation interrupted by user.")
             except:
                 _, excp, tb = sys.exc_info()
                 if debug:
                     traces = ["{e}".format(e=excp)]
                     traces += map(str.strip, traceback.format_tb(tb))
                     excp = "\n".join(traces)
-                msg = (
-                    "Error encountered while making the {n} table(s) "
-                    "with the given directory {d}: {e}"
-                )
+                msg = "Error encountered while making the {n} table(s) with the given directory {d}: {e}"
                 excp = MissingFileException(msg.format(d=dirname, n=tbl, e=excp))
                 if fail_fast:
                     raise excp from None
@@ -1495,9 +1457,7 @@ def make_table_from_sql(
         log_dataset=log_dataset,
         **kwargs,
     )
-    client.export_compiled_query(
-        query=query, table=table, target_directory=target_directory
-    )
+    client.export_compiled_query(query=query, table=table, target_directory=target_directory)
     try:
         job = client.query(
             query.format(
@@ -1578,9 +1538,7 @@ def make_tables_from_sql(
         global report_bq_client
         client = report_bq_client
     out = dict()
-    dataset = uputils.course_to_bq_dataset(
-        course_id=course_id, file_type="sql", project=project
-    )
+    dataset = uputils.course_to_bq_dataset(course_id=course_id, file_type="sql", project=project)
     dataset = bigquery.Dataset.from_string(dataset)
     dataset.description = gcp.DST_DESC.get("sql", "")
     client.create_dataset(dataset, exists_ok=True)
@@ -1665,14 +1623,10 @@ def make_tables_from_sql_par(
     if len(courses) < size:
         size = len(courses)
     results = dict()
-    with ProcessPool(
-        size, initializer=_report_pool_init, initargs=(project, safile)
-    ) as pool:
+    with ProcessPool(size, initializer=_report_pool_init, initargs=(project, safile)) as pool:
         for course_id in courses:
             if logger:
-                logger.info(
-                    "Making secondary tables for course ID {cid}".format(cid=course_id)
-                )
+                logger.info("Making secondary tables for course ID {cid}".format(cid=course_id))
             kwds = dict(
                 tables=tables,
                 course_id=course_id,
@@ -1695,7 +1649,5 @@ def make_tables_from_sql_par(
             result = results[course_id]
             results[course_id] = result.get()
             if logger:
-                logger.info(
-                    "All queries submitted for course ID {cid}".format(cid=course_id)
-                )
+                logger.info("All queries submitted for course ID {cid}".format(cid=course_id))
     return results

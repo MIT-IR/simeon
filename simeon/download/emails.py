@@ -10,9 +10,7 @@ from datetime import datetime
 
 from simeon.download.utilities import decrypt_files
 
-SCHEMA_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas"
-)
+SCHEMA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas")
 
 
 def parse_date(datestr):
@@ -97,9 +95,7 @@ def compress_email_files(files, ddir, schema_dir=SCHEMA_DIR):
                     raise OSError("The given file {f!r} is empty.".format(f=file_))
                 cols = [c.strip() for c in header_row.split(",")]
                 if "user_id" not in cols:
-                    raise OSError(
-                        "The given file {f!r} has no user_id field.".format(f=file_)
-                    )
+                    raise OSError("The given file {f!r} has no user_id field.".format(f=file_))
                 reader = csv.DictReader(
                     (line.replace("\0", "") for line in infile),
                     delimiter=",",
@@ -112,9 +108,7 @@ def compress_email_files(files, ddir, schema_dir=SCHEMA_DIR):
                     row["user_id"] = int(row["user_id"])
                     cid = (row.get("course_id") or "").split(":")[-1]
                     row["course_id"] = cid.replace("+", "/", 2).replace("+", "_")
-                    row["preference_set_datetime"] = parse_date(
-                        row.get("preference_set_datetime") or ""
-                    )
+                    row["preference_set_datetime"] = parse_date(row.get("preference_set_datetime") or "")
                     is_opt = (row.get("is_opted_in_for_email") or "").strip()
                     row["is_opted_in_for_email"] = is_opt.lower() == "true"
                     fh.write(json.dumps(row) + "\n")

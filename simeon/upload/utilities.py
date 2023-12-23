@@ -35,9 +35,7 @@ def course_to_gcs_folder(course_id: str, file_type: str, bucket: str) -> str:
     """
     segment = SEGMENTS.get(file_type)
     if not segment:
-        raise ValueError(
-            "file_type is not one of these: {ft}".format(ft=", ".join(SEGMENTS))
-        )
+        raise ValueError("file_type is not one of these: {ft}".format(ft=", ".join(SEGMENTS)))
     if not bucket.startswith("gs://"):
         bucket = "gs://{b}".format(b=bucket)
     dirname = course_id.replace("/", "__").replace(".", "_")
@@ -67,9 +65,7 @@ def local_to_gcs_path(fname: str, file_type: str, bucket: str) -> str:
     if segment == "COLD":
         gcs_file = bname
     else:
-        gcs_file = "{d}/{f}".format(
-            d=os.path.basename(dname).replace(".", "_").replace("-", "_"), f=bname
-        )
+        gcs_file = "{d}/{f}".format(d=os.path.basename(dname).replace(".", "_").replace("-", "_"), f=bname)
     return "{b}/{s}/{f}".format(b=bucket, s=segment, f=gcs_file)
 
 
@@ -95,9 +91,7 @@ def course_to_bq_dataset(course_id: str, file_type: str, project: str) -> str:
         suffix = "_logs"
     else:
         suffix = ""
-    dataset = "{d}{s}".format(
-        d=course_id.replace("/", "__").replace(".", "_").replace("-", "_"), s=suffix
-    )
+    dataset = "{d}{s}".format(d=course_id.replace("/", "__").replace(".", "_").replace("-", "_"), s=suffix)
     return "{p}.{d}".format(p=project, d=dataset)
 
 
@@ -115,9 +109,7 @@ def local_to_bq_table(fname: str, file_type: str, project: str) -> str:
     :return: BigQuery dataset name with components separated by dots
     """
     if file_type not in SEGMENTS:
-        raise ValueError(
-            "file_type is not one of these: {s}".format(s=", ".join(SEGMENTS))
-        )
+        raise ValueError("file_type is not one of these: {s}".format(s=", ".join(SEGMENTS)))
     dname, bname = os.path.split(os.path.abspath(os.path.expanduser(fname)))
     if file_type in ("sql",):
         table = bname.split(".", 1)[0].replace("-", "_")
@@ -186,10 +178,7 @@ def get_bq_schema(table: str, schema_dir: str = SCHEMA_DIR):
             for field in schema.get(bname, []):
                 out.append(dict_to_schema_field(field))
         if not out:
-            msg = (
-                "The schema file {f!r} does not contain an object "
-                "with a name matching the given table {t}"
-            )
+            msg = "The schema file {f!r} does not contain an object with a name matching the given table {t}"
             raise MissingSchemaException(msg.format(f=sfile, t=table))
         return out, schema.get("description")
     msg = "No JSON schema file found for {t} in directory {d}"
