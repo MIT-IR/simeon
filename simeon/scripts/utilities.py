@@ -3,7 +3,9 @@ Utility functions for the simeon CLI tool
 """
 import argparse
 import configparser
+import datetime
 import glob
+import io
 import json
 import logging
 import os
@@ -12,196 +14,12 @@ import socket
 import stat
 import subprocess as sb
 import sys
-import tempfile
+import typing
 from argparse import ArgumentTypeError
 
 from dateutil.parser import parse as dateparse
 
-CLI_MAIN_EPILOG = """
-RETURN CODES:
-    simeon returns either 0 or 1, depending on whether an error was encountered.
-    If any error is encountered with any of the subcommands, 1 is returned.
-    For simeon list and simeon download, if nothing is listed or downloaded, then 1 is returned.
-    For simeon split and simeon push, if nothing ends up being split or pushed, then 1 is returned.
-    For simeon report, if any error is encountered while running the queries, then 1 is returned.
 
-SETUP and CONFIGURATIONS:
-    simeon is a glorified downloader and uploader set of scripts. Much of the downloading and uploading that it does makes the assumptions that you have
-    your AWS credentials configured properly and that you've got a service account file for GCP services available on your machine. If the latter is
-    missing, you may have to authenticate to GCP services through the SDK. However, both we and Google recommend the use of service accounts.
-
-    Every downloaded file is decrypted either during the download process or while it gets split by the simeon split command. So, this tool assumes that
-    you have installed and configured gpg to be able to decrypt files from edX.
-
-    The following steps may be useful to someone just getting started with the edX data package:
-
-    1. Credentials from edX
-
-        o Reach out to edX to get your data czar credentials
-
-        o Configure both AWS and gpg, so your credentials can access the S3 buckets and your gpg key can decrypt the files there
-
-    2. Setup a GCP project
-
-        o Create a GCP project
-
-        o Setup a BigQuery workspace
-
-        o Create a GCS bucket
-
-        o Create a service account and download the associated file
-
-        o Give the service account Admin Role access to both the BigQuery project and the GCS bucket
-
-    If the above steps are carried out successfully, then you should be able to use simeon without any issues.
-
-    However, if you have taken care of the above steps but are still unable to get simeon to work, please open an issue.
-
-    Further, simeon can parse INI formatted configuration files. It, by default, looks for files in the user's home directory, or in the current working
-    directory of the running process. The base names that are targeted when config files are looked up are: simeon.cfg or .simeon.cfg or simeon.ini or .simeon.ini.
-    You can also provide simeon with a config file by using the global option --config-file or -C, and giving it a path to the file with the corresponding configurations.
-
-    The following is a sample file content:
-
-        # Default section for things like the organization whose data package is processed
-        # You can also set a default site as one of the following: edx, edge, patches
-        [DEFAULT]
-        site = edx
-        org = yourorganizationx
-        clistings_file = /path/to/file/with/course_ids
-
-        # Section related to Google Cloud (project, bucket, service account)
-        [GCP]
-        project = your-gcp-project-id
-        bucket = your-gcs-bucket
-        service_account_file = /path/to/a/service_account_file.json
-        wait_for_loads = True
-        geo_table = your-gcp-project.geocode_latest.geoip
-        youtube_table = your-gcp-project.videos.youtube
-        youtube_token = your-YouTube-API-token
-
-        # Section related to the AWS credentials needed to download data from S3
-        [AWS]
-        aws_cred_file = ~/.aws/credentials
-        profile_name = default
-
-    The options in the config file(s) should match the optional arguments of the CLI tool. For instance, the --service-account-file, --project and
-    --bucket options can be provided under the GCP section of the config file as service_account_file, project and bucket, respectively. Similarly, the
-    --site and --org options can be provided under the DEFAULT section as site and org, respectively.
-
-
-EXAMPLES:
-List files
-    simeon can list files on S3 for your organization based on criteria like file type (sql or log or email), time intervals (begin and end dates),
-    and site (edx or edge or patches).
-        # List the latest SQL data dump
-        simeon list -s edx -o mitx -f sql -L
-        # List the latest email data dump
-        simeon list -s edx -o mitx -f email -L
-        # List the latest tracking log file
-        simeon list -s edx -o mitx -f log -L
-
-Download and split files
-    simeon can download, decrypt and split up files into folders belonging to specific courses.
-
-    o Example 1: Download, split and push SQL bundles to both GCS and BigQuery
-
-        # Download the latest SQL data dump
-        simeon download -s edx -o mitx -f sql -L -d data/
-
-        # Download SQL bundles dumped any time since 2021-01-01 and
-        # extract the contents for course ID MITx/12.3x/1T2021.
-        # Place the downloaded files in data/ and the output of the split in data/SQL
-        simeon download -s edx -o mitx -c "MITx/12.3x/1T2021" -f sql -b 2021-01-01 -d data -S -D data/SQL/
-
-        # Push to GCS the split up SQL files inside data/SQL/MITx__12_3x__1T2021
-        simeon push gcs -f sql -p ${GCP_PROJECT_ID} -b ${GCS_BUCKET} -S ${SAFILE} data/SQL/MITx__12_3x__1T2021
-
-        # Push the files to BigQuery and wait for the jobs to finish
-        # Using -s or --use-storage tells BigQuery to extract the files
-        # to be loaded from Google Cloud Storage.
-        # So, use the option when you've already called simeon push gcs
-        simeon push bq -w -s -f sql -p ${GCP_PROJECT_ID} -b ${GCS_BUCKET} -S ${SAFILE} data/SQL/MITx__12_3x__1T2021
-
-    o Example 2: Download, split and push tracking logs to both GCS and BigQuery
-
-        # Download the latest tracking log file
-        simeon download -s edx -o mitx -f log -L -d data/
-
-        # Download tracking logs dumped any time since 2021-01-01
-        # and extract the contents for course ID MITx/12.3x/1T2021
-        # Place the downloaded files in data/ and the output of the split in data/TRACKING_LOGS
-        simeon download -s edx -o mitx -c "MITx/12.3x/1T2021" -f log -b 2021-01-01 -d data -S -D data/TRACKING_LOGS/
-
-        # Push to GCS the split up tracking log files inside
-        # data/TRACKING_LOGS/MITx__12_3x__1T2021
-        simeon push gcs -f log -p ${GCP_PROJECT_ID} -b ${GCS_BUCKET} -S ${SAFILE} data/TRACKING_LOGS/MITx__12_3x__1T2021
-
-        # Push the files to BigQuery and wait for the jobs to finish
-        # Using -s or --use-storage tells BigQuery to extract the files
-        # to be loaded from Google Cloud Storage.
-        # So, use the option when you've already called simeon push gcs
-        simeon push bq -w -s -f log -p ${GCP_PROJECT_ID} -b ${GCS_BUCKET} -S ${SAFILE} data/TRACKING_LOGS/MITx__12_3x__1T2021
-
-    o If you have already downloaded SQL bundles or tracking log files, you can use simeon split them up.
-
-Make secondary/aggregated tables
-    simeon can generate secondary tables based on already loaded data. Call simeon report --help for the expected positional and optional arguments.
-
-    o Example: Make person_course for course ID MITx/12.3x/1T2021
-
-        # Make a person course table for course ID MITx/12.3x/1T2021
-        # Provide the -g option to give a geolocation BigQuery table
-        # to fill the ip-to-location details in the generated person course table
-        COURSE=MITx/12.3x/1T2021
-        simeon report -w -g "${GCP_PROJECT_ID}.geocode.geoip" -t "person_course" -p ${GCP_PROJECT_ID} -S ${SAFILE} ${COURSE}
-
-
-NOTES:
-1. Please note that SQL bundles are quite large when split up, so consider using the -c or --courses option when invoking simeon download -S or
-    simeon split to make sure that you limit the splitting to a set of course IDs. The `--clistings-file` option is an alternative to `--courses`.
-    It expects a text file with one course ID per line.
-    If those options are not used, simeon may end up failing to complete the split operation
-    due to exhausted system resources (storage to be specific).
-
-2. simeon download with file types log and email will both download and decrypt the files matching the given criteria. If the latter operations are
-    successful, then the encrypted files are deleted by default. This is to make sure that you don't exhaust storage resources. If you wish to keep
-    those files, you can always use the --keep-encrypted option that comes with simeon download and simeon split. SQL bundles are only downloaded (not decrypted).
-    Their decryption is done during a split operation.
-
-3. Unless there is an unhandled exception (which should be reported as a bug), simeon should, by default, print to the standard output both information
-    and errors encountered while processing your files. You can capture those logs in a file by using the global option --log-file and providing
-    a destination file for the logs.
-
-4. When using multi argument options like --tables or --courses, you should try not to place them right before the expected positional arguments.
-    This will help the CLI parser not confuse your positional arguments with table names (in the case of --tables) or course IDs (when --courses is used).
-
-5. Splitting tracking logs is a resource intensive process. The routine that splits the logs generates a file for each course ID encountered. If you
-    happen to have more course IDs in your logs than the running process can open operating system file descriptors, then simeon will put away records
-    it cannot save to disk for a second pass. Putting away the records involves using more memory than normally required. The second pass will only
-    require one file descriptor at a time, so it should be safe in terms of file descriptor limits. To help simeon not have to do a second pass, you
-    may increase the file descriptor limits of processes from your shell by running something like ulimit -n 2000 before calling simeon split on Unix
-    machines. For Windows users, you may have to dig into the Windows Registries for a corresponding setting. This should tell your OS kernel to allow
-    OS processes to open up to 2000 file handles.
-
-6. Care must be taken when using simeon split and simeon push to make sure that the number of positional arguments passed does not lead to the
-    invoked command exceeding the maximum command-line length allowed for arguments in a command. To avoid errors along those lines, please consider
-    passing the positional arguments as UNIX glob patterns. For instance, simeon split --file-type log 'data/TRACKING-LOGS/*/*.log.gz' tells simeon to
-    expand the given glob pattern, instead of relying on the shell to do it.
-
-7. The report subcommand relies on the presence of SQL query files to parse and send to BigQuery to execute. Any errors arising from executing the parsed
-    queries will be shown to the end user through the given log stream. While the simeon tool ships with query files for most secondary/reporting tables
-    that are based on the edx2bigquery tool, an end user should be able to point simeon to a different location with SQL query files by using
-    the --query-dir option that comes with simeon report. Additionally, these query files can contain jinja2 templated SQL code.
-    Any mentioned variables within these templated queries can be passed to simeon report by using the --extra-args option and passing key-value pair items
-    in the format var1=value1,var2=value2,var3=value3,...,var_n=value_n. Further, these key-value pair items can also be typed by using the format
-    var1:i=value1,var2:s=value2,var3:f=value3,...,var_n:s=value_n. In this format, the type is append to the key, separated by a colon.
-    The only supported scalar types, so far, are s for str, i for int, and f for float. If any conversion errors occur during value parsing,
-    then those are shown to the end user, and the query won't get executed. Finally, if you wish to pass an array or list to the template,
-    you will need to repeat a key multiple times. For instance, if you want to pass a list named mylist containing the integers,
-    you could write something like --extra-args mylist:i=1,mylist:i=2,mylist:i=3. This means that you'll have a python list named
-    mylist within your template, and it should contain [1, 2, 3].
-"""
 CONFIGS = {
     "DEFAULT": (
         ("site", configparser.ConfigParser.get),
@@ -290,17 +108,19 @@ EXTRA_ARG_TYPE = {
 }
 
 
-def parsed_date(datestr: str) -> str:
+def parsed_date(datestr: typing.Union[str, datetime.datetime, datetime.date]) -> str:
     """
-    Function to parse the --start-date and --end-date
+    Function to parse the --begin-date and --end-date
     options of simeon
 
-    :type datestr: str
-    :param datestr: A stringified date
+    :type datestr: typing.Union[str, datetime.datetime, datetime.date]
+    :param datestr: A stringified date or a date/datetime object
     :rtype: str
     :returns: A properly formatted date string
     :raises: ArgumentTypeError
     """
+    if isinstance(datestr, (datetime.date, datetime.datetime)):
+        return datestr.strftime("%Y-%m-%d")
     try:
         return dateparse(datestr).strftime("%Y-%m-%d")
     except Exception:
@@ -437,15 +257,10 @@ def find_config(fname=None, no_raise=False):
     :returns: Returns a ConfigParser with configs from the file(s)
     """
     if fname is None:
-        names = ("simeon.cfg", "simeon.ini", ".simeon.cfg", ".simeon.ini")
+        possible_names = ("simeon.cfg", "simeon.ini", ".simeon.cfg", ".simeon.ini")
         files = []
-        for name in names:
-            files.extend(
-                [
-                    os.path.join(os.path.expanduser("~"), name),
-                    os.path.join(os.getcwd(), name),
-                ]
-            )
+        for name in possible_names:
+            files.extend([os.path.join(os.path.expanduser("~"), name), os.path.join(os.getcwd(), name)])
     else:
         files = [os.path.expanduser(fname)]
     config = configparser.ConfigParser()
@@ -628,7 +443,7 @@ def process_extra_args(extras):
     out = dict()
     types = EXTRA_ARG_TYPE
     extras = map(lambda p: p.lstrip().split("=")[:2], extras.split(","))
-    while 1:
+    while True:
         try:
             k, v = next(extras)
             chunks = iter(k.split(":"))
@@ -664,10 +479,7 @@ class NumberRange(object):
         try:
             v = self.type_(value)
         except Exception as excp:
-            msg = (
-                "The given value {v} could not be converted to a number. "
-                "Please provide a valid value: {e}."
-            )
+            msg = "The given value {v} could not be converted to a number. Please provide a valid value: {e}."
             raise ArgumentTypeError(msg.format(v=value, e=excp)) from None
         if not (self.lower <= v <= self.upper):
             msg = "{v} is not in the range [{l}, {u}]"
@@ -696,30 +508,6 @@ class TableOrderAction(argparse.Action):
         setattr(namespace, "tables", tables)
 
 
-def get_pager():
-    """
-    Get path to less or more
-    """
-    pagers = (
-        os.getenv("PAGER"),
-        "less",
-        "more",
-    )
-    for path in (os.getenv("PATH") or "").split(os.path.pathsep):
-        for pager in pagers:
-            if pager is None:
-                continue
-            pager = iter(pager.split(" ", 1))
-            prog = os.path.join(path, next(pager))
-            args = next(pager, None) or ""
-            try:
-                md = os.stat(prog).st_mode
-                if md & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH):
-                    return "{p} {a}".format(p=prog, a=args)
-            except OSError:
-                continue
-
-
 class CustomArgParser(argparse.ArgumentParser):
     """
     A custom ArgumentParser class that prints help messages
@@ -727,22 +515,65 @@ class CustomArgParser(argparse.ArgumentParser):
     what ArgumentParser does.
     """
 
+    @staticmethod
+    def _is_executable(f):
+        try:
+            md = os.stat(f).st_mode
+            return bool(md & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
+        except OSError:
+            return False
+
+    def get_pager(self):
+        """
+        Get path to less or more, or any other pager provided by the system via the PAGER environment variable.
+
+        :rtype: tuple[str, str]
+        :return: Path to the executable to use as a pager, along with any arguments
+        """
+        pagers = (
+            os.getenv("PAGER"),
+            "less",
+            "more",
+        )
+        for path in (os.getenv("PATH") or "").split(os.path.pathsep):
+            for pager in pagers:
+                if pager is None:
+                    continue
+                # If the pager is already the full path to the executable, then return it.
+                if self._is_executable(pager):
+                    return pager, ""
+                # Otherwise, handle the cases where it's only the program and cases where the program with arguments.
+                pager = iter(pager.split(" ", 1))
+                prog = os.path.join(path, next(pager))
+                args = next(pager, None) or ""
+                if self._is_executable(prog):
+                    return prog.strip(), args.strip()
+                else:
+                    continue
+        return "", ""
+
     def print_help(self, file=None):
-        pager = get_pager()
-        if pager is None:
+        pager_prog, pager_args = self.get_pager()
+        if not pager_prog:
             return super().print_help(file)
-        fd, fname = tempfile.mkstemp(prefix="simeon_help_", suffix=".txt")
-        with open(fd, "w") as fh:
+        with io.StringIO() as fh:
             super().print_help(fh)
-        cmd = shlex.split("{p} {f}".format(p=pager, f=fname))
-        with sb.Popen(cmd) as proc:
-            rc = proc.wait()
-            try:
-                os.unlink(fname)
-            except:
-                pass
-            if rc != 0:
-                return super().print_help(file)
+            # Have the pager (ideally less or more) read from its standard input.
+            cmd = shlex.split(f"{pager_args or ''} -".strip())
+            with sb.Popen(cmd, stdin=sb.PIPE, executable=pager_prog, text=True) as proc:
+                # Send the contents of the help via stdin and ignore any broken pipe errors
+                try:
+                    fh.seek(0, 0)
+                    proc.stdin.write(fh.read())
+                except BrokenPipeError:
+                    pass
+                finally:
+                    proc.stdin.close()
+                # Wait for the pager to exit.
+                rc = proc.wait()
+                # If the pager didn't open successfully, use the default print_help implementation.
+                if rc != 0:
+                    return super().print_help(file)
 
 
 class JSONLoggerAdapter(logging.LoggerAdapter):
@@ -775,6 +606,17 @@ class TextLoggerAdapter(logging.LoggerAdapter):
         return super().process(msg, kwargs)
 
 
+def get_main_epilog():
+    """
+    Get the epilog text for the simeon CLI
+    """
+    fname = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", "simeon_epilog.txt")
+    try:
+        return open(fname).read()
+    except:
+        return ""
+
+
 __all__ = [
     "CustomArgParser",
     "JSONLoggerAdapter",
@@ -789,7 +631,7 @@ __all__ = [
     "filter_generated_items",
     "find_config",
     "gcs_bucket",
-    "get_pager",
+    "get_main_epilog",
     "is_parallel",
     "items_from_files",
     "make_config_file",

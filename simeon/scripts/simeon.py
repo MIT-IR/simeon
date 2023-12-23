@@ -65,8 +65,7 @@ def list_files(parsed_args):
     """
     if not parsed_args.org:
         parsed_args.logger.error(
-            "No valid value was given for option --org. "
-            "Please provide one via the CLI or in your config file."
+            "No valid value was given for option --org. Please provide one via the CLI or in your config file."
         )
         sys.exit(1)
     default_edx_buckets = {
@@ -76,22 +75,12 @@ def list_files(parsed_args):
         "rdx": "edx-course-data",
     }
     if hasattr(parsed_args, "aws_cred_file"):
-        parsed_args.credentials = cli_utils.find_config(
-            parsed_args.aws_cred_file, no_raise=True
-        )
+        parsed_args.credentials = cli_utils.find_config(parsed_args.aws_cred_file, no_raise=True)
     elif parsed_args.credentials is None:
-        parsed_args.credentials = cli_utils.find_config(
-            os.path.join("~", ".aws", "credentials"), no_raise=True
-        )
-    client_id = parsed_args.credentials.get(
-        parsed_args.profile_name, "aws_access_key_id", fallback=None
-    )
-    client_secret = parsed_args.credentials.get(
-        parsed_args.profile_name, "aws_secret_access_key", fallback=None
-    )
-    session_token = parsed_args.credentials.get(
-        parsed_args.profile_name, "aws_session_token", fallback=None
-    )
+        parsed_args.credentials = cli_utils.find_config(os.path.join("~", ".aws", "credentials"), no_raise=True)
+    client_id = parsed_args.credentials.get(parsed_args.profile_name, "aws_access_key_id", fallback=None)
+    client_secret = parsed_args.credentials.get(parsed_args.profile_name, "aws_secret_access_key", fallback=None)
+    session_token = parsed_args.credentials.get(parsed_args.profile_name, "aws_session_token", fallback=None)
     start_year = int(parsed_args.begin_date[:4])
     end_year = int(parsed_args.end_date[:4])
     info = aws.BUCKETS.get(parsed_args.file_type)
@@ -177,10 +166,9 @@ def split_log_files(parsed_args):
             )
             if not rc:
                 errmsg = (
-                    "No files were extracted while splitting the tracking "
-                    "log file {f!r} with the given criteria."
+                    f"No files were extracted while splitting the tracking log file {fname!r} with the given criteria."
                 )
-                parsed_args.logger.warning(errmsg.format(f=fname))
+                parsed_args.logger.warning(errmsg)
             parsed_args.logger.info("Done splitting {f}".format(f=fname))
             success += rc
     else:
@@ -219,20 +207,16 @@ def split_sql_files(parsed_args):
             )
             if not to_decrypt:
                 errmsg = (
-                    "No files extracted while splitting the "
-                    "contents of {f!r} with the given criteria. "
-                    "Moving on"
+                    "No files extracted while splitting the contents of {fname!r} with the given criteria. Moving on"
                 )
-                parsed_args.logger.warning(errmsg.format(f=fname))
+                parsed_args.logger.warning(errmsg)
                 parsed_args.logger.warning(msg.format(f=fname, w="Done splitting"))
                 continue
             parsed_args.logger.info(msg.format(f=fname, w="Done splitting"))
             if parsed_args.no_decryption:
                 continue
             if not parsed_args.tables_only:
-                parsed_args.logger.info(
-                    msg.format(f=fname, w="Decrypting the contents in")
-                )
+                parsed_args.logger.info(msg.format(f=fname, w="Decrypting the contents in"))
                 try:
                     sqls.batch_decrypt_files(
                         all_files=to_decrypt,
@@ -247,9 +231,7 @@ def split_sql_files(parsed_args):
                     if parsed_args.fail_fast:
                         raise excp
                     parsed_args.logger.error(excp)
-                parsed_args.logger.info(
-                    msg.format(f=fname, w="Done decrypting the contents in")
-                )
+                parsed_args.logger.info(msg.format(f=fname, w="Done decrypting the contents in"))
             if parsed_args.unpack_only:
                 continue
             orapth = os.path.join("", "ora", "")
@@ -274,9 +256,7 @@ def split_sql_files(parsed_args):
                     raise excp
                 parsed_args.logger.error(excp)
                 continue
-            parsed_args.logger.info(
-                "Course reports generated with bundle {f}".format(f=fname)
-            )
+            parsed_args.logger.info("Course reports generated with bundle {f}".format(f=fname))
         except:
             _, excp, tb = sys.exc_info()
             if isinstance(excp, SystemExit):
@@ -306,9 +286,7 @@ def split_email_files(parsed_args):
         schema_dir=parsed_args.schema_dir,
     )
     if parsed_args.verbose:
-        parsed_args.logger.info(
-            "Done generating json.gz file from the email-opt-in CSV file(s)"
-        )
+        parsed_args.logger.info("Done generating json.gz file from the email-opt-in CSV file(s)")
 
 
 def split_files(parsed_args):
@@ -339,10 +317,7 @@ def split_files(parsed_args):
             items.append(item)
     parsed_args.downloaded_files = items
     if not parsed_args.downloaded_files:
-        parsed_args.logger.error(
-            "No valid files were given to simeon split. "
-            "Please provide existing files."
-        )
+        parsed_args.logger.error("No valid files were given to simeon split. Please provide existing files.")
         sys.exit(1)
     if parsed_args.file_type == "log":
         split_log_files(parsed_args)
@@ -351,11 +326,7 @@ def split_files(parsed_args):
     elif parsed_args.file_type == "email":
         split_email_files(parsed_args)
     else:
-        parsed_args.logger.error(
-            "The split command does not support file type {ft}".format(
-                ft=parsed_args.file_type
-            )
-        )
+        parsed_args.logger.error("The split command does not support file type {ft}".format(ft=parsed_args.file_type))
         sys.exit(1)
 
 
@@ -372,29 +343,18 @@ def download_files(parsed_args):
     }
     if not parsed_args.org:
         parsed_args.logger.error(
-            "No valid value was given for option --org. "
-            "Please provide one via the CLI or in your config file."
+            "No valid value was given for option --org. Please provide one via the CLI or in your config file."
         )
         sys.exit(1)
     if hasattr(parsed_args, "aws_cred_file"):
-        parsed_args.credentials = cli_utils.find_config(
-            parsed_args.aws_cred_file, no_raise=True
-        )
+        parsed_args.credentials = cli_utils.find_config(parsed_args.aws_cred_file, no_raise=True)
     elif parsed_args.credentials is None:
         if parsed_args.verbose:
             parsed_args.logger.info("Looking up S3 credentials")
-        parsed_args.credentials = cli_utils.find_config(
-            os.path.join("~", ".aws", "credentials"), no_raise=True
-        )
-    client_id = parsed_args.credentials.get(
-        parsed_args.profile_name, "aws_access_key_id", fallback=None
-    )
-    client_secret = parsed_args.credentials.get(
-        parsed_args.profile_name, "aws_secret_access_key", fallback=None
-    )
-    session_token = parsed_args.credentials.get(
-        parsed_args.profile_name, "aws_session_token", fallback=None
-    )
+        parsed_args.credentials = cli_utils.find_config(os.path.join("~", ".aws", "credentials"), no_raise=True)
+    client_id = parsed_args.credentials.get(parsed_args.profile_name, "aws_access_key_id", fallback=None)
+    client_secret = parsed_args.credentials.get(parsed_args.profile_name, "aws_secret_access_key", fallback=None)
+    session_token = parsed_args.credentials.get(parsed_args.profile_name, "aws_session_token", fallback=None)
     start_year = int(parsed_args.begin_date[:4])
     end_year = int(parsed_args.end_date[:4])
     info = aws.BUCKETS.get(parsed_args.file_type)
@@ -454,9 +414,7 @@ def download_files(parsed_args):
                 os.path.basename(os.path.join(*blob.name.split("/"))),
             )
             downloads.setdefault(fullname, 0)
-            parsed_args.logger.info(
-                "Downloading {n} into {f}".format(n=blob.name, f=fullname)
-            )
+            parsed_args.logger.info("Downloading {n} into {f}".format(n=blob.name, f=fullname))
             blob.download_file(fullname)
             downloads[fullname] += 1
             parsed_args.logger.info("Done downloading {n}".format(n=blob.name))
@@ -507,9 +465,7 @@ def download_files(parsed_args):
                 k, _ = os.path.splitext(k)
                 parsed_args.downloaded_files.append(k)
         if not parsed_args.split_destination:
-            parsed_args.destination = os.path.join(
-                parsed_args.destination, "TRACKING_LOGS"
-            )
+            parsed_args.destination = os.path.join(parsed_args.destination, "TRACKING_LOGS")
         else:
             parsed_args.destination = parsed_args.split_destination
         split_log_files(parsed_args)
@@ -522,9 +478,7 @@ def download_files(parsed_args):
         split_sql_files(parsed_args)
     elif parsed_args.file_type == "email" and parsed_args.split:
         if not parsed_args.split_destination:
-            parsed_args.destination = os.path.join(
-                parsed_args.destination, "email_opt_in"
-            )
+            parsed_args.destination = os.path.join(parsed_args.destination, "email_opt_in")
         else:
             parsed_args.destination = parsed_args.split_destination
         split_email_files(parsed_args)
@@ -538,9 +492,7 @@ def push_to_bq(parsed_args):
     """
     if not parsed_args.project:
         parsed_args.logger.error(
-            "No GCP project given in the command line. "
-            "None was found in config file(s) either. "
-            "Aborting..."
+            "No GCP project given in the command line. None was found in config file(s) either. Aborting..."
         )
         sys.exit(1)
     if not parsed_args.items:
@@ -607,12 +559,9 @@ def push_to_bq(parsed_args):
                     appender(map(lambda j: j.job_id, job))
                 else:
                     appender(job.job_id)
-            parsed_args.logger.info(
-                "Created BigQuery load job(s) for item(s) in {f!r}".format(f=item)
-            )
+            parsed_args.logger.info("Created BigQuery load job(s) for item(s) in {f!r}".format(f=item))
         except Exception as excp:
-            msg = "Failed to create BigQuery load job(s) for item(s) " "in {f!r}: {e}"
-            parsed_args.logger.error(msg.format(f=item, e=excp))
+            parsed_args.logger.error(f"Failed to create BigQuery load job(s) for item(s) in {item!r}: {excp}")
     if not all_jobs and parsed_args.wait_for_loads:
         errmsg = "No items processed. Perhaps, the given directory is empty?"
         parsed_args.logger.error(errmsg)
@@ -633,8 +582,8 @@ def push_to_bq(parsed_args):
                 parsed_args.logger.error(err, context_dict=context)
             err_count += 1
     if err_count:
-        msg = "Out of {j} load job(s) submitted, {f} failed to " "complete successfully"
-        parsed_args.logger.error(msg.format(j=len(all_jobs), f=err_count))
+        msg = f"Out of {len(all_jobs)} load job(s) submitted, {err_count} failed to complete successfully"
+        parsed_args.logger.error(msg)
         sys.exit(1)
     parsed_args.logger.info("{c} item(s) loaded to BigQuery".format(c=len(all_jobs)))
 
@@ -645,9 +594,7 @@ def push_to_gcs(parsed_args):
     """
     if not parsed_args.bucket:
         parsed_args.logger.error(
-            "No valid GCP bucket given in the command line. "
-            "None was found in config file(s) either. "
-            "Aborting..."
+            "No valid GCP bucket given in the command line. None was found in config file(s) either. Aborting..."
         )
         sys.exit(1)
     if not parsed_args.items:
@@ -731,9 +678,7 @@ def push_generated_files(parsed_args):
         try:
             parsed_args.items = cli_utils.items_from_files(parsed_args.items)
         except Exception as excp:
-            parsed_args.logger.error(
-                "The given items are not valid text files: {e}".format(e=excp)
-            )
+            parsed_args.logger.error("The given items are not valid text files: {e}".format(e=excp))
             sys.exit(1)
     # If file type in log or sql, filter by course ID
     if (
@@ -744,9 +689,7 @@ def push_generated_files(parsed_args):
         )
         and not parsed_args.no_courses
     ):
-        parsed_args.items = cli_utils.filter_generated_items(
-            parsed_args.items, parsed_args.courses
-        )
+        parsed_args.items = cli_utils.filter_generated_items(parsed_args.items, parsed_args.courses)
     try:
         # Not sure if this is going to reduce memory usage by this process,
         # but worth the try
@@ -766,9 +709,7 @@ def make_secondary_tables(parsed_args):
     """
     if not parsed_args.project:
         parsed_args.logger.error(
-            "No GCP project given in the command line. "
-            "None was found in config file(s) either. "
-            "Aborting..."
+            "No GCP project given in the command line. None was found in config file(s) either. Aborting..."
         )
         sys.exit(1)
     if not parsed_args.course_ids:
@@ -794,9 +735,7 @@ def make_secondary_tables(parsed_args):
     _clean_up_extras(parsed_args)
     if len(parsed_args.course_ids) == 1:
         course_id = list(parsed_args.course_ids)[0]
-        parsed_args.logger.info(
-            "Making secondary tables for course ID {cid}".format(cid=course_id)
-        )
+        parsed_args.logger.info("Making secondary tables for course ID {cid}".format(cid=course_id))
         all_jobs[course_id] = make_tables_from_sql(
             tables=parsed_args.tables,
             course_id=course_id,
@@ -854,10 +793,10 @@ def make_secondary_tables(parsed_args):
         sys.exit(1)
     if parsed_args.wait_for_loads:
         if num_queries > 1:
-            msg = "{c} queries completed and destination " "tables have been refreshed."
+            msg = f"{num_queries} queries completed and destination tables have been refreshed."
         else:
             msg = "The corresponding queries ran successfully."
-        parsed_args.logger.info(msg.format(c=num_queries))
+        parsed_args.logger.info(msg)
         sys.exit(0)
     msg = (
         "{c} BigQuery query jobs started. Please consult your "
@@ -882,7 +821,7 @@ def main():
         description=__doc__,
         formatter_class=RawDescriptionHelpFormatter,
         allow_abbrev=False,
-        epilog=cli_utils.CLI_MAIN_EPILOG,
+        epilog=cli_utils.get_main_epilog(),
         prog="simeon",
     )
     parser.add_argument(
@@ -967,14 +906,14 @@ def main():
     downloader.add_argument(
         "--begin-date",
         "-b",
-        help="Start date of the download timeframe. " "Default: %(default)s",
+        help="Start date of the download timeframe. Default: %(default)s",
         default=aws.BEGIN_DATE,
         type=cli_utils.parsed_date,
     )
     downloader.add_argument(
         "--end-date",
         "-e",
-        help="End date of the download timeframe. " "Default: %(default)s",
+        help="End date of the download timeframe. Default: %(default)s",
         default=aws.END_DATE,
         type=cli_utils.parsed_date,
     )
@@ -1019,10 +958,7 @@ def main():
     downloader.add_argument(
         "--split-destination",
         "-D",
-        help=(
-            "The directory in which to put the split files if --split is "
-            "given with this subcommand"
-        ),
+        help="The directory in which to put the split files if --split is given with this subcommand",
     )
     downloader.add_argument(
         "--jobs",
@@ -1037,9 +973,7 @@ def main():
     downloader.add_argument(
         "--schema-dir",
         "-R",
-        help=(
-            "Directory where to find schema files. " "Default: {d}".format(d=SCHEMA_DIR)
-        ),
+        help=f"Directory where to find schema files. Default: {SCHEMA_DIR}",
     )
     downloader.add_argument(
         "--dynamic-date",
@@ -1097,19 +1031,13 @@ def main():
     cdgroup.add_argument(
         "--courses",
         "-c",
-        help=(
-            "A list of white space separated course IDs whose data files "
-            "are unpacked and decrypted."
-        ),
+        help="A list of white space separated course IDs whose data files are unpacked and decrypted.",
         nargs="*",
     )
     cdgroup.add_argument(
         "--clistings-file",
         "-l",
-        help=(
-            "Path to a file with one course ID per line. The file is expected"
-            " to have no header row."
-        ),
+        help="Path to a file with one course ID per line. The file is expected to have no header row.",
         type=cli_utils.courses_from_file,
     )
     downloader.add_argument(
@@ -1182,14 +1110,14 @@ def main():
     lister.add_argument(
         "--begin-date",
         "-b",
-        help="Start date of the listing timeframe. " "Default: %(default)s",
+        help="Start date of the listing timeframe. Default: %(default)s",
         default=aws.BEGIN_DATE,
         type=cli_utils.parsed_date,
     )
     lister.add_argument(
         "--end-date",
         "-e",
-        help="End date of the listing timeframe. " "Default: %(default)s",
+        help="End date of the listing timeframe. Default: %(default)s",
         default=aws.END_DATE,
         type=cli_utils.parsed_date,
     )
@@ -1264,9 +1192,7 @@ def main():
     splitter.add_argument(
         "--schema-dir",
         "-R",
-        help=(
-            "Directory where to find schema files. " "Default: {d}".format(d=SCHEMA_DIR)
-        ),
+        help=f"Directory where to find schema files. Default: {SCHEMA_DIR}",
     )
     splitter.add_argument(
         "--no-decryption",
@@ -1305,10 +1231,7 @@ def main():
     splitter.add_argument(
         "--destination",
         "-d",
-        help=(
-            "Directory where to place the files from splitting the item(s)."
-            " Default: %(default)s"
-        ),
+        help="Directory where to place the files from splitting the item(s). Default: %(default)s",
         default=os.getcwd(),
     )
     csgroup = splitter.add_mutually_exclusive_group(required=False)
@@ -1324,19 +1247,13 @@ def main():
     csgroup.add_argument(
         "--courses",
         "-c",
-        help=(
-            "A list of white space separated course IDs whose data files "
-            "are unpacked and decrypted."
-        ),
+        help="A list of white space separated course IDs whose data files are unpacked and decrypted.",
         nargs="*",
     )
     csgroup.add_argument(
         "--clistings-file",
         "-l",
-        help=(
-            "Path to a file with one course ID per line. The file is expected"
-            " to have no header row."
-        ),
+        help="Path to a file with one course ID per line. The file is expected to have no header row.",
         type=cli_utils.courses_from_file,
     )
     splitter.add_argument(
@@ -1395,9 +1312,7 @@ def main():
         allow_abbrev=False,
     )
     pusher.set_defaults(command="push")
-    pusher.add_argument(
-        "destination", help="Sink for the generated data files", choices=["gcs", "bq"]
-    )
+    pusher.add_argument("destination", help="Sink for the generated data files", choices=["gcs", "bq"])
     pusher.add_argument(
         "items",
         help=(
@@ -1427,10 +1342,7 @@ def main():
     pusher.add_argument(
         "--max-bad-rows",
         "-m",
-        help=(
-            "Max number of bad rows to allow when loading data to BigQuery. "
-            "Default: %(default)s"
-        ),
+        help="Max number of bad rows to allow when loading data to BigQuery. Default: %(default)s",
         type=int,
         default=0,
     )
@@ -1462,18 +1374,13 @@ def main():
     pusher.add_argument(
         "--append",
         "-a",
-        help=(
-            "Whether to append to destination tables if they exist"
-            " when pushing data to BigQuery"
-        ),
+        help="Whether to append to destination tables if they exist when pushing data to BigQuery",
         action="store_true",
     )
     pusher.add_argument(
         "--schema-dir",
         "-R",
-        help=(
-            "Directory where to find schema files. " "Default: {d}".format(d=SCHEMA_DIR)
-        ),
+        help=f"Directory where to find schema files. Default: {SCHEMA_DIR}",
     )
     pusher.add_argument(
         "--update-description",
@@ -1494,19 +1401,13 @@ def main():
     pusher.add_argument(
         "--fail-fast",
         "-F",
-        help=(
-            "Force simeon to quit as soon as an error is encountered"
-            " with any of the given items."
-        ),
+        help="Force simeon to quit as soon as an error is encountered with any of the given items.",
         action="store_true",
     )
     pusher.add_argument(
         "--wait-for-loads",
         "-w",
-        help=(
-            "Wait for asynchronous BigQuery load jobs to finish. "
-            "Otherwise, simeon creates load jobs and exits."
-        ),
+        help="Wait for asynchronous BigQuery load jobs to finish. Otherwise, simeon creates load jobs and exits.",
         action="store_true",
     )
     pusher.add_argument(
@@ -1523,18 +1424,14 @@ def main():
         "--no-courses",
         "-V",
         help=(
-            "DO NOT try to limit the loaded files to only some course IDs. "
-            "Therefore, simeon will push everything."
+            "DO NOT try to limit the loaded files to only some course IDs. Therefore, simeon will push everything."
         ),
         action="store_true",
     )
     cpgroup.add_argument(
         "--courses",
         "-c",
-        help=(
-            "A list of white space separated course IDs whose data files "
-            "are pushed to the target destination."
-        ),
+        help="A list of white space separated course IDs whose data files are pushed to the target destination.",
         nargs="*",
     )
     cpgroup.add_argument(
@@ -1582,17 +1479,12 @@ def main():
     reporter.add_argument(
         "--query-dir",
         "-q",
-        help=(
-            "The directory where SQL query files live. "
-            "Default: {d}".format(d=QUERY_DIR)
-        ),
+        help=f"The directory where SQL query files live. Default: {QUERY_DIR}",
     )
     reporter.add_argument(
         "--schema-dir",
         "-R",
-        help=(
-            "Directory where to find schema files. " "Default: {d}".format(d=SCHEMA_DIR)
-        ),
+        help=f"Directory where to find schema files. Default: {SCHEMA_DIR}",
     )
     reporter.add_argument(
         "--append",
@@ -1603,10 +1495,7 @@ def main():
     reporter.add_argument(
         "--no-reorder",
         "-O",
-        help=(
-            "DO NOT reorder the given table names. Generate them in the "
-            "order provided."
-        ),
+        help="DO NOT reorder the given table names. Generate them in the order provided.",
         action="store_true",
     )
     reporter.add_argument(
@@ -1634,26 +1523,21 @@ def main():
         "--youtube-table",
         "-y",
         help=(
-            "Fully qualified name of the table with YouTube video metadata"
-            " to use when making the video_axis tables."
+            "Fully qualified name of the table with YouTube video metadata to use when making the video_axis tables."
         ),
         type=cli_utils.bq_table,
     )
     reporter.add_argument(
         "--fail-fast",
         "-F",
-        help=(
-            "Force simeon to quit as soon as an error is encountered"
-            " with any of the given items."
-        ),
+        help="Force simeon to quit as soon as an error is encountered with any of the given items.",
         action="store_true",
     )
     reporter.add_argument(
         "--wait-for-loads",
         "-w",
         help=(
-            "Wait for asynchronous BigQuery query jobs to finish. "
-            "Otherwise, simeon creates query jobs and exits."
+            "Wait for asynchronous BigQuery query jobs to finish. Otherwise, simeon creates query jobs and exits."
         ),
         action="store_true",
     )
@@ -1661,8 +1545,7 @@ def main():
         "--in-files",
         "-i",
         help=(
-            "Whether the provided course ID arguments are text "
-            "files that contain the course IDs. One ID per line"
+            "Whether the provided course ID arguments are text files that contain the course IDs. One ID per line"
         ),
         action="store_true",
     )

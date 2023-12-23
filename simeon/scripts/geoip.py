@@ -40,9 +40,7 @@ except ImportError:
     GeoReader = None
 
 
-SCHEMA_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas"
-)
+SCHEMA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas")
 UN_DATA_FILE = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "data",
@@ -50,14 +48,14 @@ UN_DATA_FILE = os.path.join(
 )
 
 
-def get_log_record(line, lcnt, fname, logger):
+def get_log_record(line, line_number, fname, logger):
     """
     Extract a record from a tracklog using the given string and line count
 
     :type line: Union[str, bytes]
     :param line: A line from a tracking log file
-    :type lcnt: int
-    :param lcnt: Line count of the given line in the tracking log file
+    :type line_number: int
+    :param line_number: Line number of the given line in the tracking log file
     :type fname: str
     :param fname: Name of file being processed
     :type logger: logging.Logger
@@ -65,13 +63,13 @@ def get_log_record(line, lcnt, fname, logger):
     :rtype: dict
     :return: Deserialized data
     """
-    errmsg = "Line number {l} from file {f} not processed: {e}"
+    errmsg = "Line number {line_number} from file {fname} not processed: {e}"
     try:
-        line = line[line.find("{"):]
+        line = line[line.find("{") :]
         return json.loads(line)
     except Exception as excp:
         if logger:
-            logger.warning(errmsg.format(l=lcnt, f=fname, e=excp))
+            logger.warning(errmsg.format(line_number=line_number, fname=fname, e=excp))
         return {}
 
 
@@ -160,10 +158,7 @@ def make_geo_data(
                 except StopIteration:
                     break
                 except Exception as excp:
-                    msg = (
-                        "Record {i} from {f} could not be parsed: {e}. "
-                        "Skipping it..."
-                    ).format(i=line, f=ip_file, e=excp)
+                    msg = f"Record {line} from {ip_file} could not be parsed: {excp}. Skipping it..."
                     if logger:
                         logger.warning(msg)
                     else:
@@ -184,7 +179,7 @@ def make_geo_data(
                     if not info.country.iso_code or not info.country.names.get("en"):
                         continue
                     un_info = un_data.get(info.country.iso_code, {})
-                    subdiv = info.subdivisions.most_specific
+                    subdivision = info.subdivisions.most_specific
                     row = {
                         "ip": ip_address,
                         "city": info.city.names.get("en"),
@@ -193,8 +188,8 @@ def make_geo_data(
                         "cc_by_ip": info.country.iso_code,
                         "postalCode": info.postal.code,
                         "continent": info.continent.names.get("en"),
-                        "subdivision": subdiv.names.get("en"),
-                        "region": subdiv.iso_code,
+                        "subdivision": subdivision.names.get("en"),
+                        "region": subdivision.iso_code,
                         "latitude": info.location.latitude,
                         "longitude": info.location.longitude,
                     }
@@ -265,7 +260,7 @@ def main():
         dest="command",
     )
     subparsers.required = True
-    extracter = subparsers.add_parser(
+    extractor = subparsers.add_parser(
         "extract",
         help="Extract geolocation information from the given MaxMind DB",
         description=(
@@ -274,8 +269,8 @@ def main():
         ),
         allow_abbrev=False,
     )
-    extracter.add_argument("db", help="MaxMind version 2 geolocation database file.")
-    extracter.add_argument(
+    extractor.add_argument("db", help="MaxMind version 2 geolocation database file.")
+    extractor.add_argument(
         "ip_files",
         help=(
             "File(s) containing IP addresses. If it's a text file, "
@@ -285,7 +280,7 @@ def main():
         ),
         nargs="+",
     )
-    extracter.add_argument(
+    extractor.add_argument(
         "--un-data",
         "-u",
         help=(
@@ -297,7 +292,7 @@ def main():
         ),
         default=UN_DATA_FILE,
     )
-    extracter.add_argument(
+    extractor.add_argument(
         "--output",
         "-o",
         help="Output file name for the generated data. Default: %(default)s",
@@ -306,7 +301,7 @@ def main():
             "geoip_{dt}.json.gz".format(dt=datetime.now().strftime("%Y%m%d%H%M%S")),
         ),
     )
-    extracter.add_argument(
+    extractor.add_argument(
         "--tracking-logs",
         "-t",
         help="Whether or not the given ip files are tracking log files",
@@ -318,9 +313,7 @@ def main():
         description="Merge the given file to a target BigQuery table name",
         allow_abbrev=False,
     )
-    merger.add_argument(
-        "geofile", help="A .json.gz file generated from the extract command"
-    )
+    merger.add_argument("geofile", help="A .json.gz file generated from the extract command")
     merger.add_argument(
         "--project",
         "-p",
@@ -346,19 +339,13 @@ def main():
     merger.add_argument(
         "--column",
         "-c",
-        help=(
-            "The column on which to to merge the file and table. "
-            "Default: %(default)s"
-        ),
+        help="The column on which to to merge the file and table. Default: %(default)s",
         default="ip",
     )
     merger.add_argument(
         "--schema-dir",
         "-s",
-        help=(
-            "Directory where schema file are found. "
-            "Default: {d}".format(d=SCHEMA_DIR)
-        ),
+        help=f"Directory where schema file are found. Default: {SCHEMA_DIR}",
     )
     merger.add_argument(
         "--update-description",
@@ -403,9 +390,7 @@ def main():
         sys.exit(1)
     if args.command == "extract":
         if args.logger:
-            args.logger.info(
-                "Generating geolocation data from the IPs in the given files"
-            )
+            args.logger.info("Generating geolocation data from the IPs in the given files")
         files = []
         for file_ in args.ip_files:
             if "*" in file_:
@@ -424,14 +409,14 @@ def main():
         except OSError:
             pass
         try:
-            un_denoms = import_un_denominations(args.un_data)
+            un_denomination = import_un_denominations(args.un_data)
         except Exception as e:
             msg = "Failed to get UN denominations because: {e}"
             if args.logger:
                 args.logger.warning(msg.format(e=e))
             else:
                 print(msg.format(e=e), file=sys.stderr)
-            un_denoms = {}
+            un_denomination = {}
         try:
             locs = GeoReader(args.db)
         except Exception as excp:
@@ -442,13 +427,13 @@ def main():
                 db=locs,
                 ip_files=args.ip_files,
                 outfile=args.output,
-                un_data=un_denoms,
+                un_data=un_denomination,
                 tracking_logs=args.tracking_logs,
                 logger=args.logger,
             )
             args.logger.info("Done processing the given IP files")
         except Exception as excp:
-            args.logger.error("Failed to make geolocation data: {e}".format(e=excp))
+            args.logger.error(f"Failed to make geolocation data: {excp}")
             sys.exit(1)
     else:
         try:
@@ -471,9 +456,7 @@ def main():
         args.logger.info("Connecting to BigQuery")
         try:
             if args.service_account_file is not None:
-                client = gcp.BigqueryClient.from_service_account_json(
-                    args.service_account_file, project=args.project
-                )
+                client = gcp.BigqueryClient.from_service_account_json(args.service_account_file, project=args.project)
             else:
                 client = gcp.BigqueryClient(project=args.project)
         except Exception as excp:

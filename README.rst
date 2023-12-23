@@ -62,7 +62,7 @@ Setups and configurations
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``simeon`` is a glorified downloader and uploader set of scripts. Much
-of the downloading and uploading that it does makes the assumptions that
+of the downloading and uploading that it does make the assumptions that
 you have your AWS credentials configured properly and that you’ve got a
 service account file for GCP services available on your machine. If the
 latter is missing, you may have to authenticate to GCP services through
@@ -311,12 +311,12 @@ Notes:
    Any mentioned variables within these templated queries can be passed
    to ``simeon report`` by using the ``--extra-args`` option and passing
    key-value pair items in the format
-   ``var1=value1,var2=value2,var3=value3,...,varn=valuen``. Further,
+   ``var1=value1,var2=value2,var3=value3,...,var_n=value_n``. Further,
    these key-value pair items can also be typed by using the format
-   ``var1:i=value1,var2:s=value2,var3:f=value3,...,varn:s=valuen``. In
-   this format, the type is append to the key, separated by a colon. The
-   only supported scalar types, so far, are ``s`` for ``str``, ``i`` for
-   ``int``, and ``f`` for ``float``. If any conversion errors occur
+   ``var1:i=value1,var2:s=value2,var3:f=value3,...,var_n:s=value_n``. In
+   this format, the type is appended to the key, separated by a colon.
+   The only supported scalar types, so far, are ``s`` for ``str``, ``i``
+   for ``int``, and ``f`` for ``float``. If any conversion errors occur
    during value parsing, then those are shown to the end user, and the
    query won’t get executed. Finally, if you wish to pass an ``array``
    or ``list`` to the template, you will need to repeat a key multiple
@@ -324,4 +324,6 @@ Notes:
    containing the integers, you could write something like
    ``--extra-args mylist:i=1,mylist:i=2,mylist:i=3``. This means that
    you’ll have a python ``list`` named ``mylist`` within your template,
-   and it should contain ``[1, 2, 3]``.
+   and it should contain ``[1, 2, 3]``. You can also pass a JSON file
+   whose top-level objects are parsed as variables. Use a leading ``@``
+   when passing a JSON file.

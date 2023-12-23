@@ -46,7 +46,7 @@ dev = ["black", "isort", "pip-tools", "sphinx", "tox"]
 [tool.setuptools.package-data]
 "simeon.upload" = ["schemas/*.json"]
 "simeon.report" = ["queries/*.sql"]
-"simeon.scripts" = ["data/*.csv"]
+"simeon.scripts" = ["data/*.csv", "data/*.txt"]
 
 [project.scripts]
 simeon = "simeon.scripts.simeon:main"
@@ -57,3 +57,6 @@ simeon-youtube = "simeon.scripts.youtube:main"
 "Homepage" = "https://github.com/MIT-IR/simeon"
 "Bug Tracker" = "https://github.com/MIT-IR/simeon/issues"
 "Documentation" = "https://mit-ir.github.io/simeon/"
+
+[tool.black]
+line-length = 120

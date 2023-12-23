@@ -18,13 +18,8 @@ import simeon
 import simeon.scripts.utilities as cli_utils
 import simeon.upload.gcp as gcp
 
-SCHEMA_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas"
-)
-API_URL = (
-    "https://youtube.googleapis.com/youtube/v3/videos?"
-    "part=contentDetails,snippet&id={ids}&key={token}"
-)
+SCHEMA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "upload", "schemas")
+API_URL = "https://youtube.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id={ids}&key={token}"
 VIDEO_COLS = {
     "id": ("id",),
     "duration": ("contentDetails", "duration"),
@@ -56,10 +51,7 @@ def batch_size_type(val):
     try:
         val = int(val)
     except Exception:
-        raise ArgumentTypeError(
-            "{v} is not a valid integer value. "
-            "Please provide a valid number.".format(v=val)
-        )
+        raise ArgumentTypeError(f"{val} is not a valid integer value. Please provide a valid number.")
     if val < 5 or val > 50:
         raise ArgumentTypeError("Expected batch sizes range between 5 and 50")
     return val
@@ -182,15 +174,12 @@ def extract_video_info(parsed_args):
     os.makedirs(os.path.dirname(parsed_args.output), exist_ok=True)
     outfile = gzip.open(parsed_args.output, "wt")
     for chunk in _batch_ids(parsed_args.course_axes, parsed_args.batch_size):
-        data = None
         try:
             resp = _generate_request(chunk, parsed_args.youtube_token)
             data = json.load(resp)
         except Exception:
-            data = _process_one_by_one(
-                chunk, parsed_args.youtube_token, parsed_args.logger
-            )
-        if data is None:
+            data = _process_one_by_one(chunk, parsed_args.youtube_token, parsed_args.logger)
+        if not data:
             continue
         for item in data.get("items", []):
             record = {}
@@ -224,11 +213,7 @@ def merge_video_data(parsed_args):
         msg = "The following options expected valid values: {o}"
         parsed_args.logger.error(msg.format(o=", ".join(keys)))
         sys.exit(1)
-    parsed_args.logger.info(
-        "Merging {f} to {t}".format(
-            f=parsed_args.youtube_file, t=parsed_args.youtube_table
-        )
-    )
+    parsed_args.logger.info("Merging {f} to {t}".format(f=parsed_args.youtube_file, t=parsed_args.youtube_table))
     parsed_args.logger.info("Connecting to BigQuery")
     try:
         if parsed_args.service_account_file is not None:
@@ -236,7 +221,7 @@ def merge_video_data(parsed_args):
                 parsed_args.service_account_file, project=parsed_args.project
             )
         else:
-            client = client = gcp.BigqueryClient(project=parsed_args.project)
+            client = gcp.BigqueryClient(project=parsed_args.project)
     except Exception as excp:
         errmsg = "Failed to connect to BigQuery: {e}"
         parsed_args.logger.error(errmsg.format(e=excp))
@@ -253,7 +238,7 @@ def merge_video_data(parsed_args):
             match_equal_columns=parsed_args.match_equal_columns,
             match_unequal_columns=parsed_args.match_unequal_columns,
         )
-    except Exception as excp:
+    except Exception:
         _, excp, tb = sys.exc_info()
         context = getattr(excp, "context_dict", {})
         context["youtube_file"] = parsed_args.youtube_file
@@ -276,16 +261,14 @@ def merge_video_data(parsed_args):
         parsed_args.logger.error(msg, context_dict=context)
         sys.exit(1)
     msg = "Successfully merged the records in {f} to the table {t}"
-    parsed_args.logger.info(
-        msg.format(f=parsed_args.youtube_file, t=parsed_args.youtube_table)
-    )
+    parsed_args.logger.info(msg.format(f=parsed_args.youtube_file, t=parsed_args.youtube_table))
 
 
 def unknown_command(parsed_args):
     """
     Exit the program if an unknown command is passed (somehow)
     """
-    parsed_args.logger.error("Unknow command {c}".format(c=parsed_args.command))
+    parsed_args.logger.error("Unknown command {c}".format(c=parsed_args.command))
     parsed_args.logger.error("Exiting...")
     sys.exit(1)
 
@@ -329,7 +312,7 @@ def main():
     parser.add_argument(
         "--config-file",
         "-C",
-        help=("The INI configuration file to use for default arguments."),
+        help="The INI configuration file to use for default arguments.",
     )
     parser.add_argument(
         "--version",
@@ -342,36 +325,24 @@ def main():
         dest="command",
     )
     subparsers.required = True
-    extracter = subparsers.add_parser(
+    extractor = subparsers.add_parser(
         "extract",
-        help=(
-            "Extract YouTube video details using the given API token and "
-            "course axis json.gz files"
-        ),
-        description=(
-            "Extract YouTube video details using the given API token and "
-            "course axis json.gz files"
-        ),
+        help="Extract YouTube video details using the given API token and course axis json.gz files",
+        description="Extract YouTube video details using the given API token and course axis json.gz files",
         allow_abbrev=False,
     )
-    extracter.add_argument(
+    extractor.add_argument(
         "--output",
         "-o",
-        help=(
-            "The .json.gz output file name for the YouTube video details. "
-            "Default: %(default)s"
-        ),
+        help="The .json.gz output file name for the YouTube video details. Default: %(default)s",
         default=os.path.join(os.getcwd(), "youtube.json.gz"),
     )
-    extracter.add_argument(
+    extractor.add_argument(
         "--youtube-token",
         "-t",
-        help=(
-            "YouTube data V3 API token generated from the account hosting "
-            "the lecture videos."
-        ),
+        help="YouTube data V3 API token generated from the account hosting the lecture videos.",
     )
-    extracter.add_argument(
+    extractor.add_argument(
         "--batch-size",
         "-s",
         help=(
@@ -381,28 +352,20 @@ def main():
         type=batch_size_type,
         default=10,
     )
-    extracter.add_argument(
+    extractor.add_argument(
         "course_axes",
-        help=(
-            "course_axis.json.gz files from the simeon split process " "of SQL files"
-        ),
+        help="course_axis.json.gz files from the simeon split process of SQL files",
         nargs="+",
     )
     merger = subparsers.add_parser(
         "merge",
-        help=(
-            "Merge the data file generated from simeon-youtube extract "
-            "to the given target BigQuery table."
-        ),
+        help="Merge the data file generated from simeon-youtube extract to the given target BigQuery table.",
         description=(
-            "Merge the data file generated from simeon-youtube extract "
-            "to the given target BigQuery table."
+            "Merge the data file generated from simeon-youtube extract to the given target BigQuery table."
         ),
         allow_abbrev=False,
     )
-    merger.add_argument(
-        "youtube_file", help="A .json.gz file generated from the extract command"
-    )
+    merger.add_argument("youtube_file", help="A .json.gz file generated from the extract command")
     merger.add_argument(
         "--project",
         "-p",
@@ -428,10 +391,7 @@ def main():
     merger.add_argument(
         "--column",
         "-c",
-        help=(
-            "The column on which to to merge the file and table. "
-            "Default: %(default)s"
-        ),
+        help="The column on which to to merge the file and table. Default: %(default)s",
         default="id",
     )
     merger.add_argument(
@@ -455,9 +415,7 @@ def main():
     merger.add_argument(
         "--schema-dir",
         "-s",
-        help=(
-            "Directory where to find schema files. " "Default: {d}".format(d=SCHEMA_DIR)
-        ),
+        help=f"Directory where to find schema files. Default: {SCHEMA_DIR}",
     )
     merger.add_argument(
         "--update-description",
@@ -486,12 +444,12 @@ def main():
             config_arg = cgetter(configs, k, attr, fallback=None)
             if not cli_arg and config_arg:
                 setattr(args, attr, config_arg)
-    COMMANDS = {
+    commands = {
         "extract": extract_video_info,
         "merge": merge_video_data,
     }
     try:
-        COMMANDS.get(args.command, unknown_command)(args)
+        commands.get(args.command, unknown_command)(args)
     except:
         _, excp, tb = sys.exc_info()
         context = getattr(excp, "context_dict", {})
