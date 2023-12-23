@@ -150,6 +150,7 @@ dead_letters/
 !requirements_dev.txt
 !simeon/scripts/data
 !simeon/scripts/data/*.csv
+!simeon/scripts/data/*.txt
 
 # Simeon configs
 *.cfg
