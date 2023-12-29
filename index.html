@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="lang:clipboard.copy" content="Copy to clipboard">
+  <meta name="lang:clipboard.copied" content="Copied to clipboard">
+  <meta name="lang:search.language" content="en">
+  <meta name="lang:search.pipeline.stopwords" content="True">
+  <meta name="lang:search.pipeline.trimmer" content="True">
+  <meta name="lang:search.result.none" content="No matching documents">
+  <meta name="lang:search.result.one" content="1 matching document">
+  <meta name="lang:search.result.other" content="# matching documents">
+  <meta name="lang:search.tokenizer" content="[\s\-]+">
+
+  
+    <link href="https://fonts.gstatic.com/" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,500,700|Roboto:300,400,400i,700&display=fallback" rel="stylesheet">
+
+    <style>
+      body,
+      input {
+        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif
+      }
+
+      code,
+      kbd,
+      pre {
+        font-family: "Roboto Mono", "Courier New", Courier, monospace
+      }
+    </style>
+  
+
+  <link rel="stylesheet" href="_static/stylesheets/application.css"/>
+  <link rel="stylesheet" href="_static/stylesheets/application-palette.css"/>
+  <link rel="stylesheet" href="_static/stylesheets/application-fixes.css"/>
+  
+  <link rel="stylesheet" href="_static/fonts/material-icons.css"/>
+  
+  <meta name="theme-color" content="#3f51b5">
+  <script src="_static/javascripts/modernizr.js"></script>
+  
+  
+  
+    <title>Documentation for the simeon CLI tool &#8212; simeon  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=83e35b93" />
+    <link rel="stylesheet" type="text/css" href="_static/material.css?v=79c92029" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="simeon" href="cli_intro.html" />
+  
+   
+
+  </head>
+  <body dir=ltr
+        data-md-color-primary=blue data-md-color-accent=light-blue>
+  
+  <svg class="md-svg">
+    <defs data-children-count="0">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+      
+    </defs>
+  </svg>
+  
+  <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer">
+  <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search">
+  <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+  <a href="#index" tabindex="1" class="md-skip"> Skip to content </a>
+  <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex navheader">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="#" title="simeon  documentation"
+           class="md-header-nav__button md-logo">
+          
+            &nbsp;
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          <span class="md-header-nav__topic">simeon</span>
+          <span class="md-header-nav__topic"> Documentation for the simeon CLI tool </span>
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+        
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" action="search.html" method="get" name="search">
+      <input type="text" class="md-search__input" name="q" placeholder=""Search""
+             autocapitalize="off" autocomplete="off" spellcheck="false"
+             data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            <a href="https://github.com/MIT-IR/simeon/" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    simeon
+  </div>
+</a>
+          </div>
+        </div>
+      
+      
+  
+  <script src="_static/javascripts/version_dropdown.js"></script>
+  <script>
+    var json_loc = ""versions.json"",
+        target_loc = "../",
+        text = "Versions";
+    $( document ).ready( add_version_dropdown(json_loc, target_loc, text));
+  </script>
+  
+
+    </div>
+  </nav>
+</header>
+
+  
+  <div class="md-container">
+    
+    
+    
+  <nav class="md-tabs" data-md-component="tabs">
+    <div class="md-tabs__inner md-grid">
+      <ul class="md-tabs__list">
+          <li class="md-tabs__item"><a href="#" class="md-tabs__link">simeon  documentation</a></li>
+      </ul>
+    </div>
+  </nav>
+    <main class="md-main">
+      <div class="md-main__inner md-grid" data-md-component="container">
+        
+          <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="#" title="simeon documentation" class="md-nav__button md-logo">
+      
+        <img src="_static/" alt=" logo" width="48" height="48">
+      
+    </a>
+    <a href="#"
+       title="simeon documentation">simeon</a>
+  </label>
+    <div class="md-nav__source">
+      <a href="https://github.com/MIT-IR/simeon/" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    simeon
+  </div>
+</a>
+    </div>
+  
+  
+
+</nav>
+              </div>
+            </div>
+          </div>
+          <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                
+<nav class="md-nav md-nav--secondary">
+    <label class="md-nav__title" for="__toc">"Contents"</label>
+  <ul class="md-nav__list" data-md-scrollfix="">
+        <li class="md-nav__item"><a href="#index--page-root" class="md-nav__link">Documentation for the simeon CLI tool</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#cli-guide" class="md-nav__link">CLI Guide</a>
+        </li>
+        <li class="md-nav__item"><a href="#python-api-guide" class="md-nav__link">Python API Guide</a>
+        </li></ul>
+            </nav>
+        </li>
+    
+<li class="md-nav__item"><a class="md-nav__extra_link" href="_sources/index.rst.txt">Show Source</a> </li>
+
+<li id="searchbox" class="md-nav__item"></li>
+
+  </ul>
+</nav>
+              </div>
+            </div>
+          </div>
+        
+        <div class="md-content">
+          <article class="md-content__inner md-typeset" role="main">
+            
+  <section id="documentation-for-the-simeon-cli-tool">
+<h1 id="index--page-root">Documentation for the simeon CLI tool<a class="headerlink" href="#index--page-root" title="Link to this heading">¶</a></h1>
+<section id="cli-guide">
+<h2 id="cli-guide">CLI Guide<a class="headerlink" href="#cli-guide" title="Link to this heading">¶</a></h2>
+<p>Documentation for users of the <code class="docutils literal notranslate"><span class="pre">simeon</span></code> CLI tool.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cli_intro.html">simeon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_intro.html#installing-from-pypi">Installing from pypi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_intro.html#installing-with-git-clone-and-pip">Installing with git clone and pip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_intro.html#using-docker">Using Docker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_intro.html#developing">Developing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_intro.html#setups-and-configurations">Setups and configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_intro.html#list-files">List files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_intro.html#download-and-split-files">Download and split files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_intro.html#make-secondary-aggregated-tables">Make secondary/aggregated tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_intro.html#notes">Notes:</a></li>
+</ul>
+</div>
+</section>
+<section id="python-api-guide">
+<h2 id="python-api-guide">Python API Guide<a class="headerlink" href="#python-api-guide" title="Link to this heading">¶</a></h2>
+<p>Documentation for contributing to the package, and for those wishing to add <code class="docutils literal notranslate"><span class="pre">simeon</span></code> to their python dependencies.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_intro.html">Components of the <code class="xref py py-class docutils literal notranslate"><span class="pre">download</span></code> package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_intro.html#module-simeon.download.aws">AWS module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.aws.S3Blob"><code class="docutils literal notranslate"><span class="pre">S3Blob</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.aws.get_file_date"><code class="docutils literal notranslate"><span class="pre">get_file_date()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.aws.make_s3_bucket"><code class="docutils literal notranslate"><span class="pre">make_s3_bucket()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_intro.html#module-simeon.download.emails">Email opt-in module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.emails.compress_email_files"><code class="docutils literal notranslate"><span class="pre">compress_email_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.emails.parse_date"><code class="docutils literal notranslate"><span class="pre">parse_date()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.emails.process_email_file"><code class="docutils literal notranslate"><span class="pre">process_email_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_intro.html#module-simeon.download.logs">Tracking logs module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.logs.batch_split_tracking_logs"><code class="docutils literal notranslate"><span class="pre">batch_split_tracking_logs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.logs.process_line"><code class="docutils literal notranslate"><span class="pre">process_line()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.logs.split_tracking_log"><code class="docutils literal notranslate"><span class="pre">split_tracking_log()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_intro.html#module-simeon.download.sqls">SQL data files module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.sqls.batch_decrypt_files"><code class="docutils literal notranslate"><span class="pre">batch_decrypt_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.sqls.force_delete_files"><code class="docutils literal notranslate"><span class="pre">force_delete_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.sqls.process_sql_archive"><code class="docutils literal notranslate"><span class="pre">process_sql_archive()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.sqls.unpacker"><code class="docutils literal notranslate"><span class="pre">unpacker()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_intro.html#module-simeon.download.utilities">Utilities module for the download package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.check_for_funny_keys"><code class="docutils literal notranslate"><span class="pre">check_for_funny_keys()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.decrypt_files"><code class="docutils literal notranslate"><span class="pre">decrypt_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.drop_empties"><code class="docutils literal notranslate"><span class="pre">drop_empties()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.format_sql_filename"><code class="docutils literal notranslate"><span class="pre">format_sql_filename()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.get_course_id"><code class="docutils literal notranslate"><span class="pre">get_course_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.get_file_date"><code class="docutils literal notranslate"><span class="pre">get_file_date()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.get_module_id"><code class="docutils literal notranslate"><span class="pre">get_module_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.get_sql_course_id"><code class="docutils literal notranslate"><span class="pre">get_sql_course_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.is_float"><code class="docutils literal notranslate"><span class="pre">is_float()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.make_file_handle"><code class="docutils literal notranslate"><span class="pre">make_file_handle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.make_tracklog_path"><code class="docutils literal notranslate"><span class="pre">make_tracklog_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.move_field_to_mongoid"><code class="docutils literal notranslate"><span class="pre">move_field_to_mongoid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.move_unknown_fields_to_agent"><code class="docutils literal notranslate"><span class="pre">move_unknown_fields_to_agent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.parse_mongo_tstamp"><code class="docutils literal notranslate"><span class="pre">parse_mongo_tstamp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.rephrase_record"><code class="docutils literal notranslate"><span class="pre">rephrase_record()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.download.utilities.stringify_dict"><code class="docutils literal notranslate"><span class="pre">stringify_dict()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api_intro.html#components-of-the-upload-package">Components of the <code class="xref py py-class docutils literal notranslate"><span class="pre">upload</span></code> package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_intro.html#module-simeon.upload.gcp">GCP module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.upload.gcp.BigqueryClient"><code class="docutils literal notranslate"><span class="pre">BigqueryClient</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.upload.gcp.GCSClient"><code class="docutils literal notranslate"><span class="pre">GCSClient</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_intro.html#module-simeon.upload.utilities">Utilities module for the upload package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.upload.utilities.course_to_bq_dataset"><code class="docutils literal notranslate"><span class="pre">course_to_bq_dataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.upload.utilities.course_to_gcs_folder"><code class="docutils literal notranslate"><span class="pre">course_to_gcs_folder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.upload.utilities.dict_to_schema_field"><code class="docutils literal notranslate"><span class="pre">dict_to_schema_field()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.upload.utilities.get_bq_schema"><code class="docutils literal notranslate"><span class="pre">get_bq_schema()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.upload.utilities.local_to_bq_table"><code class="docutils literal notranslate"><span class="pre">local_to_bq_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.upload.utilities.local_to_gcs_path"><code class="docutils literal notranslate"><span class="pre">local_to_gcs_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.upload.utilities.make_bq_load_config"><code class="docutils literal notranslate"><span class="pre">make_bq_load_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.upload.utilities.make_bq_query_config"><code class="docutils literal notranslate"><span class="pre">make_bq_query_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.upload.utilities.sqlify_bq_field"><code class="docutils literal notranslate"><span class="pre">sqlify_bq_field()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api_intro.html#components-of-the-report-package">Components of the <code class="xref py py-class docutils literal notranslate"><span class="pre">report</span></code> package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_intro.html#module-simeon.report.utilities">Utilities module for the report package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.check_record_schema"><code class="docutils literal notranslate"><span class="pre">check_record_schema()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.course_from_block"><code class="docutils literal notranslate"><span class="pre">course_from_block()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.drop_extra_keys"><code class="docutils literal notranslate"><span class="pre">drop_extra_keys()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.extract_table_query"><code class="docutils literal notranslate"><span class="pre">extract_table_query()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.get_has_solution"><code class="docutils literal notranslate"><span class="pre">get_has_solution()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.get_problem_nitems"><code class="docutils literal notranslate"><span class="pre">get_problem_nitems()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.get_youtube_id"><code class="docutils literal notranslate"><span class="pre">get_youtube_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.make_course_axis"><code class="docutils literal notranslate"><span class="pre">make_course_axis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.make_forum_table"><code class="docutils literal notranslate"><span class="pre">make_forum_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.make_grades_persistent"><code class="docutils literal notranslate"><span class="pre">make_grades_persistent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.make_grading_policy"><code class="docutils literal notranslate"><span class="pre">make_grading_policy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.make_problem_analysis"><code class="docutils literal notranslate"><span class="pre">make_problem_analysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.make_roles_table"><code class="docutils literal notranslate"><span class="pre">make_roles_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.make_sql_tables_par"><code class="docutils literal notranslate"><span class="pre">make_sql_tables_par()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.make_sql_tables_seq"><code class="docutils literal notranslate"><span class="pre">make_sql_tables_seq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.make_student_module"><code class="docutils literal notranslate"><span class="pre">make_student_module()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.make_table_from_sql"><code class="docutils literal notranslate"><span class="pre">make_table_from_sql()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.make_tables_from_sql"><code class="docutils literal notranslate"><span class="pre">make_tables_from_sql()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.make_tables_from_sql_par"><code class="docutils literal notranslate"><span class="pre">make_tables_from_sql_par()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.make_user_info_combo"><code class="docutils literal notranslate"><span class="pre">make_user_info_combo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.module_from_block"><code class="docutils literal notranslate"><span class="pre">module_from_block()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.process_course_structure"><code class="docutils literal notranslate"><span class="pre">process_course_structure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.wait_for_bq_job_ids"><code class="docutils literal notranslate"><span class="pre">wait_for_bq_job_ids()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.report.utilities.wait_for_bq_jobs"><code class="docutils literal notranslate"><span class="pre">wait_for_bq_jobs()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api_intro.html#components-of-the-exceptions-package">Components of the <code class="xref py py-class docutils literal notranslate"><span class="pre">exceptions</span></code> package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_intro.html#module-simeon.exceptions">Exceptions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.AWSException"><code class="docutils literal notranslate"><span class="pre">AWSException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.BadSQLFileException"><code class="docutils literal notranslate"><span class="pre">BadSQLFileException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.BigQueryNameException"><code class="docutils literal notranslate"><span class="pre">BigQueryNameException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.BlobDownloadError"><code class="docutils literal notranslate"><span class="pre">BlobDownloadError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.DecryptionError"><code class="docutils literal notranslate"><span class="pre">DecryptionError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.EarlyExitError"><code class="docutils literal notranslate"><span class="pre">EarlyExitError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.LoadJobException"><code class="docutils literal notranslate"><span class="pre">LoadJobException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.MissingFileException"><code class="docutils literal notranslate"><span class="pre">MissingFileException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.MissingQueryFileException"><code class="docutils literal notranslate"><span class="pre">MissingQueryFileException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.MissingSchemaException"><code class="docutils literal notranslate"><span class="pre">MissingSchemaException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.SQLQueryException"><code class="docutils literal notranslate"><span class="pre">SQLQueryException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.SchemaMismatchException"><code class="docutils literal notranslate"><span class="pre">SchemaMismatchException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.SimeonError"><code class="docutils literal notranslate"><span class="pre">SimeonError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_intro.html#simeon.exceptions.SplitException"><code class="docutils literal notranslate"><span class="pre">SplitException</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+          </article>
+        </div>
+      </div>
+    </main>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+          
+          
+            <a href="cli_intro.html" title="simeon"
+               class="md-flex md-footer-nav__link md-footer-nav__link--next"
+               rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span
+                class="md-flex__ellipsis"> <span
+                class="md-footer-nav__direction"> "Next" </span> simeon </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink"><i
+                class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          
+        </a>
+        
+      </nav>
+    </div>
+    <div class="md-footer-meta md-typeset">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-footer-copyright">
+          <div class="md-footer-copyright__highlight">
+              &#169; Copyright 2021, MIT Institutional Research.
+              
+          </div>
+            Created using
+            <a href="http://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+             and
+            <a href="https://github.com/bashtage/sphinx-material/">Material for
+              Sphinx</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="_static/javascripts/application.js"></script>
+  <script>app.initialize({version: "1.0.4", url: {base: ".."}})</script>
+  </body>
+</html>
