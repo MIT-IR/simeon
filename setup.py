@@ -40,7 +40,7 @@ setup(
     ],
     extras_require={
         "geoip": ["geoip2"],
-        "test": ["black", "isort", "pip-tools", "sphinx", "sphinx-material", "tox"],
+        "test": ["black", "isort", "tox"],
         "dev": ["black", "isort", "pip-tools", "sphinx", "sphinx-material", "tox"],
         "docs": ["sphinx", "sphinx-material"],
     },
