@@ -1423,9 +1423,7 @@ def main():
     cpgroup.add_argument(
         "--no-courses",
         "-V",
-        help=(
-            "DO NOT try to limit the loaded files to only some course IDs. Therefore, simeon will push everything."
-        ),
+        help=("DO NOT try to limit the loaded files to only some course IDs. Therefore, simeon will push everything."),
         action="store_true",
     )
     cpgroup.add_argument(
@@ -1536,17 +1534,13 @@ def main():
     reporter.add_argument(
         "--wait-for-loads",
         "-w",
-        help=(
-            "Wait for asynchronous BigQuery query jobs to finish. Otherwise, simeon creates query jobs and exits."
-        ),
+        help=("Wait for asynchronous BigQuery query jobs to finish. Otherwise, simeon creates query jobs and exits."),
         action="store_true",
     )
     reporter.add_argument(
         "--in-files",
         "-i",
-        help=(
-            "Whether the provided course ID arguments are text files that contain the course IDs. One ID per line"
-        ),
+        help=("Whether the provided course ID arguments are text files that contain the course IDs. One ID per line"),
         action="store_true",
     )
     reporter.add_argument(

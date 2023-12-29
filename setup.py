@@ -40,8 +40,8 @@ setup(
     ],
     extras_require={
         "geoip": ["geoip2"],
-        "test": ["black", "isort", "pip-tools", "sphinx", "tox"],
-        "dev": ["black", "isort", "pip-tools", "sphinx", "tox"],
+        "test": ["black", "isort", "pip-tools", "sphinx", "sphinx-material", "tox"],
+        "dev": ["black", "isort", "pip-tools", "sphinx", "sphinx-material", "tox"],
     },
     package_data={
         "simeon.upload": ["schemas/*.json"],

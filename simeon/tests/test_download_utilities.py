@@ -95,9 +95,7 @@ class TestDownloadUtilities(unittest.TestCase):
             {
                 "event": {},
                 "event_type": "",
-                "context": {
-                    "path": "/courses/course-v1:ORGx+Course1x+4T2099/xblock/block-v1:a+a+a+type@foo+block@bar"
-                },
+                "context": {"path": "/courses/course-v1:ORGx+Course1x+4T2099/xblock/block-v1:a+a+a+type@foo+block@bar"},
             },
             {
                 "event": {"id": "block-v1:ORGx+Course1x+4T2099+type@foo+block@bar"},

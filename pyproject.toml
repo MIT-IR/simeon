@@ -40,8 +40,8 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 geoip = ["geoip2"]
-test = ["black", "isort", "pip-tools", "sphinx", "tox"]
-dev = ["black", "isort", "pip-tools", "sphinx", "tox"]
+test = ["black", "isort", "pip-tools", "sphinx", "sphinx-material", "tox"]
+dev = ["black", "isort", "pip-tools", "sphinx", "sphinx-material", "tox"]
 
 [tool.setuptools.package-data]
 "simeon.upload" = ["schemas/*.json"]

@@ -360,9 +360,7 @@ def main():
     merger = subparsers.add_parser(
         "merge",
         help="Merge the data file generated from simeon-youtube extract to the given target BigQuery table.",
-        description=(
-            "Merge the data file generated from simeon-youtube extract to the given target BigQuery table."
-        ),
+        description=("Merge the data file generated from simeon-youtube extract to the given target BigQuery table."),
         allow_abbrev=False,
     )
     merger.add_argument("youtube_file", help="A .json.gz file generated from the extract command")

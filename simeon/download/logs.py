@@ -121,7 +121,7 @@ def process_line(
         try:
             date = parse_date(record.get("time", ""))
             outfile = utils.make_tracklog_path(course_id, date.strftime("%Y-%m-%d"), is_gzip)
-        except Exception as e:
+        except Exception:
             ext = ".gz" if is_gzip else ""
             outfile = os.path.join(
                 course_id.replace(".", "_").replace("/", "__") or "dead_letters",
