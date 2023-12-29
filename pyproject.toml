@@ -42,6 +42,7 @@ dynamic = ["version"]
 geoip = ["geoip2"]
 test = ["black", "isort", "pip-tools", "sphinx", "sphinx-material", "tox"]
 dev = ["black", "isort", "pip-tools", "sphinx", "sphinx-material", "tox"]
+docs = ["sphinx", "sphinx-material"]
 
 [tool.setuptools.package-data]
 "simeon.upload" = ["schemas/*.json"]

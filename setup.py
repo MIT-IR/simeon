@@ -42,6 +42,7 @@ setup(
         "geoip": ["geoip2"],
         "test": ["black", "isort", "pip-tools", "sphinx", "sphinx-material", "tox"],
         "dev": ["black", "isort", "pip-tools", "sphinx", "sphinx-material", "tox"],
+        "docs": ["sphinx", "sphinx-material"],
     },
     package_data={
         "simeon.upload": ["schemas/*.json"],
