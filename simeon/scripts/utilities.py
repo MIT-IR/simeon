@@ -436,7 +436,7 @@ def process_extra_args(extras):
 
     # If it's a file, try reading it as a JSON file
     if isinstance(extras, str) and extras.startswith("@"):
-        with open(extras) as file_handle:
+        with open(extras[1:]) as file_handle:
             return json.load(file_handle)
 
     # Otherwise, process the string
