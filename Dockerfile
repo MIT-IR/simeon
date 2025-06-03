@@ -1,5 +1,5 @@
 # Dockerfile for running simeon in a container
-FROM python:3.11-slim
+FROM python:3.13.2-slim
 # Set a key-value label for the Docker image
 LABEL maintainer="MIT Institutional Research"
 LABEL email="irx@mit.edu"
