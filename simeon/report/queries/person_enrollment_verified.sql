@@ -12,7 +12,7 @@ SELECT
                 null as verified_unenroll_time
             FROM `{latest_dataset}.enrollment_events`
             WHERE 
-                mode = "verified" and not activated and mode_changed
+                mode = "verified" and mode_changed
             UNION ALL
             SELECT 
                 "{course_id}" as course_id, 
