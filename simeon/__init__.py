@@ -1,5 +1,5 @@
 """
 simeon is a python package and CLI tool that helps with fetching and processing edX research data.
 """
-__version__ = "0.0.25"
+__version__ = "0.0.26"
 version = __version__
